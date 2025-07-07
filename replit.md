@@ -185,6 +185,12 @@ Changelog:
   - Wrapped setInterval and setTimeout to track all timer IDs for proper cleanup
   - Added cleanup tracking for all event listeners to prevent memory leaks and interference
   - Ensured tutorials are fully isolated - no timers or events persist between tutorial switches
+- July 07, 2025: Implemented debounced code execution and improved Console Output layout
+  - Added 500ms debounce delay to prevent errors while user is typing
+  - Code execution now waits for user to stop typing before running
+  - Console Output (printData courses) now takes 2/3 width for better visibility
+  - Code editor takes 1/3 width in printData courses, 1/2 width in canvas courses
+  - Reduced false error reports during active typing sessions
 
 ## User Preferences
 

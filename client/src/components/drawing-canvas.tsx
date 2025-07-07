@@ -36,14 +36,16 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
   };
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    // Debounce code execution to prevent errors while typing
+    const timer = setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    // Cleanup previous timers and event listeners
-    cleanupAll();
+      // Cleanup previous timers and event listeners
+      cleanupAll();
 
     // Set canvas size
     canvas.width = 400;
@@ -130,8 +132,13 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
       ctx.fillText(displayMessage, 10, 50);
     }
 
-    // Cleanup on unmount
-    return cleanupAll;
+    }, 500); // 500ms debounce delay
+
+    // Cleanup on unmount or code change
+    return () => {
+      clearTimeout(timer);
+      cleanupAll();
+    };
   }, [code, onOutput]);
 
   return (

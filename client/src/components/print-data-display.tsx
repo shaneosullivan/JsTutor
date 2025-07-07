@@ -59,36 +59,38 @@ export default function PrintDataDisplay({ code, onOutput, onError }: PrintDataD
   };
 
   useEffect(() => {
-    if (!code.trim()) {
+    // Debounce code execution to prevent errors while typing
+    const timer = setTimeout(() => {
+      if (!code.trim()) {
+        setOutputItems([]);
+        onOutput([]);
+        onError?.(null);
+        return;
+      }
+
+      // Cleanup previous timers
+      cleanupAll();
+
+      // Clear previous output
       setOutputItems([]);
-      onOutput([]);
-      onError?.(null);
-      return;
-    }
+      
+      try {
+        // Create wrapped timer functions that track their IDs
+        const wrappedSetTimeout = (fn: Function, delay: number) => {
+          const id = window.setTimeout(fn, delay);
+          timeoutsRef.current.push(id);
+          return id;
+        };
 
-    // Cleanup previous timers
-    cleanupAll();
+        const wrappedSetInterval = (fn: Function, delay: number) => {
+          const id = window.setInterval(fn, delay);
+          intervalsRef.current.push(id);
+          return id;
+        };
 
-    // Clear previous output
-    setOutputItems([]);
-    
-    try {
-      // Create wrapped timer functions that track their IDs
-      const wrappedSetTimeout = (fn: Function, delay: number) => {
-        const id = window.setTimeout(fn, delay);
-        timeoutsRef.current.push(id);
-        return id;
-      };
-
-      const wrappedSetInterval = (fn: Function, delay: number) => {
-        const id = window.setInterval(fn, delay);
-        intervalsRef.current.push(id);
-        return id;
-      };
-
-      // Create a custom console that captures output
-      const customGlobal = {
-        printData,
+        // Create a custom console that captures output
+        const customGlobal = {
+          printData,
         console: {
           log: printData,
           error: (msg: any) => addError(String(msg)),
@@ -136,8 +138,13 @@ export default function PrintDataDisplay({ code, onOutput, onError }: PrintDataD
       onError?.(errorInfo);
     }
     
-    // Cleanup on unmount
-    return cleanupAll;
+    }, 500); // 500ms debounce delay
+
+    // Cleanup on unmount or code change
+    return () => {
+      clearTimeout(timer);
+      cleanupAll();
+    };
   }, [code]);
 
   // Update parent with output strings

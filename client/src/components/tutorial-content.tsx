@@ -235,7 +235,10 @@ export default function TutorialContent({
         {/* Right Panel - Code Editor and Canvas (Side by Side) */}
         <div className="flex-1 flex overflow-hidden">
           {/* Code Editor */}
-          <div className="w-1/2 border-r border-slate-200 bg-white">
+          <div className={cn(
+            "border-r border-slate-200 bg-white",
+            courseType === 'printData' ? "w-1/3" : "w-1/2"
+          )}>
             <div className="h-full p-4">
               <div className="h-full border border-slate-200 rounded-lg overflow-hidden">
                 <CodeEditor
@@ -249,8 +252,11 @@ export default function TutorialContent({
             </div>
           </div>
 
-          {/* Canvas Area */}
-          <div className="w-1/2 bg-slate-50 relative">
+          {/* Canvas/Output Area */}
+          <div className={cn(
+            "bg-slate-50 relative",
+            courseType === 'printData' ? "w-2/3" : "w-1/2"
+          )}>
             <div className="h-full p-4">
               <div className="h-full border border-slate-200 rounded-lg bg-white flex items-center justify-center overflow-hidden">
                 {showAiChat ? (
