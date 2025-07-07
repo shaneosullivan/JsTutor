@@ -25,13 +25,24 @@ export default function TutorialContent({
   const [code, setCode] = useState(tutorial.starterCode);
   const [output, setOutput] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [isExplanationOpen, setIsExplanationOpen] = useState(false);
+  const [isExplanationOpen, setIsExplanationOpen] = useState(true); // Start expanded for first-time reading
+  const [hasBeenOpened, setHasBeenOpened] = useState(false);
 
-  // Reset code when tutorial changes
+  // Reset code when tutorial changes and auto-expand explanation for new tutorials
   useEffect(() => {
     setCode(tutorial.starterCode);
     setOutput([]);
+    setIsExplanationOpen(true); // Auto-expand for each new tutorial
+    setHasBeenOpened(false);
   }, [tutorial.id, tutorial.starterCode]);
+
+  // Handle explanation section open/close
+  const handleExplanationToggle = (open: boolean) => {
+    setIsExplanationOpen(open);
+    if (open) {
+      setHasBeenOpened(true);
+    }
+  };
 
   // Auto-execute code when it changes (but not on initial load)
   useEffect(() => {
@@ -134,7 +145,7 @@ export default function TutorialContent({
         <div className="w-1/2 flex flex-col">
           {/* Tutorial Explanation - Collapsible */}
           <div className="bg-white border-b border-slate-200">
-            <Collapsible open={isExplanationOpen} onOpenChange={setIsExplanationOpen}>
+            <Collapsible open={isExplanationOpen} onOpenChange={handleExplanationToggle}>
               <CollapsibleTrigger asChild>
                 <div className="flex items-center justify-between p-4 hover:bg-slate-50 cursor-pointer transition-colors">
                   <div className="flex items-center text-lg font-medium">

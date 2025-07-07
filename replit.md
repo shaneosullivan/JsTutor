@@ -96,6 +96,13 @@ Changelog:
   - Added color examples and hex code support
   - Included practical code examples for common patterns
   - Integrated as "Reference" tab alongside tutorial content
+- July 07, 2025: Enhanced tutorial progression and user experience
+  - Added detailed educational explanations for all drawing functions
+  - Implemented collapsible "What You'll Learn" section
+  - Auto-expands explanations when opening tutorials for first time
+  - Removed confusing Run Code button, added automatic execution
+  - Fixed progression system with manual completion and advancement
+  - Added "Mark Complete & Continue" and "Next Lesson" buttons
 
 ## User Preferences
 
