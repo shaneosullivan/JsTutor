@@ -105,9 +105,9 @@ export default function TutorialContent({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-slate-700 leading-relaxed mb-4">
+                <div className="text-slate-700 leading-relaxed mb-4 whitespace-pre-line">
                   {tutorial.content}
-                </p>
+                </div>
                 {tutorial.expectedOutput && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <h4 className="font-medium text-blue-800 mb-2">Expected Output:</h4>

@@ -38,7 +38,7 @@ export class MemStorage implements IStorage {
       {
         title: "Your First Variable",
         description: "Learn to store information",
-        content: "Variables are like boxes that hold information. You can put numbers, text, or other things in them and use them later!",
+        content: "Variables are like boxes that hold information. You can put numbers, text, or other things in them and use them later!\n\n🎨 About the Drawing Functions:\n• drawCircle(x, y, radius, color) - The first number (x) is how many pixels from the LEFT edge to place the center. The second number (y) is how many pixels from the TOP edge. The radius is how big the circle is (like measuring from the center to the edge).\n• drawText(x, y, text, color) - Places text at a position. X is pixels from left, Y is pixels from top.\n\n📍 Think of the canvas like a grid: (0,0) is the top-left corner, (400,400) is the bottom-right!",
         starterCode: `// Let's create our first variable!
 let myName = "Your Name";
 let age = 9;
@@ -53,7 +53,7 @@ drawText(200, 300, myName, 'black');`,
       {
         title: "Math is Fun!",
         description: "Add, subtract, and more",
-        content: "JavaScript can do math just like you! You can add (+), subtract (-), multiply (*), and divide (/) numbers.",
+        content: "JavaScript can do math just like you! You can add (+), subtract (-), multiply (*), and divide (/) numbers.\n\n🎨 New Drawing Function:\n• drawRect(x, y, width, height, color) - Draws a rectangle! X and Y tell us where the TOP-LEFT corner goes. Width is how wide (left to right), height is how tall (top to bottom). Think of it like drawing a box!",
         starterCode: `// Let's do some math and draw with it!
 let x = 100;
 let y = 150;
@@ -69,7 +69,7 @@ drawRect(x + 150, y, size / 2, size, 'blue');`,
       {
         title: "Making Decisions",
         description: "Learn if/else statements",
-        content: "Sometimes we want our code to do different things depending on what's happening. That's where if/else comes in!",
+        content: "Sometimes we want our code to do different things depending on what's happening. That's where if/else comes in!\n\n🎨 New Drawing Function:\n• drawLine(x1, y1, x2, y2, color) - Draws a straight line! The first two numbers (x1, y1) are where the line STARTS. The next two numbers (x2, y2) are where the line ENDS. It's like drawing with a ruler!",
         starterCode: `// Let's draw different things based on conditions!
 let isHappy = true;
 
@@ -93,7 +93,7 @@ if (isHappy) {
       {
         title: "Creating Functions",
         description: "Organize your code",
-        content: "Functions are like recipes - they tell the computer how to do something step by step. You can use them over and over!",
+        content: "Functions are like recipes - they tell the computer how to do something step by step. You can use them over and over!\n\n💡 Function Tip: Notice how we can put numbers in parentheses after the function name? These are called 'parameters' - they're like ingredients for our recipe! The drawHouse function takes an x position, y position, and color as its ingredients.",
         starterCode: `// Let's create a function to draw a house!
 function drawHouse(x, y, color) {
     drawRect(x, y, 60, 40, color);
@@ -113,7 +113,7 @@ drawHouse(300, 200, 'green');`,
       {
         title: "While Loops",
         description: "Repeat until done",
-        content: "While loops keep doing something as long as a condition is true. It's like saying 'keep doing this until...'",
+        content: "While loops keep doing something as long as a condition is true. It's like saying 'keep doing this until...'\n\n💡 Loop Tip: See how we change 'x', 'y', 'size', and 'count' each time? This makes each circle appear in a slightly different place and size, creating a spiral pattern! Without changing these values, all circles would be drawn in exactly the same spot.",
         starterCode: `// Let's draw a spiral using a while loop!
 let x = 200;
 let y = 200;
@@ -134,7 +134,7 @@ while (count < 20) {
       {
         title: "For Loops",
         description: "Count and repeat",
-        content: "For loops are perfect when you know exactly how many times you want to repeat something. Like counting from 1 to 10!",
+        content: "For loops are perfect when you know exactly how many times you want to repeat something. Like counting from 1 to 10!\n\n💡 Array Tip: The 'colors' variable is an array - it's like a list that holds multiple colors! We use colors[i] to pick a different color each time through the loop. When i=0, we get 'red'. When i=1, we get 'orange', and so on!",
         starterCode: `// Let's draw a rainbow using a for loop!
 let colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
 
@@ -153,7 +153,7 @@ for (let i = 0; i < 10; i++) {
       {
         title: "Arrays & Lists",
         description: "Store many things",
-        content: "Arrays are like lists that can hold many items. You can store numbers, colors, names, or anything else!",
+        content: "Arrays are like lists that can hold many items. You can store numbers, colors, names, or anything else!\n\n💡 Array Tips:\n• Arrays use square brackets: ['red', 'blue', 'green']\n• We access items by their position: colors[0] gets the first item\n• arrays.length tells us how many items are in the list\n• Arrays start counting from 0, not 1! So the first item is [0], second is [1], etc.",
         starterCode: `// Let's create an array of colors and use them!
 let colors = ['red', 'blue', 'green', 'yellow', 'purple'];
 let sizes = [10, 20, 30, 40, 50];
@@ -168,7 +168,7 @@ for (let i = 0; i < colors.length; i++) {
       {
         title: "Pattern Party",
         description: "Draw cool patterns",
-        content: "Now let's combine everything we learned to create amazing patterns and designs!",
+        content: "Now let's combine everything we learned to create amazing patterns and designs!\n\n💡 Pattern Tip: This uses 'nested loops' - a loop inside another loop! The outer loop (x) makes columns, the inner loop (y) makes rows. The (x + y) % 2 is a math trick that alternates between 0 and 1, giving us the checkerboard pattern!",
         starterCode: `// Let's create a checkerboard pattern!
 let colors = ['red', 'black'];
 
@@ -185,7 +185,7 @@ for (let x = 0; x < 8; x++) {
       {
         title: "Animation Fun",
         description: "Make things move",
-        content: "Let's make our drawings move and change over time! This is where programming gets really exciting!",
+        content: "Let's make our drawings move and change over time! This is where programming gets really exciting!\n\n🎨 New Drawing Function:\n• clearCanvas() - Erases everything on the canvas, making it white again!\n\n💡 Animation Tip: Math.sin() and Math.cos() create smooth, wave-like movements. They're like magic functions that make things move in circles and curves! The 'time' variable keeps track of how long the animation has been running.",
         starterCode: `// Let's create a simple animation!
 let time = 0;
 
@@ -218,7 +218,7 @@ setInterval(animate, 100);`,
       {
         title: "Your Own Game!",
         description: "Build something awesome",
-        content: "Congratulations! You've learned so much! Now let's create your very own interactive game!",
+        content: "Congratulations! You've learned so much! Now let's create your very own interactive game!\n\n💡 Game Tip: This game uses everything you've learned! Variables to keep track of the score, if/else to check winning conditions, functions to organize code, and even some advanced math (Math.sqrt) to detect if clicks are inside the circle. You're a real programmer now!",
         starterCode: `// Let's create a simple clicking game!
 let score = 0;
 let gameRunning = true;
