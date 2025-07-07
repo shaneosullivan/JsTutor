@@ -24,7 +24,7 @@ An interactive JavaScript learning platform designed for children, featuring han
 ## Prerequisites
 
 - **Node.js**: Version 18 or higher
-- **npm**: Version 8 or higher.
+- **npm**: Version 8 or higher
 
 That's it! No API keys or database setup required.
 
