@@ -156,8 +156,12 @@ export default function CourseSelection() {
                     )}
                     
                     {isUnlocked ? (
-                      <Link href={`/course/${course.id}`}>
-                        <Button className="w-full" variant={isCompleted ? "outline" : "default"}>
+                      <Link href={course.id === 1 ? "/" : `/course/${course.id}`}>
+                        <Button 
+                          className="w-full" 
+                          variant={isCompleted ? "outline" : "default"}
+                          onClick={() => localStorage.setItem('lastCourseId', course.id.toString())}
+                        >
                           <Play className="h-4 w-4 mr-2" />
                           {isCompleted ? 'Review Course' : isBasics ? 'Start Learning' : 'Start Course'}
                         </Button>

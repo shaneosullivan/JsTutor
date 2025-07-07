@@ -191,6 +191,11 @@ Changelog:
   - Console Output and code editor now have equal width (1/2 each) for balanced layout
   - Removed centering constraints that were limiting printData display components
   - Reduced false error reports during active typing sessions
+- July 07, 2025: Implemented automatic course resume functionality
+  - Users automatically return to their last visited course when refreshing or reopening the app
+  - Course selection screen tracks last visited course in localStorage
+  - Basics course (course 1) remains on home route, other courses use /course/:id
+  - Seamless user experience with persistent course state across sessions
 
 ## User Preferences
 

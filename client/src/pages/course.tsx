@@ -65,6 +65,13 @@ export default function CoursePage() {
     setSidebarCollapsed,
   } = useTutorial();
 
+  // Save last visited course to localStorage
+  useEffect(() => {
+    if (courseId) {
+      localStorage.setItem('lastCourseId', courseId.toString());
+    }
+  }, [courseId]);
+
   // Save progress to localStorage
   useEffect(() => {
     localStorage.setItem(`completedTutorials_course_${courseId}`, JSON.stringify(completedTutorials));

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { useTutorial } from "@/hooks/use-tutorial";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import TutorialContent from "@/components/tutorial-content";
@@ -9,7 +11,38 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+interface Course {
+  id: number;
+  title: string;
+  description: string;
+  type: string;
+  order: number;
+  requiredCourse: number | null;
+}
+
 export default function Home() {
+  const [, setLocation] = useLocation();
+  const { data: courses = [] } = useQuery<Course[]>({
+    queryKey: ["/api/courses"],
+  });
+
+  // Check for last visited course on component mount
+  useEffect(() => {
+    const lastCourseId = localStorage.getItem('lastCourseId');
+    
+    if (lastCourseId && courses.length > 0) {
+      // Verify the course still exists
+      const courseExists = courses.some(course => course.id === parseInt(lastCourseId));
+      if (courseExists && parseInt(lastCourseId) !== 1) {
+        // Redirect to the last course if it's not the Basics course (which is already on home)
+        setLocation(`/course/${lastCourseId}`);
+        return;
+      }
+    }
+    
+    // If no last course or it's the Basics course, stay on home page
+    // The home page shows the Basics course content
+  }, [courses, setLocation]);
   const {
     currentTutorial,
     tutorials,
@@ -50,6 +83,14 @@ export default function Home() {
                 </div>
                 <h1 className="text-xl font-bold text-slate-800">JavaScript Adventure</h1>
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation('/courses')}
+                className="text-slate-600 hover:text-slate-800"
+              >
+                All Courses
+              </Button>
             </div>
             
             <div className="flex items-center space-x-4">
