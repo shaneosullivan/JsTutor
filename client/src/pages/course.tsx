@@ -117,6 +117,27 @@ export default function CoursePage() {
   const isCurrentCompleted = currentTutorialData ? completedTutorials.includes(currentTutorialData.id) : false;
   const hasNext = currentTutorialOrder < Math.max(...tutorials.map(t => t.order));
 
+  // Load starter code when tutorial changes
+  useEffect(() => {
+    if (currentTutorialData && currentTutorialData.starterCode) {
+      // Check if we have saved user code for this tutorial
+      const savedCode = localStorage.getItem(`userCode_tutorial_${currentTutorialData.id}`);
+      if (savedCode) {
+        setUserCode(savedCode);
+      } else {
+        // Load the starter code
+        setUserCode(currentTutorialData.starterCode);
+      }
+    }
+  }, [currentTutorialData]);
+
+  // Save user code when it changes
+  useEffect(() => {
+    if (currentTutorialData && userCode) {
+      localStorage.setItem(`userCode_tutorial_${currentTutorialData.id}`, userCode);
+    }
+  }, [currentTutorialData, userCode]);
+
   if (courseLoading || tutorialsLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
