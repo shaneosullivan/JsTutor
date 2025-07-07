@@ -200,9 +200,139 @@ onSpaceBar(() => {
       },
       {
         courseId: 1,
+        title: "Colors and Shapes",
+        description: "Learn about different colors and drawing shapes",
+        content: "Let's explore different colors and learn to draw more shapes! Colors make our drawings come alive.\n\n🎨 Color Tips:\n• You can use color names like 'red', 'blue', 'green', 'purple', 'orange', 'yellow'\n• You can also use hex codes like '#FF0000' for red, '#00FF00' for green\n• Try mixing different colors to make your art colorful!\n\n🌟 Your Challenge:\nDraw a simple house using rectangles for the walls, lines for the roof, and a circle for the sun. Use at least 3 different colors!",
+        starterCode: `// Let's draw with different colors!
+drawRect(150, 200, 100, 80, 'brown');  // House walls
+drawRect(175, 240, 20, 40, 'darkbrown'); // Door
+drawLine(150, 200, 200, 150, 'red');   // Roof left
+drawLine(200, 150, 250, 200, 'red');   // Roof right
+drawCircle(50, 50, 30, 'yellow');      // Sun
+
+// Try adding more to your house!
+// Maybe windows? A chimney? Flowers?`,
+        expectedOutput: "A colorful house with sun",
+        order: 6,
+        isLocked: true
+      },
+      {
+        courseId: 1,
+        title: "Making Patterns",
+        description: "Use loops to create repeating patterns",
+        content: "Loops help us repeat code without writing it over and over! It's like telling the computer 'do this 10 times'.\n\n🔄 About Loops:\n• A 'for loop' repeats code a certain number of times\n• We use 'i' as a counter that changes each time\n• The loop runs while i is less than the number we set\n\n✨ Loop Magic:\n• i starts at 0, then becomes 1, 2, 3, and so on\n• We can use i in our drawing to make patterns\n• i * 50 means: 0, 50, 100, 150... (perfect for spacing!)\n\n🌟 Your Challenge:\nCreate your own pattern! Try changing the numbers, colors, or shapes. What happens if you use i for the color or size?",
+        starterCode: `// Let's make a pattern with a loop!
+for (let i = 0; i < 5; i++) {
+  drawCircle(50 + i * 60, 200, 20, 'purple');
+}
+
+// Try making a different pattern!
+for (let i = 0; i < 3; i++) {
+  drawRect(100 + i * 80, 300, 40, 40, 'orange');
+}`,
+        expectedOutput: "A pattern of purple circles and orange squares",
+        order: 7,
+        isLocked: true
+      },
+      {
+        courseId: 1,
+        title: "Random Fun",
+        description: "Add randomness to make things unpredictable",
+        content: "Random numbers make our programs exciting and different every time! It's like rolling dice in your code.\n\n🎲 Random Magic:\n• Math.random() gives us a number between 0 and 1\n• Math.random() * 400 gives us a number between 0 and 400\n• Math.floor() removes the decimal part (1.7 becomes 1)\n• This helps us get random positions on our canvas!\n\n🌈 Random Ideas:\n• Random positions for stars in the sky\n• Random colors for a rainbow\n• Random sizes for bubbles\n\n🌟 Your Challenge:\nRun your code multiple times and watch it change! Try adding more random elements - maybe random colors or sizes!",
+        starterCode: `// Let's add some randomness!
+clearCanvas();
+
+// Draw 10 random circles
+for (let i = 0; i < 10; i++) {
+  let x = Math.floor(Math.random() * 400);
+  let y = Math.floor(Math.random() * 400);
+  let colors = ['red', 'blue', 'green', 'purple', 'orange'];
+  let randomColor = colors[Math.floor(Math.random() * colors.length)];
+  drawCircle(x, y, 15, randomColor);
+}
+
+// Try adding random rectangles too!`,
+        expectedOutput: "Random colored circles scattered around",
+        order: 8,
+        isLocked: true
+      },
+      {
+        courseId: 1,
+        title: "Moving Things",
+        description: "Learn to animate objects",
+        content: "Animation makes things move on screen! We use setInterval to run code over and over, creating motion.\n\n⏰ About setInterval:\n• setInterval(function, milliseconds) runs code repeatedly\n• 100 milliseconds = 0.1 seconds (pretty fast!)\n• We change positions each time to create movement\n• clearCanvas() erases the old drawing before drawing the new one\n\n🏃‍♀️ Movement Tips:\n• Increase x to move right, decrease to move left\n• Increase y to move down, decrease to move up\n• Check boundaries to keep things on screen\n\n🌟 Your Challenge:\nTry changing the speed (100 to 50 for faster, 200 for slower) or direction. Can you make the ball bounce off the edges?",
+        starterCode: `// Let's make a moving ball!
+let ballX = 50;
+let ballY = 200;
+let speedX = 2;
+
+setInterval(() => {
+  clearCanvas();
+  drawCircle(ballX, ballY, 20, 'red');
+  ballX = ballX + speedX;
+  
+  // Bounce off edges
+  if (ballX > 380 || ballX < 20) {
+    speedX = -speedX;
+  }
+}, 100);`,
+        expectedOutput: "A red ball bouncing back and forth",
+        order: 9,
+        isLocked: true
+      },
+      {
+        courseId: 1,
+        title: "Spacebar Magic",
+        description: "Add special actions with the spacebar",
+        content: "The spacebar is perfect for special actions! In games, it's often used for jumping, shooting, or resetting things.\n\n🚀 Spacebar Power:\n• onSpaceBar() listens specifically for the spacebar\n• Great for 'action' buttons in games\n• Can trigger special effects or reset your game\n• Works great with other keyboard controls\n\n✨ Action Ideas:\n• Jump or change color\n• Create new objects\n• Reset positions\n• Trigger animations\n\n🌟 Your Challenge:\nTry combining arrow keys AND spacebar! Maybe the spacebar changes the player's color, or creates a trail behind them?",
+        starterCode: `// Spacebar creates colorful circles!
+let playerX = 200;
+let playerY = 200;
+let circles = [];
+
+// Move with arrow keys
+onArrowKeys((direction, preventDefault) => {
+  preventDefault();
+  
+  if (direction === 'left') playerX -= 15;
+  if (direction === 'right') playerX += 15;
+  if (direction === 'up') playerY -= 15;
+  if (direction === 'down') playerY += 15;
+  
+  redrawEverything();
+});
+
+// Spacebar creates a circle!
+onSpaceBar(() => {
+  let colors = ['red', 'blue', 'green', 'purple', 'orange'];
+  let randomColor = colors[Math.floor(Math.random() * colors.length)];
+  circles.push({x: playerX, y: playerY, color: randomColor});
+  redrawEverything();
+});
+
+function redrawEverything() {
+  clearCanvas();
+  
+  // Draw all circles
+  for (let circle of circles) {
+    drawCircle(circle.x, circle.y, 10, circle.color);
+  }
+  
+  // Draw player
+  drawRect(playerX, playerY, 20, 20, 'black');
+}
+
+// Initial draw
+redrawEverything();`,
+        expectedOutput: "Move with arrows, press spacebar to create colorful circles",
+        order: 10,
+        isLocked: true
+      },
+      {
+        courseId: 1,
         title: "Snake Game",
-        description: "Build a complete game using everything you've learned",
-        content: "Let's build a classic Snake game! This combines variables, loops, arrays, and keyboard controls.\n\n🐍 Game Rules:\n• Use arrow keys to move the snake\n• Eat the red food to grow\n• Don't hit the walls or yourself\n• Press spacebar to restart if you lose\n\n🌟 Your Challenge:\nOnce you understand how it works, try changing the colors, speed, or game size!",
+        description: "Build the classic Snake game",
+        content: "Let's build the famous Snake game! This combines everything we've learned: drawing, movement, keyboard controls, and game logic.\n\n🐍 Snake Game Rules:\n• Snake moves continuously in one direction\n• Arrow keys change the direction\n• Snake grows when it eats food\n• Game ends if snake hits the walls or itself\n• Score increases with each food eaten\n\n🎮 Game Programming Concepts:\n• Game loop (setInterval) keeps everything moving\n• Arrays store the snake's body segments\n• Collision detection checks for hits\n• Game state manages score and game over\n\n🌟 Your Challenge:\nTry making the game your own! Change colors, speed, or add new features. What about power-ups or obstacles?",
         starterCode: `// Snake Game!
 let snake = [{x: 200, y: 200}];
 let direction = 'right';
@@ -280,7 +410,38 @@ onSpaceBar(() => {
     }
 });`,
         expectedOutput: "A playable Snake game with arrow key controls",
-        order: 6,
+        order: 11,
+        isLocked: true
+      },
+      {
+        courseId: 1,
+        title: "Your Own Game!",
+        description: "Create your own game using everything you've learned",
+        content: "Congratulations! You've learned all the basics of programming and game development. Now it's time to create something totally your own!\n\n🎯 What You Can Build:\n• A different type of game (Pong, Pac-Man style, platformer)\n• An interactive art program\n• A physics simulation\n• A drawing tool with special effects\n• Your own twist on Snake\n\n🛠️ Tools You've Mastered:\n• Drawing shapes and colors\n• Variables and math\n• Loops and patterns\n• Random numbers\n• Animation with setInterval\n• Keyboard controls\n• Game logic and collision detection\n\n🌟 Your Challenge:\nStart with a blank canvas and create something amazing! Don't be afraid to experiment, break things, and try new ideas. Programming is all about creativity and problem-solving!",
+        starterCode: `// Your blank canvas - create anything you want!
+// Here are some ideas to get you started:
+
+// Idea 1: Paint program
+// onKeyPress((key) => {
+//   // Draw wherever mouse would be
+// });
+
+// Idea 2: Bouncing balls
+// let balls = [];
+// setInterval(() => {
+//   // Move and bounce balls
+// }, 50);
+
+// Idea 3: Space shooter
+// let player = {x: 200, y: 350};
+// let bullets = [];
+// let enemies = [];
+
+// Start coding your masterpiece here!
+clearCanvas();
+drawText(150, 200, 'Your turn to create!', 'purple');`,
+        expectedOutput: "Your own creative project",
+        order: 12,
         isLocked: true
       },
 
