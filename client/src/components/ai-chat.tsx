@@ -54,16 +54,14 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
         content: msg.content
       }));
 
-      const response = await apiRequest<{ message: string }>({
-        endpoint: '/api/ai-chat',
-        method: 'POST',
-        body: {
-          messages: chatMessages,
-          tutorialId,
-          code,
-          isFirstMessage
-        }
+      const apiResponse = await apiRequest('POST', '/api/ai-chat', {
+        messages: chatMessages,
+        tutorialId,
+        code,
+        isFirstMessage
       });
+      
+      const response = await apiResponse.json();
 
       const assistantMessage: Message = {
         role: 'assistant',
