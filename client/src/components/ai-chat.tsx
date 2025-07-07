@@ -165,13 +165,14 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
   }
 
   return (
-    <Card className="h-full flex flex-col max-h-full overflow-hidden">
-      <CardHeader className="pb-3 flex-shrink-0">
+    <div className="h-full flex flex-col max-h-full">
+      {/* Header */}
+      <div className="flex-shrink-0 p-4 border-b bg-white">
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-blue-500" />
-            AI Assistant
-          </CardTitle>
+            <h3 className="font-medium">AI Assistant</h3>
+          </div>
           <Button
             variant="ghost"
             size="sm"
@@ -181,11 +182,12 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
             <X className="w-4 h-4" />
           </Button>
         </div>
-      </CardHeader>
+      </div>
       
-      <CardContent className="flex-1 flex flex-col p-4 pt-0 min-h-0">
-        <ScrollArea className="flex-1 mb-4 max-h-full">
-          <div className="space-y-4 pr-4">
+      {/* Messages Area - Scrollable */}
+      <div className="flex-1 overflow-hidden bg-white">
+        <ScrollArea className="h-full">
+          <div className="p-4 space-y-4">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -246,8 +248,11 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
-        
-        <div className="flex gap-2 flex-shrink-0">
+      </div>
+      
+      {/* Input Area - Fixed at bottom */}
+      <div className="flex-shrink-0 p-4 border-t bg-white">
+        <div className="flex gap-2 mb-2">
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
@@ -265,10 +270,10 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
           </Button>
         </div>
         
-        <p className="text-xs text-gray-500 mt-2 text-center flex-shrink-0">
+        <p className="text-xs text-gray-500 text-center">
           I'm here to help explain bugs and suggest next steps. I won't write code for you - that's the fun part!
         </p>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

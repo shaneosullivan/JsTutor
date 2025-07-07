@@ -120,6 +120,8 @@ Changelog:
   - Added automatic error detection - AI assistant automatically offers help when canvas has errors
   - AI chat only sends initial message when first shown, not when mounted in background
   - Error messages are automatically sent to AI with code context for immediate debugging help
+  - Fixed AI chat layout to use proper flex constraints preventing overflow and scrolling issues
+  - Chat input always stays visible at bottom with messages scrolling independently in dedicated area
 
 ## User Preferences
 

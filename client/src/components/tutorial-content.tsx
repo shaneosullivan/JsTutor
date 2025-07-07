@@ -252,9 +252,9 @@ export default function TutorialContent({
           </div>
 
           {/* Canvas Area or AI Chat */}
-          <div className="flex-1 p-6 bg-slate-50 relative">
+          <div className="flex-1 bg-slate-50 relative flex flex-col min-h-0">
             {/* Drawing Canvas */}
-            <div className={showAiChat ? "hidden" : "block h-full"}>
+            <div className={showAiChat ? "hidden" : "flex-1 p-6"}>
               <DrawingCanvas 
                 code={code} 
                 onOutput={setOutput}
@@ -263,7 +263,7 @@ export default function TutorialContent({
             </div>
             
             {/* AI Chat - Always rendered but hidden when not active */}
-            <div className={showAiChat ? "block h-full" : "hidden"}>
+            <div className={showAiChat ? "flex-1 flex flex-col min-h-0" : "hidden"}>
               <AiChat
                 key={`tutorial-${tutorial.id}`}
                 tutorialId={tutorial.id}
