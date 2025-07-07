@@ -164,6 +164,18 @@ isKeyPressed(key)
 
 ## Deployment
 
+### Vercel (Recommended)
+The project is configured for easy deployment on Vercel:
+
+1. **Fork or clone the repository** to your GitHub account
+2. **Connect to Vercel**: 
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Vercel will automatically detect the configuration
+3. **Deploy**: Click "Deploy" - no additional configuration needed!
+
+The `vercel.json` configuration file handles both the frontend build and Node.js backend automatically.
+
 ### Replit Deployment
 This project is optimized for Replit deployment with built-in environment variable management.
 
