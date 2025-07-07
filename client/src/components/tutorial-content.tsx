@@ -250,16 +250,21 @@ export default function TutorialContent({
           </div>
 
           {/* Canvas Area or AI Chat */}
-          <div className="flex-1 p-6 bg-slate-50">
-            {showAiChat ? (
+          <div className="flex-1 p-6 bg-slate-50 relative">
+            {/* Drawing Canvas */}
+            <div className={showAiChat ? "hidden" : "block h-full"}>
+              <DrawingCanvas code={code} onOutput={setOutput} />
+            </div>
+            
+            {/* AI Chat - Always rendered but hidden when not active */}
+            <div className={showAiChat ? "block h-full" : "hidden"}>
               <AiChat
+                key={`tutorial-${tutorial.id}`}
                 tutorialId={tutorial.id}
                 code={code}
                 onClose={() => setShowAiChat(false)}
               />
-            ) : (
-              <DrawingCanvas code={code} onOutput={setOutput} />
-            )}
+            </div>
           </div>
 
           {/* Output Console - Only show when not using AI chat */}

@@ -115,6 +115,8 @@ Changelog:
   - Updated AI instructions to be brief (2-3 sentences max) for children's attention spans
   - AI now always receives complete current code with every message for better context
   - AI explicitly instructed to use provided utility functions instead of suggesting rewrites
+  - Fixed AI chat state persistence - conversation now maintained when switching between canvas and chat views
+  - AI chat only resets when switching to a different tutorial, preserving conversation within same lesson
 
 ## User Preferences
 
