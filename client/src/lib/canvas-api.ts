@@ -14,24 +14,29 @@ export interface CanvasAPI {
 export function createCanvasAPI(ctx: CanvasRenderingContext2D): CanvasAPI {
   const canvas = ctx.canvas;
   
-  // Track pressed keys
-  const pressedKeys = new Set<string>();
-  
-  // Add event listeners for keyboard tracking
-  const handleKeyDown = (e: KeyboardEvent) => {
-    pressedKeys.add(e.key.toLowerCase());
-  };
-  
-  const handleKeyUp = (e: KeyboardEvent) => {
-    pressedKeys.delete(e.key.toLowerCase());
-  };
-  
-  // Add listeners if not already added
-  if (!document.hasAttribute('data-canvas-listeners')) {
+  // Track pressed keys globally
+  if (!(window as any).canvasKeyTracker) {
+    const pressedKeys = new Set<string>();
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      pressedKeys.add(e.key.toLowerCase());
+    };
+    
+    const handleKeyUp = (e: KeyboardEvent) => {
+      pressedKeys.delete(e.key.toLowerCase());
+    };
+    
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
-    document.setAttribute('data-canvas-listeners', 'true');
+    
+    (window as any).canvasKeyTracker = {
+      pressedKeys,
+      handleKeyDown,
+      handleKeyUp
+    };
   }
+  
+  const keyTracker = (window as any).canvasKeyTracker;
   
   return {
     drawPixel: (x: number, y: number, color: string) => {
@@ -113,7 +118,7 @@ export function createCanvasAPI(ctx: CanvasRenderingContext2D): CanvasAPI {
     },
     
     isKeyPressed: (key: string) => {
-      return pressedKeys.has(key.toLowerCase());
+      return keyTracker.pressedKeys.has(key.toLowerCase());
     }
   };
 }
