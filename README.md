@@ -25,28 +25,22 @@ An interactive JavaScript learning platform designed for children, featuring han
 
 - **Node.js**: Version 18 or higher
 - **npm**: Version 8 or higher
-- **OpenAI API Key**: Optional, but recommended for AI assistance features
+
+That's it! No API keys or database setup required.
 
 ## Environment Variables
 
-Create a `.env` file in the root directory with the following optional variable:
+The application works out of the box with no environment variables required. You can optionally create a `.env` file for custom settings:
 
 ```env
-# OpenAI Integration (Optional - for AI assistance)
-OPENAI_API_KEY=your_openai_api_key_here
-
-# Application Settings
+# Application Settings (Optional)
 NODE_ENV=development
 PORT=5000
 ```
 
-### Optional Environment Variables
+### AI Integration
 
-1. **OPENAI_API_KEY**: 
-   - Get from: https://platform.openai.com/api-keys
-   - Used for: AI-powered coding assistance and help features
-   - Note: Users can also provide their own API keys through the application interface
-   - If not provided, AI features will prompt users to enter their own API key
+The platform includes AI-powered coding assistance. Users provide their own OpenAI API keys directly through the application interface when they want to use AI features. No server-side API key configuration needed.
 
 ## Installation & Setup
 
@@ -61,18 +55,12 @@ PORT=5000
    npm install
    ```
 
-3. **Set up environment variables**:
-   ```bash
-   cp .env.example .env
-   # Edit .env file with your actual values
-   ```
-
-4. **Start the development server**:
+3. **Start the development server**:
    ```bash
    npm run dev
    ```
 
-5. **Open the application**:
+4. **Open the application**:
    - Navigate to `http://localhost:5000` in your browser
    - The application serves both frontend and backend on the same port
 
@@ -195,10 +183,10 @@ The application uses:
 
 ### Common Issues
 
-1. **OpenAI API errors**: Verify your API key is valid and has sufficient credits
-2. **Port conflicts**: Change the PORT environment variable if 5000 is in use
-3. **Module not found**: Run `npm install` to ensure all dependencies are installed
-4. **TypeScript errors**: Run `npm run type-check` to identify type issues
+1. **Port conflicts**: Change the PORT environment variable if 5000 is in use
+2. **Module not found**: Run `npm install` to ensure all dependencies are installed
+3. **TypeScript errors**: Run `npm run type-check` to identify type issues
+4. **AI features not working**: Users need to provide their own OpenAI API key through the application interface
 
 ### Performance Optimization
 
