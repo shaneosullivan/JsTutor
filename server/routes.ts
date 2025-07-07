@@ -79,19 +79,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Initialize OpenAI client
-  const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+  // API key validation endpoint
+  app.post("/api/validate-api-key", async (req, res) => {
+    try {
+      const { apiKey } = req.body;
+
+      if (!apiKey) {
+        return res.status(400).json({ error: "API key is required" });
+      }
+
+      // Test the API key with a simple request
+      const testOpenai = new OpenAI({ apiKey });
+      
+      await testOpenai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: "Hello" }],
+        max_tokens: 5,
+      });
+
+      res.json({ valid: true });
+    } catch (error) {
+      console.error("API key validation error:", error);
+      res.status(400).json({ error: "Invalid API key" });
+    }
   });
 
   // AI Assistant endpoint
   app.post("/api/ai-chat", async (req, res) => {
     try {
-      const { messages, tutorialId, code, isFirstMessage } = req.body;
+      const { messages, tutorialId, code, isFirstMessage, apiKey } = req.body;
 
       if (!messages || !Array.isArray(messages)) {
         return res.status(400).json({ error: "Invalid messages format" });
       }
+
+      if (!apiKey) {
+        return res.status(400).json({ error: "API key is required" });
+      }
+
+      const openai = new OpenAI({ apiKey });
 
       let systemMessage = "";
       

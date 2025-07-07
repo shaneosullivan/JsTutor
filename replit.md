@@ -103,6 +103,12 @@ Changelog:
   - Removed confusing Run Code button, added automatic execution
   - Fixed progression system with manual completion and advancement
   - Added "Mark Complete & Continue" and "Next Lesson" buttons
+- July 07, 2025: Implemented user-provided OpenAI API key system
+  - Replaced server-side API key with user-provided keys stored in localStorage
+  - Added child-friendly API key setup process with parent guidance
+  - Implemented API key validation before saving
+  - Created encouraging, upbeat interface explaining the benefits of AI assistance
+  - AI assistant now uses user's own OpenAI credits for personalized help
 
 ## User Preferences
 

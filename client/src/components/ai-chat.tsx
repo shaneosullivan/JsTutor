@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bot, User, Send, X, Loader2 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
+import ApiKeySetup from '@/components/api-key-setup';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -23,16 +24,28 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [showSetup, setShowSetup] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Check for existing API key on mount
+  useEffect(() => {
+    const storedApiKey = localStorage.getItem('openai_api_key');
+    if (storedApiKey) {
+      setApiKey(storedApiKey);
+    } else {
+      setShowSetup(true);
+    }
+  }, []);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Initialize chat with context on first open
+  // Initialize chat with context on first open (only if API key is available)
   useEffect(() => {
-    if (!hasInitialized && messages.length === 0) {
+    if (!hasInitialized && messages.length === 0 && apiKey && !showSetup) {
       const initialMessage: Message = {
         role: 'user',
         content: "Hi! I'm working on this tutorial and could use some help. Can you look at my code and let me know if there are any bugs or suggest what I should try next?",
@@ -43,7 +56,7 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
       sendMessage(initialMessage, true);
       setHasInitialized(true);
     }
-  }, [hasInitialized, messages.length]);
+  }, [hasInitialized, messages.length, apiKey, showSetup]);
 
   const sendMessage = async (message: Message, isFirstMessage = false) => {
     setIsLoading(true);
@@ -58,7 +71,8 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
         messages: chatMessages,
         tutorialId,
         code,
-        isFirstMessage
+        isFirstMessage,
+        apiKey
       });
       
       const response = await apiResponse.json();
@@ -103,6 +117,26 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
       handleSendMessage();
     }
   };
+
+  const handleApiKeyValidated = (validatedApiKey: string) => {
+    setApiKey(validatedApiKey);
+    setShowSetup(false);
+  };
+
+  const handleCancelSetup = () => {
+    setShowSetup(false);
+    onClose();
+  };
+
+  // Show API key setup if needed
+  if (showSetup || !apiKey) {
+    return (
+      <ApiKeySetup
+        onKeyValidated={handleApiKeyValidated}
+        onCancel={handleCancelSetup}
+      />
+    );
+  }
 
   return (
     <Card className="h-full flex flex-col">
