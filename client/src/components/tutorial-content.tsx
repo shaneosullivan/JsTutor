@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { RotateCcw, ArrowRight, Play, Eraser, Lightbulb } from "lucide-react";
+import { RotateCcw, ArrowRight, Play, Eraser, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import CodeEditor from "@/components/code-editor";
 import DrawingCanvas from "@/components/drawing-canvas";
 import type { Tutorial } from "@shared/schema";
@@ -20,6 +21,7 @@ export default function TutorialContent({
   const [code, setCode] = useState(tutorial.starterCode);
   const [output, setOutput] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [isExplanationOpen, setIsExplanationOpen] = useState(false);
 
   // Reset code when tutorial changes
   useEffect(() => {
@@ -95,27 +97,36 @@ export default function TutorialContent({
       <div className="flex-1 flex overflow-hidden">
         {/* Tutorial Text and Code Editor */}
         <div className="w-1/2 flex flex-col">
-          {/* Tutorial Explanation */}
-          <div className="bg-white p-6 border-b border-slate-200">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-lg">
-                  <Lightbulb className="text-yellow-500 mr-2" size={20} />
-                  What You'll Learn
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-slate-700 leading-relaxed mb-4 whitespace-pre-line">
-                  {tutorial.content}
-                </div>
-                {tutorial.expectedOutput && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h4 className="font-medium text-blue-800 mb-2">Expected Output:</h4>
-                    <p className="text-blue-700 text-sm">{tutorial.expectedOutput}</p>
+          {/* Tutorial Explanation - Collapsible */}
+          <div className="bg-white border-b border-slate-200">
+            <Collapsible open={isExplanationOpen} onOpenChange={setIsExplanationOpen}>
+              <CollapsibleTrigger asChild>
+                <div className="flex items-center justify-between p-4 hover:bg-slate-50 cursor-pointer transition-colors">
+                  <div className="flex items-center text-lg font-medium">
+                    <Lightbulb className="text-yellow-500 mr-2" size={20} />
+                    What You'll Learn
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  {isExplanationOpen ? (
+                    <ChevronUp className="text-slate-500" size={20} />
+                  ) : (
+                    <ChevronDown className="text-slate-500" size={20} />
+                  )}
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="px-6 pb-6">
+                  <div className="text-slate-700 leading-relaxed mb-4 whitespace-pre-line">
+                    {tutorial.content}
+                  </div>
+                  {tutorial.expectedOutput && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-medium text-blue-800 mb-2">Expected Output:</h4>
+                      <p className="text-blue-700 text-sm">{tutorial.expectedOutput}</p>
+                    </div>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
           {/* Code Editor */}
