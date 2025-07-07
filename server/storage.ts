@@ -216,44 +216,183 @@ setInterval(animate, 100);`,
         isLocked: true
       },
       {
-        title: "Your Own Game!",
-        description: "Build something awesome",
-        content: "Congratulations! You've learned so much! Now let's create your very own interactive game!\n\n💡 Game Tip: This game uses everything you've learned! Variables to keep track of the score, if/else to check winning conditions, functions to organize code, and even some advanced math (Math.sqrt) to detect if clicks are inside the circle. You're a real programmer now!\n\n🌟 Your Final Challenge:\nDesign your own game! Change the target shape, add multiple targets, create power-ups, or make the target move around. You have all the tools you need to build something amazing. Show the world what you can create!",
-        starterCode: `// Let's create a simple clicking game!
-let score = 0;
-let gameRunning = true;
+        title: "Listening to Keys",
+        description: "Make interactive art",
+        content: "Now let's learn how to make our programs respond to keyboard input! This is how we create interactive experiences.\n\n🎹 New Keyboard Functions:\n• onKeyPress(callback) - Runs your function when any key is pressed\n• onArrowKeys(callback) - Specifically listens for arrow keys\n• onSpaceBar(callback) - Listens just for the spacebar\n• isKeyPressed(key) - Checks if a key is currently being held down\n\n💡 Interactive Tip: The square remembers its position using variables. Each time you press an arrow key, we change the x or y position and redraw everything!\n\n🌟 Your Challenge:\nMake the square do something different! Try changing its color, size, or drawing a trail behind it as it moves. Can you make it wrap around the screen edges?",
+        starterCode: `// Let's create a square you can move with arrow keys!
+let squareX = 200;
+let squareY = 200;
+let squareColor = 'blue';
+
+function drawSquare() {
+    clearCanvas();
+    drawRect(squareX, squareY, 50, 50, squareColor);
+    drawText(150, 50, 'Use arrow keys to move!', 'black');
+}
+
+// Listen for arrow key presses
+onArrowKeys(function(direction) {
+    if (direction === 'up') squareY = squareY - 20;
+    if (direction === 'down') squareY = squareY + 20;
+    if (direction === 'left') squareX = squareX - 20;
+    if (direction === 'right') squareX = squareX + 20;
+    
+    drawSquare();
+});
+
+// Draw the initial square
+drawSquare();`,
+        expectedOutput: "A blue square that moves with arrow keys",
+        order: 10,
+        isLocked: true
+      },
+      {
+        title: "Spacebar Magic",
+        description: "Add special actions",
+        content: "The spacebar is perfect for special actions in games! Let's make our moving square even more fun by adding color changes.\n\n🎨 Color Fun:\n• We can store multiple colors in an array\n• Use % (modulo) to cycle through colors when we reach the end\n• The spacebar becomes like a magic wand that changes colors!\n\n💡 Array Cycling Tip: currentColorIndex % colors.length makes sure we never go past the last color. When we reach the end, it starts over at the beginning. This creates an endless cycle!\n\n🌟 Your Challenge:\nAdd more special spacebar actions! Try changing the square's size, making it leave a trail, or creating sparkle effects around it. What other magical powers can you give the spacebar?",
+        starterCode: `// Moving square with color-changing spacebar magic!
+let squareX = 200;
+let squareY = 200;
+let colors = ['red', 'green', 'blue', 'purple', 'orange', 'pink'];
+let currentColorIndex = 0;
+
+function drawSquare() {
+    clearCanvas();
+    drawRect(squareX, squareY, 50, 50, colors[currentColorIndex]);
+    drawText(130, 50, 'Arrow keys = move, Space = change color!', 'black');
+}
+
+// Listen for arrow keys
+onArrowKeys(function(direction) {
+    if (direction === 'up') squareY = squareY - 20;
+    if (direction === 'down') squareY = squareY + 20;
+    if (direction === 'left') squareX = squareX - 20;
+    if (direction === 'right') squareX = squareX + 20;
+    
+    drawSquare();
+});
+
+// Listen for spacebar
+onSpaceBar(function() {
+    currentColorIndex = (currentColorIndex + 1) % colors.length;
+    drawSquare();
+});
+
+// Draw the initial square
+drawSquare();`,
+        expectedOutput: "A colorful square controlled by arrow keys and spacebar",
+        order: 11,
+        isLocked: true
+      },
+      {
+        title: "Snake Game",
+        description: "Build the classic game",
+        content: "Time to build the famous Snake game! This combines everything you've learned: arrays, loops, keyboard input, and game logic.\n\n🐍 Snake Game Elements:\n• The snake is an array of positions\n• Food appears at random locations\n• Arrow keys change the snake's direction\n• Spacebar starts a new game\n• The snake grows when it eats food!\n\n💡 Game Tips:\n• unshift() adds to the front of an array\n• pop() removes from the end of an array\n• Math.floor(Math.random() * 20) gives a random number from 0 to 19\n• The snake moves by adding a new head and removing the tail\n\n🌟 Your Final Challenge:\nYou're building a real game! Try adding a score display, making the snake faster as it grows, or adding obstacles. You've become a true game developer!",
+        starterCode: `// Let's build Snake!
+let snake = [{x: 10, y: 10}];
+let direction = {x: 0, y: 0};
+let food = {x: 15, y: 15};
+let gameRunning = false;
 
 function drawGame() {
     clearCanvas();
     
-    // Draw the target
-    drawCircle(200, 200, 50, 'red');
-    drawCircle(200, 200, 30, 'white');
-    drawCircle(200, 200, 10, 'red');
+    // Draw snake
+    for (let i = 0; i < snake.length; i++) {
+        let segment = snake[i];
+        let color = i === 0 ? 'darkgreen' : 'green';
+        drawRect(segment.x * 20, segment.y * 20, 18, 18, color);
+    }
     
-    // Draw the score
-    drawText(50, 50, "Score: " + score, 'black');
+    // Draw food
+    drawCircle(food.x * 20 + 10, food.y * 20 + 10, 8, 'red');
     
-    if (score >= 10) {
-        drawText(150, 350, "You Win! Great job!", 'green');
-        gameRunning = false;
+    // Draw instructions
+    if (!gameRunning) {
+        drawText(120, 50, 'Press SPACE to start!', 'black');
+        drawText(140, 350, 'Use arrow keys to move', 'black');
+    } else {
+        drawText(10, 30, 'Length: ' + snake.length, 'black');
     }
 }
 
-// Handle clicks (you'll learn more about this later!)
-function handleClick(x, y) {
-    if (gameRunning) {
-        let distance = Math.sqrt((x - 200) * (x - 200) + (y - 200) * (y - 200));
-        if (distance < 50) {
-            score++;
-            drawGame();
-        }
+function moveSnake() {
+    if (!gameRunning) return;
+    
+    let head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+    
+    // Check if snake ate food
+    if (head.x === food.x && head.y === food.y) {
+        food = {x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20)};
+    } else {
+        snake.pop(); // Remove tail
     }
+    
+    snake.unshift(head); // Add new head
+    drawGame();
 }
 
+// Arrow key controls
+onArrowKeys(function(dir) {
+    if (!gameRunning) return;
+    if (dir === 'up' && direction.y !== 1) direction = {x: 0, y: -1};
+    if (dir === 'down' && direction.y !== -1) direction = {x: 0, y: 1};
+    if (dir === 'left' && direction.x !== 1) direction = {x: -1, y: 0};
+    if (dir === 'right' && direction.x !== -1) direction = {x: 1, y: 0};
+});
+
+// Spacebar to start
+onSpaceBar(function() {
+    snake = [{x: 10, y: 10}];
+    direction = {x: 0, y: 0};
+    gameRunning = true;
+    drawGame();
+});
+
+// Start game loop
+setInterval(moveSnake, 200);
 drawGame();`,
-        expectedOutput: "An interactive clicking game",
-        order: 10,
+        expectedOutput: "A playable Snake game with arrow key controls",
+        order: 12,
+        isLocked: true
+      },
+      {
+        title: "Your Own Game!",
+        description: "Build something awesome",
+        content: "Congratulations! You've learned so much! Now let's create your very own interactive game or art project!\n\n💡 Programming Power: You now know variables, if/else statements, functions, loops, arrays, keyboard input, and game logic. You're a real programmer! These are the same tools that professional game developers use.\n\n🌟 Your Final Challenge:\nCreate anything you want! Here are some ideas:\n• A drawing app that responds to keys\n• A simple platformer game\n• An interactive art piece\n• Your own version of a classic game\n• Something completely new that no one has thought of!\n\nThe only limit is your imagination. Show the world what you can create!",
+        starterCode: `// Your creative playground! Build anything you want!
+// Here's a simple starting point, but feel free to delete it all and start fresh
+
+let playerX = 200;
+let playerY = 200;
+let playerColor = 'blue';
+
+function drawPlayer() {
+    clearCanvas();
+    drawRect(playerX, playerY, 30, 30, playerColor);
+    drawText(150, 50, 'This is YOUR creation!', 'black');
+    drawText(120, 350, 'What will you build today?', 'purple');
+}
+
+// Your controls
+onArrowKeys(function(direction) {
+    if (direction === 'up') playerY -= 10;
+    if (direction === 'down') playerY += 10;
+    if (direction === 'left') playerX -= 10;
+    if (direction === 'right') playerX += 10;
+    drawPlayer();
+});
+
+onSpaceBar(function() {
+    // What happens when you press space? You decide!
+    playerColor = playerColor === 'blue' ? 'red' : 'blue';
+    drawPlayer();
+});
+
+// Start your creation
+drawPlayer();`,
+        expectedOutput: "Your own creative masterpiece",
+        order: 13,
         isLocked: true
       }
     ];

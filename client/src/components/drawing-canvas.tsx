@@ -10,6 +10,16 @@ interface DrawingCanvasProps {
 export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const intervalsRef = useRef<number[]>([]);
+  const timeoutsRef = useRef<number[]>([]);
+
+  // Cleanup function to clear all intervals and timeouts
+  const cleanupTimers = () => {
+    intervalsRef.current.forEach(id => clearInterval(id));
+    timeoutsRef.current.forEach(id => clearTimeout(id));
+    intervalsRef.current = [];
+    timeoutsRef.current = [];
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -17,6 +27,9 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    // Cleanup previous timers
+    cleanupTimers();
 
     // Set canvas size
     canvas.width = 400;
@@ -31,18 +44,34 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
       // Create canvas API
       const canvasAPI = createCanvasAPI(ctx);
       
+      // Create wrapped timer functions that track their IDs
+      const wrappedSetInterval = (callback: () => void, delay: number) => {
+        const id = setInterval(callback, delay);
+        intervalsRef.current.push(id);
+        return id;
+      };
+
+      const wrappedSetTimeout = (callback: () => void, delay: number) => {
+        const id = setTimeout(callback, delay);
+        timeoutsRef.current.push(id);
+        return id;
+      };
+
       // Create a safe execution environment
       const safeCode = `
         ${Object.keys(canvasAPI).map(key => 
           `const ${key} = canvasAPI.${key};`
         ).join('\n')}
         
+        const setInterval = wrappedSetInterval;
+        const setTimeout = wrappedSetTimeout;
+        
         ${code}
       `;
 
       // Execute the code
-      const executeCode = new Function('canvasAPI', safeCode);
-      executeCode(canvasAPI);
+      const executeCode = new Function('canvasAPI', 'wrappedSetInterval', 'wrappedSetTimeout', safeCode);
+      executeCode(canvasAPI, wrappedSetInterval, wrappedSetTimeout);
       
       const newError = null;
       setError(newError);
@@ -61,6 +90,9 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
       ctx.font = "12px Arial";
       ctx.fillText(err instanceof Error ? err.message : "Unknown error", 10, 50);
     }
+
+    // Cleanup on unmount
+    return cleanupTimers;
   }, [code, onOutput]);
 
   return (

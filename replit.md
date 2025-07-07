@@ -124,6 +124,17 @@ Changelog:
   - Chat input always stays visible at bottom with messages scrolling independently in dedicated area
   - Made "Help Me" button more playful with gradient colors, emojis, and hover animations for child appeal
   - Button features purple-to-pink gradient with scaling animation and robot emoji for fun factor
+- July 07, 2025: Fixed setInterval/setTimeout cleanup system to prevent persistent timers
+  - Added automatic cleanup of all intervals and timeouts when code changes or tutorials switch
+  - Wrapped setInterval and setTimeout to track all timer IDs for proper cleanup
+  - Fixed bug where animations would continue running when switching tutorials
+- July 07, 2025: Added keyboard event system and Snake game tutorials
+  - Added onKeyPress, onArrowKeys, onSpaceBar, and isKeyPressed utility functions
+  - Created "Listening to Keys" tutorial for basic keyboard interaction
+  - Created "Spacebar Magic" tutorial for special key actions
+  - Built complete Snake game tutorial with arrow key controls and spacebar restart
+  - Added "Your Own Game!" as final creative challenge tutorial
+  - Enhanced canvas API with comprehensive keyboard event handling
 
 ## User Preferences
 
