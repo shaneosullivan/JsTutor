@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RotateCcw, ArrowRight, Play, Eraser, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
+import { RotateCcw, ArrowRight, Eraser, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -11,12 +11,16 @@ interface TutorialContentProps {
   tutorial: Tutorial;
   onComplete: (tutorialId: number) => void;
   isCompleted: boolean;
+  onNext?: () => void;
+  hasNext: boolean;
 }
 
 export default function TutorialContent({ 
   tutorial, 
   onComplete, 
-  isCompleted 
+  isCompleted,
+  onNext,
+  hasNext
 }: TutorialContentProps) {
   const [code, setCode] = useState(tutorial.starterCode);
   const [output, setOutput] = useState<string[]>([]);
@@ -29,12 +33,25 @@ export default function TutorialContent({
     setOutput([]);
   }, [tutorial.id, tutorial.starterCode]);
 
+  // Auto-execute code when it changes (but not on initial load)
+  useEffect(() => {
+    if (code === tutorial.starterCode) return; // Don't auto-run starter code
+    
+    const timeoutId = setTimeout(() => {
+      handleRunCode();
+    }, 1000); // Wait 1 second after user stops typing
+
+    return () => clearTimeout(timeoutId);
+  }, [code, tutorial.starterCode]);
+
   const handleReset = () => {
     setCode(tutorial.starterCode);
     setOutput([]);
   };
 
   const handleRunCode = async () => {
+    if (isRunning) return; // Prevent multiple simultaneous executions
+    
     setIsRunning(true);
     try {
       const response = await fetch("/api/execute", {
@@ -83,10 +100,18 @@ export default function TutorialContent({
               <RotateCcw size={16} className="mr-2" />
               Reset
             </Button>
-            {isCompleted && (
-              <Button className="gradient-success text-white">
+            {isCompleted && hasNext && (
+              <Button 
+                onClick={onNext}
+                className="gradient-success text-white"
+              >
+                Next Lesson
                 <ArrowRight size={16} className="ml-2" />
-                Completed!
+              </Button>
+            )}
+            {isCompleted && !hasNext && (
+              <Button className="gradient-success text-white">
+                Course Complete!
               </Button>
             )}
           </div>
@@ -138,23 +163,17 @@ export default function TutorialContent({
                 </h3>
                 <div className="flex items-center space-x-2">
                   <Button
-                    onClick={handleRunCode}
-                    disabled={isRunning}
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                  >
-                    <Play size={14} className="mr-1" />
-                    {isRunning ? "Running..." : "Run Code"}
-                  </Button>
-                  <Button
                     onClick={handleClearCanvas}
                     variant="outline"
                     size="sm"
                     className="text-slate-300 border-slate-600"
                   >
                     <Eraser size={14} className="mr-1" />
-                    Clear
+                    Clear Canvas
                   </Button>
+                  {isRunning && (
+                    <span className="text-green-400 text-sm">Running...</span>
+                  )}
                 </div>
               </div>
             </div>

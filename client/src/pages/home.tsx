@@ -18,6 +18,17 @@ export default function Home() {
     setCurrentTutorial,
     completeTutorial 
   } = useTutorial();
+
+  const handleNextTutorial = () => {
+    if (!currentTutorial) return;
+    const nextTutorial = tutorials.find((t: any) => t.order === currentTutorial.order + 1);
+    if (nextTutorial) {
+      setCurrentTutorial(nextTutorial);
+    }
+  };
+
+  const hasNextTutorial = currentTutorial ? 
+    tutorials.some((t: any) => t.order === currentTutorial.order + 1) : false;
   
   const [showHelp, setShowHelp] = useState(false);
 
@@ -97,6 +108,8 @@ export default function Home() {
                   tutorial={currentTutorial}
                   onComplete={completeTutorial}
                   isCompleted={progress?.completedTutorials.includes(currentTutorial.id) || false}
+                  onNext={handleNextTutorial}
+                  hasNext={hasNextTutorial}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center">
