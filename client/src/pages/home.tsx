@@ -3,9 +3,11 @@ import { useTutorial } from "@/hooks/use-tutorial";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import TutorialContent from "@/components/tutorial-content";
 import HelpModal from "@/components/help-modal";
-import { Code, Star, HelpCircle } from "lucide-react";
+import ApiDocumentation from "@/components/api-documentation";
+import { Code, Star, HelpCircle, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   const { 
@@ -75,25 +77,46 @@ export default function Home() {
 
         {/* Main Content */}
         <main className="flex-1 overflow-hidden">
-          {currentTutorial ? (
-            <TutorialContent 
-              tutorial={currentTutorial}
-              onComplete={completeTutorial}
-              isCompleted={progress?.completedTutorials.includes(currentTutorial.id) || false}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <Code className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-                <h3 className="text-lg font-medium text-slate-800 mb-2">
-                  Select a tutorial to get started!
-                </h3>
-                <p className="text-slate-600">
-                  Choose a tutorial from the sidebar to begin your JavaScript adventure.
-                </p>
-              </div>
+          <Tabs defaultValue="tutorial" className="h-full flex flex-col">
+            <div className="border-b border-slate-200 bg-white px-6 py-3">
+              <TabsList className="grid w-full grid-cols-2 max-w-md">
+                <TabsTrigger value="tutorial" className="flex items-center gap-2">
+                  <Code className="w-4 h-4" />
+                  Tutorial
+                </TabsTrigger>
+                <TabsTrigger value="reference" className="flex items-center gap-2">
+                  <Book className="w-4 h-4" />
+                  Reference
+                </TabsTrigger>
+              </TabsList>
             </div>
-          )}
+            
+            <TabsContent value="tutorial" className="flex-1 overflow-hidden mt-0">
+              {currentTutorial ? (
+                <TutorialContent 
+                  tutorial={currentTutorial}
+                  onComplete={completeTutorial}
+                  isCompleted={progress?.completedTutorials.includes(currentTutorial.id) || false}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <Code className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                    <h3 className="text-lg font-medium text-slate-800 mb-2">
+                      Select a tutorial to get started!
+                    </h3>
+                    <p className="text-slate-600">
+                      Choose a tutorial from the sidebar to begin your JavaScript adventure.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="reference" className="flex-1 overflow-hidden mt-0">
+              <ApiDocumentation />
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
 
