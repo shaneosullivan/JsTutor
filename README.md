@@ -176,6 +176,8 @@ The project is configured for easy deployment on Vercel:
 
 The `vercel.json` configuration file handles both the frontend build and Node.js backend automatically.
 
+**Note**: Initial builds may take 2-3 minutes due to the comprehensive UI component library. Subsequent deployments will be faster due to caching.
+
 ### Replit Deployment
 This project is optimized for Replit deployment with built-in environment variable management.
 

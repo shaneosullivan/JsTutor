@@ -201,6 +201,13 @@ Changelog:
   - Added .env.example template with all required and optional environment variables
   - Documented tech stack, project structure, and development guidelines
   - Included troubleshooting section and deployment strategies
+- July 07, 2025: Fixed Vercel deployment configuration and module resolution
+  - Added proper ES module imports with .js extensions for Node.js compatibility
+  - Created vercel.json with correct serverless function configuration
+  - Added @vercel/node package for proper TypeScript support
+  - Resolved toaster component build issues and path resolution conflicts
+  - Updated server architecture to export Express app for Vercel serverless functions
+  - Fixed production environment detection and static file serving
 
 ## User Preferences
 
