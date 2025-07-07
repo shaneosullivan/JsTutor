@@ -411,7 +411,7 @@ redrawEverything();`,
         starterCode: `// Snake Game!
 let snake = [{x: 200, y: 200}];
 let direction = 'right';
-let food = {x: 150, y: 150};
+let food = {x: 160, y: 160};  // Fixed: align to 20px grid
 let gameOver = false;
 
 // Game loop
@@ -441,11 +441,12 @@ setInterval(() => {
     
     snake.unshift(head);
     
-    // Check food
+    // Check food collision
     if (head.x === food.x && head.y === food.y) {
+        // Generate new food position (aligned to 20px grid)
         food = {
-            x: Math.floor(Math.random() * 20) * 20,
-            y: Math.floor(Math.random() * 20) * 20
+            x: Math.floor(Math.random() * 19) * 20,  // 0-18 * 20 = 0-360
+            y: Math.floor(Math.random() * 19) * 20   // 0-18 * 20 = 0-360
         };
     } else {
         snake.pop();
@@ -480,7 +481,7 @@ onSpaceBar(() => {
     if (gameOver) {
         snake = [{x: 200, y: 200}];
         direction = 'right';
-        food = {x: 150, y: 150};
+        food = {x: 160, y: 160};  // Fixed: align to 20px grid
         gameOver = false;
     }
 });`,
