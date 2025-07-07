@@ -63,13 +63,13 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
       // Create wrapped timer functions that track their IDs
       const wrappedSetInterval = (callback: () => void, delay: number) => {
         const id = setInterval(callback, delay);
-        intervalsRef.current.push(id);
+        intervalsRef.current.push(id as unknown as number);
         return id;
       };
 
       const wrappedSetTimeout = (callback: () => void, delay: number) => {
         const id = setTimeout(callback, delay);
-        timeoutsRef.current.push(id);
+        timeoutsRef.current.push(id as unknown as number);
         return id;
       };
 

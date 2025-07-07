@@ -17,6 +17,8 @@ export function log(message: string, source = "express") {
 }
 
 export function serveStatic(app: Express) {
+  // In production, the public files are built to dist/public from project root
+  // The server runs as dist/index.js, so public files are at ./public relative to server
   const distPath = path.resolve(__dirname, "public");
 
   if (!fs.existsSync(distPath)) {

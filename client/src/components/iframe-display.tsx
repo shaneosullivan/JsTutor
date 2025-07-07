@@ -51,10 +51,10 @@ export default function IframeDisplay({ code, onOutput, onError }: IframeDisplay
           const iframeWindow = iframe.contentWindow;
           if (iframeWindow) {
             // Override console methods to capture output
-            const originalConsole = iframeWindow.console;
+            const originalConsole = (iframeWindow as any).console;
             const capturedLogs: string[] = [];
             
-            iframeWindow.console = {
+            (iframeWindow as any).console = {
               ...originalConsole,
               log: (...args: any[]) => {
                 capturedLogs.push(`Console: ${args.join(' ')}`);

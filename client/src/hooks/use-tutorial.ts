@@ -45,7 +45,7 @@ export function useTutorial() {
       } catch (error) {
         console.error('Error parsing saved completed tutorials:', error);
       }
-    } else if (progress) {
+    } else if (progress && 'completedTutorials' in progress) {
       // Fallback to server data if no local storage
       setCompletedTutorials(progress.completedTutorials || []);
     }

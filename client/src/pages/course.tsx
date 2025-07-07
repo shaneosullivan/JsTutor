@@ -186,6 +186,7 @@ export default function CoursePage() {
       <TutorialSidebar
         tutorials={sortedTutorials.map(t => ({
           id: t.id,
+          courseId: t.courseId,
           title: t.title,
           description: t.description,
           content: t.content,
@@ -196,6 +197,7 @@ export default function CoursePage() {
         }))}
         currentTutorial={currentTutorialData ? {
           id: currentTutorialData.id,
+          courseId: currentTutorialData.courseId,
           title: currentTutorialData.title,
           description: currentTutorialData.description,
           content: currentTutorialData.content,
@@ -239,6 +241,7 @@ export default function CoursePage() {
           <TutorialContent
             tutorial={{
               id: currentTutorialData.id,
+              courseId: currentTutorialData.courseId,
               title: currentTutorialData.title,
               description: currentTutorialData.description,
               content: currentTutorialData.content,
