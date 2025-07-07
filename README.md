@@ -29,19 +29,11 @@ An interactive JavaScript learning platform designed for children, featuring han
 
 ## Environment Variables
 
-Create a `.env` file in the root directory with the following variables:
+Create a `.env` file in the root directory with the following optional variable:
 
 ```env
-# OpenAI Integration (Required for AI assistance)
+# OpenAI Integration (Optional - for AI assistance)
 OPENAI_API_KEY=your_openai_api_key_here
-
-# Database (Optional - uses in-memory storage by default)
-DATABASE_URL=your_postgresql_connection_string_here
-PGHOST=your_postgres_host
-PGPORT=your_postgres_port
-PGUSER=your_postgres_user
-PGPASSWORD=your_postgres_password
-PGDATABASE=your_postgres_database
 
 # Application Settings
 NODE_ENV=development
@@ -55,11 +47,6 @@ PORT=5000
    - Used for: AI-powered coding assistance and help features
    - Note: Users can also provide their own API keys through the application interface
    - If not provided, AI features will prompt users to enter their own API key
-
-2. **Database Variables**: 
-   - Only needed if you want persistent data storage
-   - By default, the application uses in-memory storage which resets on restart
-   - For production deployments, configure PostgreSQL for persistent storage
 
 ## Installation & Setup
 
@@ -99,9 +86,7 @@ npm run dev          # Start development server with hot reload
 npm run build        # Build frontend and backend for production
 npm start           # Start production server
 
-# Database (if using PostgreSQL)
-npm run db:push     # Push schema changes to database
-npm run db:studio   # Open database studio (if using Drizzle)
+# No database setup required - uses in-memory storage and localStorage
 
 # Code Quality
 npm run lint        # Run ESLint
@@ -200,12 +185,11 @@ This project is optimized for Replit deployment with built-in environment variab
 3. Start the server: `npm start`
 4. Ensure port 5000 is accessible (or set custom PORT environment variable)
 
-### Database Setup (Optional)
-For persistent storage:
-1. Set up a PostgreSQL database
-2. Configure DATABASE_URL and related environment variables
-3. Update `server/storage.ts` to use DatabaseStorage instead of MemStorage
-4. Run `npm run db:push` to initialize the database schema
+### Storage
+The application uses:
+- **In-memory storage** for course and tutorial data (resets on server restart)
+- **localStorage** for user progress and tutorial completion (persists in browser)
+- No database setup required
 
 ## Troubleshooting
 
