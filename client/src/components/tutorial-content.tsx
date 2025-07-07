@@ -63,10 +63,7 @@ export default function TutorialContent({
       const result = await response.json();
       if (result.success) {
         setOutput(result.logs || ["Code executed successfully!"]);
-        // Mark as completed if not already
-        if (!isCompleted) {
-          onComplete(tutorial.id);
-        }
+        // Don't auto-complete tutorials - let user decide when to advance
       } else {
         setOutput(["Error: " + result.error]);
       }
@@ -75,6 +72,10 @@ export default function TutorialContent({
     } finally {
       setIsRunning(false);
     }
+  };
+
+  const handleCompleteTutorial = () => {
+    onComplete(tutorial.id);
   };
 
   const handleClearCanvas = () => {
@@ -100,6 +101,15 @@ export default function TutorialContent({
               <RotateCcw size={16} className="mr-2" />
               Reset
             </Button>
+            {!isCompleted && (
+              <Button 
+                onClick={handleCompleteTutorial}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Mark Complete & Continue
+                <ArrowRight size={16} className="ml-2" />
+              </Button>
+            )}
             {isCompleted && hasNext && (
               <Button 
                 onClick={onNext}

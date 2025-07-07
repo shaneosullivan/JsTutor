@@ -54,10 +54,7 @@ export function useTutorial() {
       currentTutorial: nextTutorial?.id || progress.currentTutorial,
     });
 
-    // Auto-advance to next tutorial if available
-    if (nextTutorial) {
-      setCurrentTutorial(nextTutorial);
-    }
+    // Don't auto-advance - let user manually navigate
   };
 
   const selectTutorial = (tutorial: Tutorial) => {
