@@ -119,32 +119,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const openai = new OpenAI({ apiKey });
 
-      let systemMessage = "";
-      
-      if (isFirstMessage && tutorialId) {
-        // Get tutorial context for first message
-        const tutorial = await storage.getTutorial(tutorialId);
-        if (tutorial) {
-          systemMessage = `You are a friendly AI assistant helping a 9-year-old child learn JavaScript programming. 
+      let systemMessage = `You are a friendly AI assistant helping a 9-year-old child learn JavaScript programming. 
 
-Current Tutorial: "${tutorial.title}"
-Tutorial Description: ${tutorial.description}
-Tutorial Content: ${tutorial.content}
 Current Code: ${code || "No code yet"}
-
-The child is working on this tutorial and may need help with:
-- Understanding programming concepts in simple terms
-- Finding and explaining bugs in their code
-- Suggestions for next steps or improvements
-- Encouragement and positive feedback
 
 IMPORTANT RULES:
 1. NEVER write or fix code for the child - only explain what might be wrong and how they can fix it
 2. Use simple, encouraging language appropriate for a 9-year-old
-3. If there are bugs, explain them step by step
-4. Suggest next steps but let the child implement them
-5. Be patient and supportive
+3. Keep responses BRIEF (2-3 sentences max) - children have short attention spans
+4. If there are bugs, explain them step by step
+5. Suggest next steps but let the child implement them
 6. Focus on learning and understanding, not just getting the "right" answer
+7. Always use the provided drawing functions - DON'T suggest rewriting them
 
 Available drawing functions they can use:
 - drawCircle(x, y, radius, color)
@@ -155,6 +141,16 @@ Available drawing functions they can use:
 - clearCanvas()
 
 Canvas size is 400x400 pixels, with (0,0) at top-left corner.`;
+      
+      if (isFirstMessage && tutorialId) {
+        // Get tutorial context for first message
+        const tutorial = await storage.getTutorial(tutorialId);
+        if (tutorial) {
+          systemMessage += `
+
+Current Tutorial: "${tutorial.title}"
+Tutorial Description: ${tutorial.description}
+Tutorial Content: ${tutorial.content}`;
         }
       }
 

@@ -70,7 +70,7 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
       const apiResponse = await apiRequest('POST', '/api/ai-chat', {
         messages: chatMessages,
         tutorialId,
-        code,
+        code, // Always send current code with every message for complete context
         isFirstMessage,
         apiKey
       });
@@ -139,8 +139,8 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
+    <Card className="h-full flex flex-col max-h-full overflow-hidden">
+      <CardHeader className="pb-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-blue-500" />
@@ -157,9 +157,9 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
         </div>
       </CardHeader>
       
-      <CardContent className="flex-1 flex flex-col p-4 pt-0">
-        <ScrollArea className="flex-1 mb-4">
-          <div className="space-y-4">
+      <CardContent className="flex-1 flex flex-col p-4 pt-0 min-h-0">
+        <ScrollArea className="flex-1 mb-4 max-h-full">
+          <div className="space-y-4 pr-4">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -221,7 +221,7 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
           </div>
         </ScrollArea>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
@@ -239,7 +239,7 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
           </Button>
         </div>
         
-        <p className="text-xs text-gray-500 mt-2 text-center">
+        <p className="text-xs text-gray-500 mt-2 text-center flex-shrink-0">
           I'm here to help explain bugs and suggest next steps. I won't write code for you - that's the fun part!
         </p>
       </CardContent>

@@ -109,6 +109,12 @@ Changelog:
   - Implemented API key validation before saving
   - Created encouraging, upbeat interface explaining the benefits of AI assistance
   - AI assistant now uses user's own OpenAI credits for personalized help
+- July 07, 2025: Enhanced AI chat experience and fixed scrolling issues
+  - Fixed AI chat container scrolling to prevent code editor from being pushed off-screen
+  - Added proper overflow handling and flex constraints for chat messages
+  - Updated AI instructions to be brief (2-3 sentences max) for children's attention spans
+  - AI now always receives complete current code with every message for better context
+  - AI explicitly instructed to use provided utility functions instead of suggesting rewrites
 
 ## User Preferences
 
