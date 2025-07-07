@@ -196,6 +196,11 @@ Changelog:
   - Course selection screen tracks last visited course in localStorage
   - Basics course (course 1) remains on home route, other courses use /course/:id
   - Seamless user experience with persistent course state across sessions
+- July 07, 2025: Added comprehensive documentation for external deployment
+  - Created detailed README.md with setup instructions for running outside Replit
+  - Added .env.example template with all required and optional environment variables
+  - Documented tech stack, project structure, and development guidelines
+  - Included troubleshooting section and deployment strategies
 
 ## User Preferences
 
