@@ -147,6 +147,13 @@ Changelog:
   - Updated tutorial layout with horizontally collapsible "What You'll Learn" panel
   - Arranged code editor and canvas side-by-side for better screen space utilization
   - Enhanced workspace layout for improved coding and visual feedback experience
+- July 07, 2025: Implemented error line highlighting and enhanced AI debugging assistance
+  - Added line number detection for JavaScript errors in code execution
+  - Code editor now highlights error lines with red background and left border indicator
+  - Error messages display specific line numbers where problems occur
+  - AI assistant instructed to always mention line numbers when discussing code issues
+  - Enhanced error parsing to extract line numbers from JavaScript stack traces
+  - Improved debugging experience with visual error indicators and precise AI guidance
 
 ## User Preferences
 

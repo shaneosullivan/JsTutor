@@ -18,7 +18,7 @@ interface AiChatProps {
   code: string;
   onClose: () => void;
   isVisible: boolean;
-  canvasError?: string | null;
+  canvasError?: {message: string; line?: number} | null;
 }
 
 export default function AiChat({ tutorialId, code, onClose, isVisible, canvasError }: AiChatProps) {
@@ -28,7 +28,7 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
   const [hasInitialized, setHasInitialized] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [showSetup, setShowSetup] = useState(false);
-  const [lastErrorSent, setLastErrorSent] = useState<string | null>(null);
+  const [lastErrorSent, setLastErrorSent] = useState<{message: string; line?: number} | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check for existing API key on mount
@@ -59,7 +59,10 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
       let initialContent;
       
       if (canvasError) {
-        initialContent = `Hi! I'm having trouble with my code. I'm getting this error: "${canvasError}". Can you help me understand what's wrong and how to fix it?`;
+        const errorText = canvasError.line 
+          ? `"${canvasError.message}" on line ${canvasError.line}`
+          : `"${canvasError.message}"`;
+        initialContent = `Hi! I'm having trouble with my code. I'm getting this error: ${errorText}. Can you help me understand what's wrong and how to fix it?`;
       } else {
         initialContent = "Hi! I'm working on this tutorial and could use some help. Can you look at my code and let me know if there are any bugs or suggest what I should try next?";
       }
@@ -78,10 +81,14 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
 
   // Send error message when chat becomes visible and there's a new error
   useEffect(() => {
-    if (hasInitialized && isVisible && canvasError && apiKey && !showSetup && !isLoading && canvasError !== lastErrorSent) {
+    if (hasInitialized && isVisible && canvasError && apiKey && !showSetup && !isLoading && 
+        JSON.stringify(canvasError) !== JSON.stringify(lastErrorSent)) {
+      const errorText = canvasError.line 
+        ? `"${canvasError.message}" on line ${canvasError.line}`
+        : `"${canvasError.message}"`;
       const errorMessage: Message = {
         role: 'user',
-        content: `I just got this error in my code: "${canvasError}". Can you help me fix it?`,
+        content: `I just got this error in my code: ${errorText}. Can you help me fix it?`,
         timestamp: new Date()
       };
       

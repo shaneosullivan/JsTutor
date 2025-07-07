@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { createCanvasAPI } from "@/lib/canvas-api";
 
+interface ErrorInfo {
+  message: string;
+  line?: number;
+  column?: number;
+}
+
 interface DrawingCanvasProps {
   code: string;
   onOutput: (output: string[]) => void;
-  onError?: (error: string | null) => void;
+  onError?: (error: ErrorInfo | null) => void;
 }
 
 export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvasProps) {
@@ -73,22 +79,47 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
       const executeCode = new Function('canvasAPI', 'wrappedSetInterval', 'wrappedSetTimeout', safeCode);
       executeCode(canvasAPI, wrappedSetInterval, wrappedSetTimeout);
       
-      const newError = null;
-      setError(newError);
-      onError?.(newError);
+      setError(null);
+      onError?.(null);
       onOutput(["✨ Code executed successfully!", "🎨 Your drawing is looking great!"]);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      
+      // Parse line number from error stack if available
+      let lineNumber: number | undefined;
+      if (err instanceof Error && err.stack) {
+        // Look for line numbers in the stack trace
+        const stackMatch = err.stack.match(/<anonymous>:(\d+):\d+/);
+        if (stackMatch) {
+          // Subtract the number of lines we added before the user code
+          const executedLine = parseInt(stackMatch[1]);
+          const prefixLines = 7; // Number of lines added before user code
+          lineNumber = Math.max(1, executedLine - prefixLines);
+        }
+      }
+      
+      const errorInfo: ErrorInfo = {
+        message: errorMessage,
+        line: lineNumber
+      };
+      
       setError(errorMessage);
-      onError?.(errorMessage);
-      onOutput([`❌ Error: ${errorMessage}`]);
+      onError?.(errorInfo);
+      
+      const errorOutput = lineNumber 
+        ? `❌ Error on line ${lineNumber}: ${errorMessage}`
+        : `❌ Error: ${errorMessage}`;
+      onOutput([errorOutput]);
       
       // Draw error message on canvas
       ctx.fillStyle = "#ef4444";
       ctx.font = "16px Arial";
       ctx.fillText("Error in code!", 10, 30);
       ctx.font = "12px Arial";
-      ctx.fillText(err instanceof Error ? err.message : "Unknown error", 10, 50);
+      const displayMessage = lineNumber 
+        ? `Line ${lineNumber}: ${errorMessage}`
+        : errorMessage;
+      ctx.fillText(displayMessage, 10, 50);
     }
 
     // Cleanup on unmount

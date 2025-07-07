@@ -33,7 +33,7 @@ export default function TutorialContent({
   const [isExplanationOpen, setIsExplanationOpen] = useState(true); // Start expanded for first-time reading
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
   const [showAiChat, setShowAiChat] = useState(false);
-  const [canvasError, setCanvasError] = useState<string | null>(null);
+  const [canvasError, setCanvasError] = useState<{message: string; line?: number} | null>(null);
 
   // Reset when tutorial changes
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function TutorialContent({
     setCanvasError(null);
   };
 
-  const handleCanvasError = (error: string | null) => {
+  const handleCanvasError = (error: {message: string; line?: number} | null) => {
     setCanvasError(error);
   };
 
@@ -243,6 +243,7 @@ export default function TutorialContent({
                   onChange={onCodeChange}
                   language="javascript"
                   className="h-full"
+                  errorLine={canvasError?.line}
                 />
               </div>
             </div>
