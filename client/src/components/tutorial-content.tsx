@@ -233,7 +233,7 @@ export default function TutorialContent({
         </div>
 
         {/* Right Panel - Code Editor and Canvas (Side by Side) */}
-        <div className="flex-1 flex overflow-hidden relative">
+        <div className="flex-1 flex overflow-hidden">
           {/* Code Editor */}
           <div className="w-1/2 border-r border-slate-200 bg-white">
             <div className="h-full p-4">
@@ -249,30 +249,27 @@ export default function TutorialContent({
           </div>
 
           {/* Canvas Area */}
-          <div className="w-1/2 bg-slate-50">
+          <div className="w-1/2 bg-slate-50 relative">
             <div className="h-full p-4">
               <div className="h-full border border-slate-200 rounded-lg bg-white flex items-center justify-center overflow-hidden">
-                <DrawingCanvas 
-                  code={userCode} 
-                  onOutput={setOutput}
-                  onError={handleCanvasError}
-                />
+                {showAiChat ? (
+                  <AiChat
+                    tutorialId={tutorial.id}
+                    code={userCode}
+                    onClose={() => setShowAiChat(false)}
+                    isVisible={showAiChat}
+                    canvasError={canvasError}
+                  />
+                ) : (
+                  <DrawingCanvas 
+                    code={userCode} 
+                    onOutput={setOutput}
+                    onError={handleCanvasError}
+                  />
+                )}
               </div>
             </div>
           </div>
-
-          {/* AI Chat Overlay - covers both code and canvas */}
-          {showAiChat && (
-            <div className="absolute inset-4 bg-white border border-slate-200 rounded-lg shadow-xl flex flex-col overflow-hidden z-10">
-              <AiChat
-                tutorialId={tutorial.id}
-                code={userCode}
-                onClose={() => setShowAiChat(false)}
-                isVisible={showAiChat}
-                canvasError={canvasError}
-              />
-            </div>
-          )}
         </div>
       </div>
     </div>
