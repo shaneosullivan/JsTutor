@@ -28,6 +28,7 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
   const [hasInitialized, setHasInitialized] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [showSetup, setShowSetup] = useState(false);
+  const [lastErrorSent, setLastErrorSent] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check for existing API key on mount
@@ -67,6 +68,21 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
       setHasInitialized(true);
     }
   }, [hasInitialized, messages.length, apiKey, showSetup, isVisible, canvasError]);
+
+  // Send error message when chat becomes visible and there's a new error
+  useEffect(() => {
+    if (hasInitialized && isVisible && canvasError && apiKey && !showSetup && !isLoading && canvasError !== lastErrorSent) {
+      const errorMessage: Message = {
+        role: 'user',
+        content: `I just got this error in my code: "${canvasError}". Can you help me fix it?`,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      sendMessage(errorMessage, false);
+      setLastErrorSent(canvasError);
+    }
+  }, [canvasError, isVisible, hasInitialized, apiKey, showSetup, isLoading, lastErrorSent]);
 
   const sendMessage = async (message: Message, isFirstMessage = false) => {
     setIsLoading(true);
