@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { RotateCcw, ArrowRight, Eraser, Lightbulb, ChevronDown, ChevronUp, Bot } from "lucide-react";
+import { RotateCcw, ArrowRight, Eraser, Lightbulb, ChevronLeft, Bot } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -109,28 +110,40 @@ export default function TutorialContent({
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Tutorial Instructions */}
-        <div className="w-96 border-r border-slate-200 bg-white flex flex-col">
-          <div className="p-6 flex-1 overflow-y-auto">
-            {/* What You'll Learn - Collapsible */}
-            <Collapsible open={isExplanationOpen} onOpenChange={handleExplanationToggle}>
-              <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-between p-0 h-auto mb-4 hover:bg-transparent"
-                >
-                  <div className="flex items-center space-x-2">
-                    <Lightbulb className="h-5 w-5 text-yellow-500" />
-                    <span className="font-semibold text-slate-800">What You'll Learn</span>
-                  </div>
-                  {isExplanationOpen ? (
-                    <ChevronUp className="h-4 w-4 text-slate-500" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-slate-500" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
+        {/* Left Panel - Tutorial Instructions (Collapsible) */}
+        <div className={cn(
+          "border-r border-slate-200 bg-white flex flex-col transition-all duration-300",
+          isExplanationOpen ? "w-96" : "w-12"
+        )}>
+          {/* Collapse Toggle */}
+          <div className="p-3 border-b border-slate-200">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleExplanationToggle}
+              className="w-full justify-center p-1 h-8"
+            >
+              {isExplanationOpen ? (
+                <ChevronLeft className="h-4 w-4" />
+              ) : (
+                <div className="flex flex-col items-center">
+                  <Lightbulb className="h-4 w-4 text-yellow-500" />
+                </div>
+              )}
+            </Button>
+          </div>
+
+          {/* Collapsible Content */}
+          {isExplanationOpen && (
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="p-6 flex-1 overflow-y-auto">
+                {/* What You'll Learn Header */}
+                <div className="flex items-center space-x-2 mb-4">
+                  <Lightbulb className="h-5 w-5 text-yellow-500" />
+                  <span className="font-semibold text-slate-800">What You'll Learn</span>
+                </div>
+
+                {/* Tutorial Content */}
                 <Card className="mb-6 border-yellow-200 bg-yellow-50">
                   <CardContent className="p-4">
                     <div className="prose prose-sm max-w-none">
@@ -142,87 +155,87 @@ export default function TutorialContent({
                     </div>
                   </CardContent>
                 </Card>
-              </CollapsibleContent>
-            </Collapsible>
 
-            {/* Expected Output */}
-            {tutorial.expectedOutput && (
-              <Card className="mb-4 border-blue-200 bg-blue-50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-blue-800 flex items-center">
-                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8z" clipRule="evenodd" />
-                    </svg>
-                    What You'll Create
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-blue-700 text-sm">{tutorial.expectedOutput}</p>
-                </CardContent>
-              </Card>
-            )}
+                {/* Expected Output */}
+                {tutorial.expectedOutput && (
+                  <Card className="mb-4 border-blue-200 bg-blue-50">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium text-blue-800 flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8z" clipRule="evenodd" />
+                        </svg>
+                        What You'll Create
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <p className="text-blue-700 text-sm">{tutorial.expectedOutput}</p>
+                    </CardContent>
+                  </Card>
+                )}
 
-            {/* Output Console */}
-            <Card className="mb-4">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium text-slate-700">Output</CardTitle>
+                {/* Output Console */}
+                <Card className="mb-4">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-sm font-medium text-slate-700">Output</CardTitle>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleClearCanvas}
+                        className="h-6 px-2 text-xs"
+                      >
+                        <Eraser className="h-3 w-3 mr-1" />
+                        Clear
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="bg-slate-900 rounded-md p-3 min-h-[100px] max-h-[200px] overflow-y-auto">
+                      {output.length > 0 ? (
+                        output.map((line, index) => (
+                          <div key={index} className="text-green-400 text-sm font-mono mb-1">
+                            {line}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-slate-500 text-sm">Run your code to see output here...</div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Controls */}
+              <div className="border-t border-slate-200 p-4">
+                <div className="flex space-x-2">
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
-                    onClick={handleClearCanvas}
-                    className="h-6 px-2 text-xs"
+                    onClick={handleReset}
+                    className="flex items-center"
                   >
-                    <Eraser className="h-3 w-3 mr-1" />
-                    Clear
+                    <RotateCcw className="h-4 w-4 mr-1" />
+                    Reset
+                  </Button>
+                  
+                  <Button
+                    onClick={handleShowAiChat}
+                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white transition-all duration-200 hover:scale-105 shadow-lg"
+                    size="sm"
+                  >
+                    <Bot className="h-4 w-4 mr-2" />
+                    🤖 Help Me!
                   </Button>
                 </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="bg-slate-900 rounded-md p-3 min-h-[100px] max-h-[200px] overflow-y-auto">
-                  {output.length > 0 ? (
-                    output.map((line, index) => (
-                      <div key={index} className="text-green-400 text-sm font-mono mb-1">
-                        {line}
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-slate-500 text-sm">Run your code to see output here...</div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Controls */}
-          <div className="border-t border-slate-200 p-4">
-            <div className="flex space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleReset}
-                className="flex items-center"
-              >
-                <RotateCcw className="h-4 w-4 mr-1" />
-                Reset
-              </Button>
-              
-              <Button
-                onClick={handleShowAiChat}
-                className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white transition-all duration-200 hover:scale-105 shadow-lg"
-                size="sm"
-              >
-                <Bot className="h-4 w-4 mr-2" />
-                🤖 Help Me!
-              </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Right Panel - Code Editor and Canvas */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Right Panel - Code Editor and Canvas (Side by Side) */}
+        <div className="flex-1 flex overflow-hidden">
           {/* Code Editor */}
-          <div className="h-1/2 border-b border-slate-200 bg-white">
+          <div className="w-1/2 border-r border-slate-200 bg-white">
             <div className="h-full p-4">
               <div className="h-full border border-slate-200 rounded-lg overflow-hidden">
                 <CodeEditor
@@ -236,7 +249,7 @@ export default function TutorialContent({
           </div>
 
           {/* Canvas Area */}
-          <div className="h-1/2 bg-slate-50 relative">
+          <div className="w-1/2 bg-slate-50 relative">
             <div className="h-full p-4">
               <div className="h-full border border-slate-200 rounded-lg bg-white flex items-center justify-center overflow-hidden relative">
                 <DrawingCanvas 

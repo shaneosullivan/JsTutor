@@ -142,6 +142,9 @@ Changelog:
   - Created collapsible left sidebar that can be minimized to show only tutorial numbers
   - In collapsed state, sidebar shows progress indicators and current tutorial markers
   - Improved user experience with persistent progress and better space utilization
+  - Updated tutorial layout with horizontally collapsible "What You'll Learn" panel
+  - Arranged code editor and canvas side-by-side for better screen space utilization
+  - Enhanced workspace layout for improved coding and visual feedback experience
 
 ## User Preferences
 
