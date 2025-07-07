@@ -29,6 +29,7 @@ export default function TutorialContent({
   const [isExplanationOpen, setIsExplanationOpen] = useState(true); // Start expanded for first-time reading
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
   const [showAiChat, setShowAiChat] = useState(false);
+  const [canvasError, setCanvasError] = useState<string | null>(null);
 
   // Reset code when tutorial changes and auto-expand explanation for new tutorials
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function TutorialContent({
     setIsExplanationOpen(true); // Auto-expand for each new tutorial
     setHasBeenOpened(false);
     setShowAiChat(false); // Close AI chat when switching tutorials
+    setCanvasError(null); // Reset canvas error state
   }, [tutorial.id, tutorial.starterCode]);
 
   // Handle explanation section open/close
@@ -253,7 +255,11 @@ export default function TutorialContent({
           <div className="flex-1 p-6 bg-slate-50 relative">
             {/* Drawing Canvas */}
             <div className={showAiChat ? "hidden" : "block h-full"}>
-              <DrawingCanvas code={code} onOutput={setOutput} />
+              <DrawingCanvas 
+                code={code} 
+                onOutput={setOutput}
+                onError={setCanvasError}
+              />
             </div>
             
             {/* AI Chat - Always rendered but hidden when not active */}
@@ -263,6 +269,8 @@ export default function TutorialContent({
                 tutorialId={tutorial.id}
                 code={code}
                 onClose={() => setShowAiChat(false)}
+                isVisible={showAiChat}
+                canvasError={canvasError}
               />
             </div>
           </div>

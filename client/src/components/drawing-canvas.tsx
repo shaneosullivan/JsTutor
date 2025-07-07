@@ -4,9 +4,10 @@ import { createCanvasAPI } from "@/lib/canvas-api";
 interface DrawingCanvasProps {
   code: string;
   onOutput: (output: string[]) => void;
+  onError?: (error: string | null) => void;
 }
 
-export default function DrawingCanvas({ code, onOutput }: DrawingCanvasProps) {
+export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,11 +44,15 @@ export default function DrawingCanvas({ code, onOutput }: DrawingCanvasProps) {
       const executeCode = new Function('canvasAPI', safeCode);
       executeCode(canvasAPI);
       
-      setError(null);
+      const newError = null;
+      setError(newError);
+      onError?.(newError);
       onOutput(["✨ Code executed successfully!", "🎨 Your drawing is looking great!"]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      onOutput([`❌ Error: ${err instanceof Error ? err.message : "Unknown error"}`]);
+      const errorMessage = err instanceof Error ? err.message : "An error occurred";
+      setError(errorMessage);
+      onError?.(errorMessage);
+      onOutput([`❌ Error: ${errorMessage}`]);
       
       // Draw error message on canvas
       ctx.fillStyle = "#ef4444";

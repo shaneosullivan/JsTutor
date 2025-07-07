@@ -17,9 +17,11 @@ interface AiChatProps {
   tutorialId: number;
   code: string;
   onClose: () => void;
+  isVisible: boolean;
+  canvasError?: string | null;
 }
 
-export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
+export default function AiChat({ tutorialId, code, onClose, isVisible, canvasError }: AiChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -43,12 +45,20 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Initialize chat with context on first open (only if API key is available)
+  // Initialize chat with context when first shown (only if API key is available)
   useEffect(() => {
-    if (!hasInitialized && messages.length === 0 && apiKey && !showSetup) {
+    if (!hasInitialized && messages.length === 0 && apiKey && !showSetup && isVisible) {
+      let initialContent;
+      
+      if (canvasError) {
+        initialContent = `Hi! I'm having trouble with my code. I'm getting this error: "${canvasError}". Can you help me understand what's wrong and how to fix it?`;
+      } else {
+        initialContent = "Hi! I'm working on this tutorial and could use some help. Can you look at my code and let me know if there are any bugs or suggest what I should try next?";
+      }
+      
       const initialMessage: Message = {
         role: 'user',
-        content: "Hi! I'm working on this tutorial and could use some help. Can you look at my code and let me know if there are any bugs or suggest what I should try next?",
+        content: initialContent,
         timestamp: new Date()
       };
       
@@ -56,7 +66,7 @@ export default function AiChat({ tutorialId, code, onClose }: AiChatProps) {
       sendMessage(initialMessage, true);
       setHasInitialized(true);
     }
-  }, [hasInitialized, messages.length, apiKey, showSetup]);
+  }, [hasInitialized, messages.length, apiKey, showSetup, isVisible, canvasError]);
 
   const sendMessage = async (message: Message, isFirstMessage = false) => {
     setIsLoading(true);

@@ -117,6 +117,9 @@ Changelog:
   - AI explicitly instructed to use provided utility functions instead of suggesting rewrites
   - Fixed AI chat state persistence - conversation now maintained when switching between canvas and chat views
   - AI chat only resets when switching to a different tutorial, preserving conversation within same lesson
+  - Added automatic error detection - AI assistant automatically offers help when canvas has errors
+  - AI chat only sends initial message when first shown, not when mounted in background
+  - Error messages are automatically sent to AI with code context for immediate debugging help
 
 ## User Preferences
 
