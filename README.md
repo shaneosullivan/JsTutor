@@ -33,7 +33,7 @@ That's it! No API keys or database setup required.
 The application works out of the box with no environment variables required. You can optionally create a `.env` file for custom settings:
 
 ```env
-# Application Settings (Optional)
+# Application Settings (Optional, only for dev)
 NODE_ENV=development
 PORT=5000
 ```
