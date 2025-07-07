@@ -85,6 +85,15 @@ export default function TutorialContent({
             <p className="text-slate-600 mt-1">{tutorial.description}</p>
           </div>
           <div className="flex items-center space-x-3">
+            <Button
+              onClick={handleShowAiChat}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white transition-all duration-200 hover:scale-105 shadow-lg"
+              size="sm"
+            >
+              <Bot className="h-4 w-4 mr-2" />
+              🤖 Help Me!
+            </Button>
+            
             {isCompleted ? (
               <div className="flex items-center space-x-2">
                 <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
@@ -212,19 +221,10 @@ export default function TutorialContent({
                     variant="outline"
                     size="sm"
                     onClick={handleReset}
-                    className="flex items-center"
+                    className="flex items-center w-full justify-center"
                   >
                     <RotateCcw className="h-4 w-4 mr-1" />
-                    Reset
-                  </Button>
-                  
-                  <Button
-                    onClick={handleShowAiChat}
-                    className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white transition-all duration-200 hover:scale-105 shadow-lg"
-                    size="sm"
-                  >
-                    <Bot className="h-4 w-4 mr-2" />
-                    🤖 Help Me!
+                    Reset Code
                   </Button>
                 </div>
               </div>
@@ -233,7 +233,7 @@ export default function TutorialContent({
         </div>
 
         {/* Right Panel - Code Editor and Canvas (Side by Side) */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden relative">
           {/* Code Editor */}
           <div className="w-1/2 border-r border-slate-200 bg-white">
             <div className="h-full p-4">
@@ -249,9 +249,9 @@ export default function TutorialContent({
           </div>
 
           {/* Canvas Area */}
-          <div className="w-1/2 bg-slate-50 relative">
+          <div className="w-1/2 bg-slate-50">
             <div className="h-full p-4">
-              <div className="h-full border border-slate-200 rounded-lg bg-white flex items-center justify-center overflow-hidden relative">
+              <div className="h-full border border-slate-200 rounded-lg bg-white flex items-center justify-center overflow-hidden">
                 <DrawingCanvas 
                   code={userCode} 
                   onOutput={setOutput}
@@ -259,20 +259,20 @@ export default function TutorialContent({
                 />
               </div>
             </div>
-
-            {/* AI Chat Overlay */}
-            {showAiChat && (
-              <div className="absolute inset-4 bg-white border border-slate-200 rounded-lg shadow-xl flex flex-col overflow-hidden">
-                <AiChat
-                  tutorialId={tutorial.id}
-                  code={userCode}
-                  onClose={() => setShowAiChat(false)}
-                  isVisible={showAiChat}
-                  canvasError={canvasError}
-                />
-              </div>
-            )}
           </div>
+
+          {/* AI Chat Overlay - covers both code and canvas */}
+          {showAiChat && (
+            <div className="absolute inset-4 bg-white border border-slate-200 rounded-lg shadow-xl flex flex-col overflow-hidden z-10">
+              <AiChat
+                tutorialId={tutorial.id}
+                code={userCode}
+                onClose={() => setShowAiChat(false)}
+                isVisible={showAiChat}
+                canvasError={canvasError}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
