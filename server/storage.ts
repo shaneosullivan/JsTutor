@@ -130,34 +130,37 @@ drawRect(x + 150, y, size / 2, size, 'blue');`,
         content: "Sometimes you want to change a variable by adding or subtracting from it. There are shortcuts that make this easier!\n\n🚀 Math Shortcuts:\n• += means 'add to this variable' (like score += 10 means score = score + 10)\n• -= means 'subtract from this variable' (like lives -= 1 means lives = lives - 1)\n• *= means 'multiply this variable' (like size *= 2 means size = size * 2)\n• /= means 'divide this variable' (like speed /= 2 means speed = speed / 2)\n\n✨ Why Use Shortcuts?\n• They're faster to type\n• They're easier to read\n• They help prevent mistakes\n• Real programmers use them all the time!\n\n🌟 Your Challenge:\nTry changing the code to use different shortcuts. What happens if you use *= instead of +=? Can you make the squares get smaller instead of bigger?",
         starterCode: `// Let's practice math shortcuts!
 let score = 0;
-let size = 10;
+let lives = 5;
+let size = 20;
 let x = 50;
 
-// Using shortcuts to change our variables
+// Show starting values
+drawText(50, 50, 'Starting Score: ' + score, 'black');
+drawText(50, 70, 'Starting Lives: ' + lives, 'black');
+
+// Using += to add to score
 score += 25;  // Same as: score = score + 25
-size += 5;    // Same as: size = size + 5
-
-// Draw first rectangle
 drawRect(x, 100, size, size, 'blue');
-drawText(x, 80, 'Score: ' + score, 'black');
+drawText(x, 130, 'Score: ' + score, 'blue');
 
-// Change variables again
-score += 50;  // Add 50 more points
-size *= 2;    // Double the size
-x += 100;     // Move to the right
+// Using -= to subtract from lives
+lives -= 1;  // Same as: lives = lives - 1
+x += 80;
+drawRect(x, 100, size, size, 'orange');
+drawText(x, 130, 'Lives: ' + lives, 'orange');
 
-// Draw second rectangle
+// Using *= to multiply size
+size *= 2;    // Same as: size = size * 2
+x += 100;
 drawRect(x, 100, size, size, 'red');
-drawText(x, 80, 'Score: ' + score, 'black');
+drawText(x, 150, 'Size: ' + size, 'red');
 
-// One more time!
-score -= 10;  // Subtract 10 points
-size /= 2;    // Half the size
-x += 150;     // Move again
-
-// Draw third rectangle
+// Using /= to divide size back down
+size /= 2;    // Same as: size = size / 2
+score += 100; // Add bonus points!
+x += 120;
 drawRect(x, 100, size, size, 'green');
-drawText(x, 80, 'Score: ' + score, 'black');`,
+drawText(x, 130, 'Final Score: ' + score, 'green');`,
         expectedOutput: "Three rectangles showing math shortcuts in action",
         order: 3,
         isLocked: true
