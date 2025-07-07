@@ -168,6 +168,12 @@ Changelog:
   - Complete progression from variables through Snake game to creative final project
   - Each tutorial builds on previous concepts while introducing new programming skills
   - "What You'll Learn" section now auto-expands when switching tutorials for immediate educational context
+- July 07, 2025: Added compound assignment operators tutorial
+  - Created "Shortcuts with Math" tutorial after "Math is Fun!" covering +=, -=, *=, /=
+  - Demonstrates practical usage with visual examples showing score tracking and size changes
+  - Teaches programming efficiency and industry-standard coding practices
+  - Updated all subsequent tutorial order numbers to maintain proper sequence
+  - Now 13 total tutorials in Basics course with comprehensive mathematical foundation
 
 ## User Preferences
 

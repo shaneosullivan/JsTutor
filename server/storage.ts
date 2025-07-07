@@ -125,6 +125,45 @@ drawRect(x + 150, y, size / 2, size, 'blue');`,
       },
       {
         courseId: 1,
+        title: "Shortcuts with Math",
+        description: "Learn faster ways to do math with variables",
+        content: "Sometimes you want to change a variable by adding or subtracting from it. There are shortcuts that make this easier!\n\n🚀 Math Shortcuts:\n• += means 'add to this variable' (like score += 10 means score = score + 10)\n• -= means 'subtract from this variable' (like lives -= 1 means lives = lives - 1)\n• *= means 'multiply this variable' (like size *= 2 means size = size * 2)\n• /= means 'divide this variable' (like speed /= 2 means speed = speed / 2)\n\n✨ Why Use Shortcuts?\n• They're faster to type\n• They're easier to read\n• They help prevent mistakes\n• Real programmers use them all the time!\n\n🌟 Your Challenge:\nTry changing the code to use different shortcuts. What happens if you use *= instead of +=? Can you make the squares get smaller instead of bigger?",
+        starterCode: `// Let's practice math shortcuts!
+let score = 0;
+let size = 10;
+let x = 50;
+
+// Using shortcuts to change our variables
+score += 25;  // Same as: score = score + 25
+size += 5;    // Same as: size = size + 5
+
+// Draw first rectangle
+drawRect(x, 100, size, size, 'blue');
+drawText(x, 80, 'Score: ' + score, 'black');
+
+// Change variables again
+score += 50;  // Add 50 more points
+size *= 2;    // Double the size
+x += 100;     // Move to the right
+
+// Draw second rectangle
+drawRect(x, 100, size, size, 'red');
+drawText(x, 80, 'Score: ' + score, 'black');
+
+// One more time!
+score -= 10;  // Subtract 10 points
+size /= 2;    // Half the size
+x += 150;     // Move again
+
+// Draw third rectangle
+drawRect(x, 100, size, size, 'green');
+drawText(x, 80, 'Score: ' + score, 'black');`,
+        expectedOutput: "Three rectangles showing math shortcuts in action",
+        order: 3,
+        isLocked: true
+      },
+      {
+        courseId: 1,
         title: "Repeating with Loops",
         description: "Do the same thing many times",
         content: "Loops let you repeat code! It's like telling the computer 'do this 10 times' instead of writing the same thing 10 times.\n\n🎨 New Drawing Function:\n• drawLine(x1, y1, x2, y2, color) - Draws a line from one point to another! The first two numbers (x1, y1) are where the line starts, and the next two (x2, y2) are where it ends.\n\n🌟 Your Challenge:\nTry creating your own pattern! Change the numbers in the loop to make different designs. Can you make a staircase? Or maybe a zigzag pattern?",
@@ -136,7 +175,7 @@ for (let i = 0; i < 5; i++) {
     drawCircle(x + 20, y + 20, 15, 'yellow');
 }`,
         expectedOutput: "A diagonal pattern of purple squares with yellow circles",
-        order: 3,
+        order: 4,
         isLocked: true
       },
       {
@@ -158,7 +197,7 @@ for (let i = 0; i < 10; i++) {
     }
 }`,
         expectedOutput: "Alternating blue circles and red squares",
-        order: 4,
+        order: 5,
         isLocked: true
       },
       {
@@ -195,7 +234,7 @@ onSpaceBar(() => {
     drawCircle(x, y, 10, 'red');
 });`,
         expectedOutput: "A blue circle that moves with arrow keys and turns red with spacebar",
-        order: 5,
+        order: 7,
         isLocked: true
       },
       {
@@ -213,7 +252,7 @@ drawCircle(50, 50, 30, 'yellow');      // Sun
 // Try adding more to your house!
 // Maybe windows? A chimney? Flowers?`,
         expectedOutput: "A colorful house with sun",
-        order: 6,
+        order: 7,
         isLocked: true
       },
       {
@@ -231,7 +270,7 @@ for (let i = 0; i < 3; i++) {
   drawRect(100 + i * 80, 300, 40, 40, 'orange');
 }`,
         expectedOutput: "A pattern of purple circles and orange squares",
-        order: 7,
+        order: 8,
         isLocked: true
       },
       {
@@ -253,7 +292,7 @@ for (let i = 0; i < 10; i++) {
 
 // Try adding random rectangles too!`,
         expectedOutput: "Random colored circles scattered around",
-        order: 8,
+        order: 9,
         isLocked: true
       },
       {
@@ -277,7 +316,7 @@ setInterval(() => {
   }
 }, 100);`,
         expectedOutput: "A red ball bouncing back and forth",
-        order: 9,
+        order: 10,
         isLocked: true
       },
       {
@@ -325,7 +364,7 @@ function redrawEverything() {
 // Initial draw
 redrawEverything();`,
         expectedOutput: "Move with arrows, press spacebar to create colorful circles",
-        order: 10,
+        order: 11,
         isLocked: true
       },
       {
@@ -410,7 +449,7 @@ onSpaceBar(() => {
     }
 });`,
         expectedOutput: "A playable Snake game with arrow key controls",
-        order: 11,
+        order: 12,
         isLocked: true
       },
       {
@@ -441,7 +480,7 @@ onSpaceBar(() => {
 clearCanvas();
 drawText(150, 200, 'Your turn to create!', 'purple');`,
         expectedOutput: "Your own creative project",
-        order: 12,
+        order: 13,
         isLocked: true
       },
 
