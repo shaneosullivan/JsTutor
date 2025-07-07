@@ -231,11 +231,23 @@ export default function TutorialContent({
               <div className="flex gap-2">
                 <Button
                   onClick={() => setShowAiChat(!showAiChat)}
-                  variant={showAiChat ? "default" : "outline"}
+                  variant={showAiChat ? "default" : undefined}
                   size="sm"
+                  className={showAiChat 
+                    ? "bg-slate-600 hover:bg-slate-700 text-white" 
+                    : "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 font-semibold"
+                  }
                 >
-                  <Bot size={16} className="mr-2" />
-                  {showAiChat ? "Show Canvas" : "Help Me"}
+                  {showAiChat ? (
+                    <>
+                      <span className="mr-2">🎨</span>
+                      Show Canvas
+                    </>
+                  ) : (
+                    <>
+                      🤖 Help Me!
+                    </>
+                  )}
                 </Button>
                 {!showAiChat && (
                   <Button
