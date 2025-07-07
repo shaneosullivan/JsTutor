@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RotateCcw, ArrowRight, Play, Eraser, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +20,12 @@ export default function TutorialContent({
   const [code, setCode] = useState(tutorial.starterCode);
   const [output, setOutput] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+
+  // Reset code when tutorial changes
+  useEffect(() => {
+    setCode(tutorial.starterCode);
+    setOutput([]);
+  }, [tutorial.id, tutorial.starterCode]);
 
   const handleReset = () => {
     setCode(tutorial.starterCode);

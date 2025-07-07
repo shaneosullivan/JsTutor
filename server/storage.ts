@@ -260,7 +260,12 @@ drawGame();`,
 
     tutorialData.forEach(tutorial => {
       const id = this.currentTutorialId++;
-      this.tutorials.set(id, { ...tutorial, id });
+      this.tutorials.set(id, { 
+        ...tutorial, 
+        id,
+        expectedOutput: tutorial.expectedOutput ?? null,
+        isLocked: tutorial.isLocked ?? false
+      });
     });
   }
 
@@ -318,7 +323,12 @@ drawGame();`,
 
   async createTutorial(tutorial: InsertTutorial): Promise<Tutorial> {
     const id = this.currentTutorialId++;
-    const newTutorial: Tutorial = { ...tutorial, id };
+    const newTutorial: Tutorial = { 
+      ...tutorial, 
+      id,
+      expectedOutput: tutorial.expectedOutput ?? null,
+      isLocked: tutorial.isLocked ?? false
+    };
     this.tutorials.set(id, newTutorial);
     return newTutorial;
   }
