@@ -1,6 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes.js";
-import { setupVite, serveStatic, log } from "./vite.js";
 
 export async function createServer() {
   const app = express();
@@ -30,7 +29,7 @@ export async function createServer() {
           logLine = logLine.slice(0, 79) + "…";
         }
 
-        log(logLine);
+        console.log(logLine);
       }
     });
 
@@ -51,8 +50,10 @@ export async function createServer() {
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "development") {
+    const { setupVite, log } = await import("./vite.js");
     await setupVite(app, server);
   } else {
+    const { serveStatic } = await import("./static.js");
     serveStatic(app);
   }
 
@@ -69,7 +70,7 @@ if (process.env.NODE_ENV === "development") {
     // It is the only port that is not firewalled.
     const port = 5000;
     app.listen(port, "0.0.0.0", () => {
-      log(`serving on port ${port}`);
+      console.log(`serving on port ${port}`);
     });
   })();
 }
