@@ -1,66 +1,79 @@
-import { pgTable, text, serial, integer, boolean, json } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
+// Pure TypeScript types without database dependencies
+export interface User {
+  id: number;
+  username: string;
+  password: string;
+}
+
+export interface Course {
+  id: number;
+  title: string;
+  description: string;
+  type: string; // 'canvas', 'printData', 'iframe'
+  order: number;
+  requiredCourse: number | null;
+}
+
+export interface UserProgress {
+  id: number;
+  userId: number;
+  completedTutorials: number[];
+  currentTutorial: number;
+  currentCourse: number;
+  completedCourses: number[];
+  stars: number;
+}
+
+export interface Tutorial {
+  id: number;
+  courseId: number;
+  title: string;
+  description: string;
+  content: string;
+  starterCode: string;
+  expectedOutput?: string;
+  order: number;
+  isLocked: boolean;
+}
+
+// Zod schemas for validation
+export const insertUserSchema = z.object({
+  username: z.string().min(1),
+  password: z.string().min(1),
 });
 
-export const courses = pgTable("courses", {
-  id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  type: text("type").notNull(), // 'canvas', 'printData', 'iframe'
-  order: integer("order").notNull(),
-  requiredCourse: integer("required_course").references(() => courses.id),
+export const insertUserProgressSchema = z.object({
+  userId: z.number(),
+  completedTutorials: z.array(z.number()).default([]),
+  currentTutorial: z.number().default(1),
+  currentCourse: z.number().default(1),
+  completedCourses: z.array(z.number()).default([]),
+  stars: z.number().default(0),
 });
 
-export const userProgress = pgTable("user_progress", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").references(() => users.id),
-  completedTutorials: json("completed_tutorials").$type<number[]>().default([]),
-  currentTutorial: integer("current_tutorial").default(1),
-  currentCourse: integer("current_course").default(1),
-  completedCourses: json("completed_courses").$type<number[]>().default([]),
-  stars: integer("stars").default(0),
+export const insertCourseSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  type: z.string().min(1),
+  order: z.number(),
+  requiredCourse: z.number().nullable(),
 });
 
-export const tutorials = pgTable("tutorials", {
-  id: serial("id").primaryKey(),
-  courseId: integer("course_id").references(() => courses.id).notNull(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  content: text("content").notNull(),
-  starterCode: text("starter_code").notNull(),
-  expectedOutput: text("expected_output"),
-  order: integer("order").notNull(),
-  isLocked: boolean("is_locked").default(true),
+export const insertTutorialSchema = z.object({
+  courseId: z.number(),
+  title: z.string().min(1),
+  description: z.string().min(1),
+  content: z.string().min(1),
+  starterCode: z.string().default(''),
+  expectedOutput: z.string().optional(),
+  order: z.number(),
+  isLocked: z.boolean().default(false),
 });
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export const insertUserProgressSchema = createInsertSchema(userProgress).omit({
-  id: true,
-});
-
-export const insertCourseSchema = createInsertSchema(courses).omit({
-  id: true,
-});
-
-export const insertTutorialSchema = createInsertSchema(tutorials).omit({
-  id: true,
-});
-
+// Inferred types
 export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
-export type UserProgress = typeof userProgress.$inferSelect;
 export type InsertUserProgress = z.infer<typeof insertUserProgressSchema>;
-export type Course = typeof courses.$inferSelect;
 export type InsertCourse = z.infer<typeof insertCourseSchema>;
-export type Tutorial = typeof tutorials.$inferSelect;
 export type InsertTutorial = z.infer<typeof insertTutorialSchema>;

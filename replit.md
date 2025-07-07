@@ -16,9 +16,9 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
-- **Database**: PostgreSQL with Drizzle ORM
-- **Session Management**: In-memory storage with fallback to database
-- **API Design**: RESTful endpoints for tutorials and user progress
+- **Storage**: In-memory storage for course/tutorial data
+- **Session Management**: Local storage for user progress
+- **API Design**: RESTful endpoints for course data and Remote Data course examples
 - **Development**: Hot module replacement via Vite integration
 
 ### Key Components
@@ -42,11 +42,11 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 
 ## Data Flow
 
-1. **Tutorial Loading**: Frontend fetches tutorial list and user progress from backend
+1. **Course Loading**: Frontend fetches course and tutorial data from in-memory backend storage
 2. **Code Execution**: User writes JavaScript code in the editor
-3. **Canvas Rendering**: Code executes in sandboxed environment with drawing API
-4. **Progress Updates**: Completion status sent to backend and persisted
-5. **Tutorial Unlocking**: Backend logic determines next available tutorials
+3. **Visual Rendering**: Code executes with course-specific interfaces (canvas, printData, iframe)
+4. **Progress Updates**: Completion status stored locally in browser localStorage
+5. **Course Unlocking**: Client-side logic determines available courses and tutorials
 
 ## External Dependencies
 
@@ -59,8 +59,6 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 - **wouter**: Lightweight routing
 
 ### Backend Dependencies
-- **@neondatabase/serverless**: PostgreSQL database driver
-- **drizzle-orm**: Type-safe database ORM
 - **express**: Web application framework
 - **tsx**: TypeScript execution runtime
 
@@ -74,13 +72,12 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 ### Build Process
 1. **Frontend Build**: Vite compiles React application to static assets
 2. **Backend Build**: esbuild bundles Express server for production
-3. **Database Migration**: Drizzle pushes schema changes to PostgreSQL
-4. **Asset Optimization**: Vite optimizes CSS and JavaScript bundles
+3. **Asset Optimization**: Vite optimizes CSS and JavaScript bundles
 
 ### Environment Configuration
 - **Development**: Local development with hot reloading
 - **Production**: Containerized deployment with environment variables
-- **Database**: PostgreSQL with connection pooling via Neon
+- **Storage**: Client-side localStorage for user progress
 
 ### Performance Considerations
 - **Code Splitting**: Vite automatically splits bundles for optimal loading
@@ -154,6 +151,13 @@ Changelog:
   - AI assistant instructed to always mention line numbers when discussing code issues
   - Enhanced error parsing to extract line numbers from JavaScript stack traces
   - Improved debugging experience with visual error indicators and precise AI guidance
+- July 07, 2025: Removed PostgreSQL database dependency and simplified architecture
+  - Eliminated unnecessary PostgreSQL database as all data is stored client-side
+  - Removed Drizzle ORM, database tables, and related dependencies
+  - Simplified schema to pure TypeScript interfaces with Zod validation
+  - Course and tutorial data now served from in-memory storage only
+  - User progress maintained entirely in localStorage for better performance
+  - Cleaner, simpler architecture focused on client-side educational experience
 
 ## User Preferences
 
