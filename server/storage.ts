@@ -167,18 +167,51 @@ drawText(x, 130, 'Final Score: ' + score, 'green');`,
       },
       {
         courseId: 1,
-        title: "Repeating with Loops",
-        description: "Do the same thing many times",
-        content: "Loops let you repeat code! It's like telling the computer 'do this 10 times' instead of writing the same thing 10 times.\n\n🎨 New Drawing Function:\n• drawLine(x1, y1, x2, y2, color) - Draws a line from one point to another! The first two numbers (x1, y1) are where the line starts, and the next two (x2, y2) are where it ends.\n\n🌟 Your Challenge:\nTry creating your own pattern! Change the numbers in the loop to make different designs. Can you make a staircase? Or maybe a zigzag pattern?",
-        starterCode: `// Let's draw a pattern with a loop!
+        title: "Simple Repeating",
+        description: "Learn while loops - the easiest way to repeat code",
+        content: "While loops are the simplest way to repeat code! They keep going 'while' something is true.\n\n🔄 How While Loops Work:\n• while (condition) means 'keep doing this while condition is true'\n• We need a counter variable to track how many times we've done something\n• We must change the counter inside the loop or it will go forever!\n• Much easier to understand than for loops\n\n🎨 New Drawing Function:\n• drawLine(x1, y1, x2, y2, color) - Draws a line from one point to another! The first two numbers (x1, y1) are where the line starts, and the next two (x2, y2) are where it ends.\n\n🌟 Your Challenge:\nTry changing the condition! What happens if you change 'i < 5' to 'i < 8'? Can you make the circles change color each time?",
+        starterCode: `// Let's draw with a while loop!
+let i = 0;  // Start counting at 0
+
+while (i < 5) {  // Keep going while i is less than 5
+    let x = 50 + i * 60;  // Space circles out
+    let y = 200;
+    
+    drawCircle(x, y, 25, 'blue');
+    drawText(x - 5, y + 5, i + 1, 'white');  // Show the number
+    
+    i += 1;  // Very important! Add 1 to i each time
+}
+
+drawText(50, 100, 'Drew ' + i + ' circles!', 'black');`,
+        expectedOutput: "5 blue circles in a row with numbers inside",
+        order: 4,
+        isLocked: true
+      },
+      {
+        courseId: 1,
+        title: "Advanced Repeating",
+        description: "Learn for loops - a more powerful way to repeat",
+        content: "For loops are a more compact way to write loops! They put the counter, condition, and increment all in one line.\n\n🚀 For Loop Structure:\n• for (start; condition; increment) - all the loop parts in parentheses\n• let i = 0 (start counting at 0)\n• i < 5 (keep going while i is less than 5)\n• i++ (add 1 to i each time - same as i += 1)\n\n🔄 For vs While:\n• For loops are more compact when you know how many times to repeat\n• While loops are clearer when the condition is more complex\n• Both do the same thing, just written differently!\n\n🌟 Your Challenge:\nTry changing the for loop numbers! What happens if you change 'i < 5' to 'i < 8'? Can you make a diagonal pattern by changing the y position too?",
+        starterCode: `// Let's draw a pattern with a for loop!
 for (let i = 0; i < 5; i++) {
-    let x = i * 50;
-    let y = i * 30;
+    let x = i * 60;
+    let y = i * 40;
     drawRect(x, y, 40, 40, 'purple');
     drawCircle(x + 20, y + 20, 15, 'yellow');
-}`,
+}
+
+// Compare to while loop way:
+// let i = 0;
+// while (i < 5) {
+//     let x = i * 60;
+//     let y = i * 40;
+//     drawRect(x, y, 40, 40, 'purple');
+//     drawCircle(x + 20, y + 20, 15, 'yellow');
+//     i++;
+// }`,
         expectedOutput: "A diagonal pattern of purple squares with yellow circles",
-        order: 4,
+        order: 5,
         isLocked: true
       },
       {
@@ -200,7 +233,7 @@ for (let i = 0; i < 10; i++) {
     }
 }`,
         expectedOutput: "Alternating blue circles and red squares",
-        order: 5,
+        order: 6,
         isLocked: true
       },
       {
@@ -237,7 +270,7 @@ onSpaceBar(() => {
     drawCircle(x, y, 10, 'red');
 });`,
         expectedOutput: "A blue circle that moves with arrow keys and turns red with spacebar",
-        order: 7,
+        order: 8,
         isLocked: true
       },
       {
@@ -255,7 +288,7 @@ drawCircle(50, 50, 30, 'yellow');      // Sun
 // Try adding more to your house!
 // Maybe windows? A chimney? Flowers?`,
         expectedOutput: "A colorful house with sun",
-        order: 7,
+        order: 9,
         isLocked: true
       },
       {
@@ -273,7 +306,7 @@ for (let i = 0; i < 3; i++) {
   drawRect(100 + i * 80, 300, 40, 40, 'orange');
 }`,
         expectedOutput: "A pattern of purple circles and orange squares",
-        order: 8,
+        order: 10,
         isLocked: true
       },
       {
@@ -295,7 +328,7 @@ for (let i = 0; i < 10; i++) {
 
 // Try adding random rectangles too!`,
         expectedOutput: "Random colored circles scattered around",
-        order: 9,
+        order: 11,
         isLocked: true
       },
       {
@@ -319,7 +352,7 @@ setInterval(() => {
   }
 }, 100);`,
         expectedOutput: "A red ball bouncing back and forth",
-        order: 10,
+        order: 12,
         isLocked: true
       },
       {
@@ -367,7 +400,7 @@ function redrawEverything() {
 // Initial draw
 redrawEverything();`,
         expectedOutput: "Move with arrows, press spacebar to create colorful circles",
-        order: 11,
+        order: 13,
         isLocked: true
       },
       {
@@ -452,7 +485,7 @@ onSpaceBar(() => {
     }
 });`,
         expectedOutput: "A playable Snake game with arrow key controls",
-        order: 12,
+        order: 14,
         isLocked: true
       },
       {
@@ -483,7 +516,7 @@ onSpaceBar(() => {
 clearCanvas();
 drawText(150, 200, 'Your turn to create!', 'purple');`,
         expectedOutput: "Your own creative project",
-        order: 13,
+        order: 15,
         isLocked: true
       },
 

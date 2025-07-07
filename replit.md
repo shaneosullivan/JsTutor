@@ -168,12 +168,15 @@ Changelog:
   - Complete progression from variables through Snake game to creative final project
   - Each tutorial builds on previous concepts while introducing new programming skills
   - "What You'll Learn" section now auto-expands when switching tutorials for immediate educational context
-- July 07, 2025: Added compound assignment operators tutorial
+- July 07, 2025: Added compound assignment operators tutorial and improved loop progression
   - Created "Shortcuts with Math" tutorial after "Math is Fun!" covering +=, -=, *=, /=
   - Demonstrates practical usage with visual examples showing score tracking and size changes
   - Teaches programming efficiency and industry-standard coding practices
+  - Restructured loop learning progression: while loops first (simpler), then for loops (advanced)
+  - "Simple Repeating" tutorial introduces while loops with clear counter examples
+  - "Advanced Repeating" tutorial teaches for loops and compares them to while loops
   - Updated all subsequent tutorial order numbers to maintain proper sequence
-  - Now 13 total tutorials in Basics course with comprehensive mathematical foundation
+  - Now 15 total tutorials in Basics course with comprehensive programming foundation
 
 ## User Preferences
 
