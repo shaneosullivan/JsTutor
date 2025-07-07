@@ -1,5 +1,8 @@
-import { Check, Lock } from "lucide-react";
+import { Check, Lock, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Tutorial } from "@shared/schema";
 
 interface TutorialSidebarProps {
@@ -15,6 +18,8 @@ export default function TutorialSidebar({
   completedTutorials,
   onTutorialSelect
 }: TutorialSidebarProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   const isUnlocked = (tutorial: Tutorial) => {
     if (tutorial.order === 1) return true;
     const previousTutorial = tutorials.find(t => t.order === tutorial.order - 1);
@@ -48,63 +53,105 @@ export default function TutorialSidebar({
     
     return (
       <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
-        <span className="text-slate-600 font-medium text-sm">{tutorial.order}</span>
+        <span className="text-slate-600 font-bold text-sm">{tutorial.order}</span>
       </div>
     );
   };
 
   const getTutorialClassName = (tutorial: Tutorial) => {
-    if (completedTutorials.includes(tutorial.id)) {
-      return "bg-gradient-to-r from-green-50 to-green-100 border border-green-200 hover:shadow-md";
+    const baseClasses = "flex items-center w-full text-left transition-all duration-200 relative group";
+    
+    if (!isUnlocked(tutorial)) {
+      return cn(baseClasses, "opacity-50 cursor-not-allowed");
     }
     
     if (currentTutorial?.id === tutorial.id) {
-      return "gradient-primary border border-purple-400 text-white hover:shadow-md";
+      return cn(baseClasses, "bg-gradient-to-r from-purple-600 to-pink-600 text-white");
     }
     
-    if (!isUnlocked(tutorial)) {
-      return "bg-slate-50 border border-slate-200 opacity-60 cursor-not-allowed";
+    if (completedTutorials.includes(tutorial.id)) {
+      return cn(baseClasses, "hover:bg-green-50 text-green-700");
     }
     
-    return "bg-white border border-slate-200 hover:border-purple-300 hover:shadow-md";
+    return cn(baseClasses, "hover:bg-purple-50 text-slate-700");
   };
 
   return (
-    <aside className="w-80 bg-white shadow-sm border-r border-slate-200 overflow-y-auto">
-      <div className="p-6">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">Learn JavaScript</h2>
-        
-        <div className="space-y-3">
+    <div className={cn(
+      "bg-white border-r border-slate-200 flex flex-col transition-all duration-300",
+      isCollapsed ? "w-16" : "w-80"
+    )}>
+      {/* Header */}
+      <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+        {!isCollapsed && (
+          <h2 className="text-lg font-semibold text-slate-800">Learn JavaScript</h2>
+        )}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="p-1 h-8 w-8"
+        >
+          {isCollapsed ? (
+            <ChevronRight className="h-4 w-4" />
+          ) : (
+            <ChevronLeft className="h-4 w-4" />
+          )}
+        </Button>
+      </div>
+
+      {/* Tutorial List */}
+      <ScrollArea className="flex-1">
+        <div className="p-2">
           {tutorials.map((tutorial) => (
-            <div
+            <button
               key={tutorial.id}
               onClick={() => isUnlocked(tutorial) && onTutorialSelect(tutorial)}
               className={cn(
-                "rounded-lg p-4 cursor-pointer transition-all duration-200",
-                getTutorialClassName(tutorial)
+                getTutorialClassName(tutorial),
+                isCollapsed ? "p-3 justify-center" : "p-4 space-x-3"
               )}
+              disabled={!isUnlocked(tutorial)}
             >
-              <div className="flex items-center space-x-3">
-                {getStatusIcon(tutorial)}
-                <div className="flex-1">
-                  <h3 className={cn(
-                    "font-medium",
-                    currentTutorial?.id === tutorial.id ? "text-white" : "text-slate-800"
-                  )}>
-                    {tutorial.order}. {tutorial.title}
+              {getStatusIcon(tutorial)}
+              
+              {!isCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-sm leading-tight">
+                    {tutorial.title}
                   </h3>
-                  <p className={cn(
-                    "text-sm",
-                    currentTutorial?.id === tutorial.id ? "text-white/80" : "text-slate-600"
-                  )}>
+                  <p className="text-xs opacity-75 mt-1 line-clamp-2">
                     {tutorial.description}
                   </p>
                 </div>
-              </div>
-            </div>
+              )}
+
+              {/* Progress indicator for collapsed state */}
+              {isCollapsed && completedTutorials.includes(tutorial.id) && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
+              )}
+              
+              {/* Current tutorial indicator for collapsed state */}
+              {isCollapsed && currentTutorial?.id === tutorial.id && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full border-2 border-white" />
+              )}
+            </button>
           ))}
         </div>
-      </div>
-    </aside>
+      </ScrollArea>
+
+      {/* Footer */}
+      {!isCollapsed && (
+        <div className="p-4 border-t border-slate-200">
+          <div className="text-center">
+            <div className="text-sm text-slate-600 mb-1">Progress</div>
+            <div className="text-2xl font-bold text-purple-600">
+              {completedTutorials.length}/{tutorials.length}
+            </div>
+            <div className="text-xs text-slate-500">tutorials completed</div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

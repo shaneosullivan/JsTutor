@@ -135,6 +135,13 @@ Changelog:
   - Built complete Snake game tutorial with arrow key controls and spacebar restart
   - Added "Your Own Game!" as final creative challenge tutorial
   - Enhanced canvas API with comprehensive keyboard event handling
+- July 07, 2025: Implemented local storage for user progress and collapsible sidebar
+  - Added localStorage persistence for completed tutorials and user code per tutorial
+  - Code automatically saves as user types and loads when switching between tutorials
+  - Progress persists across page refreshes without server dependency
+  - Created collapsible left sidebar that can be minimized to show only tutorial numbers
+  - In collapsed state, sidebar shows progress indicators and current tutorial markers
+  - Improved user experience with persistent progress and better space utilization
 
 ## User Preferences
 

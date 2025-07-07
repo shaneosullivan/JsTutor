@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTutorial } from "@/hooks/use-tutorial";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import TutorialContent from "@/components/tutorial-content";
@@ -10,29 +10,24 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
-  const { 
-    currentTutorial, 
-    tutorials, 
-    progress, 
-    isLoading, 
+  const {
+    currentTutorial,
+    tutorials,
+    completedTutorials,
+    userCode,
+    isLoading,
+    completeTutorial,
+    goToNextTutorial,
     setCurrentTutorial,
-    completeTutorial 
+    updateUserCode,
   } = useTutorial();
 
-  const handleNextTutorial = () => {
-    if (!currentTutorial) return;
-    const nextTutorial = tutorials.find((t: any) => t.order === currentTutorial.order + 1);
-    if (nextTutorial) {
-      setCurrentTutorial(nextTutorial);
-    }
-  };
+  const [showHelp, setShowHelp] = useState(false);
 
   const hasNextTutorial = currentTutorial ? 
     tutorials.some((t: any) => t.order === currentTutorial.order + 1) : false;
-  
-  const [showHelp, setShowHelp] = useState(false);
 
-  const progressPercentage = progress ? (progress.completedTutorials.length / tutorials.length) * 100 : 0;
+  const progressPercentage = tutorials.length > 0 ? (completedTutorials.length / tutorials.length) * 100 : 0;
 
   if (isLoading) {
     return (
@@ -62,14 +57,14 @@ export default function Home() {
                 <span className="text-sm text-slate-600">Progress:</span>
                 <Progress value={progressPercentage} className="w-32" />
                 <span className="text-sm font-medium text-slate-700">
-                  {progress?.completedTutorials.length || 0}/{tutorials.length}
+                  {completedTutorials.length}/{tutorials.length}
                 </span>
               </div>
               
               <div className="flex items-center space-x-1">
                 <Star className="text-yellow-500 fill-current" size={16} />
                 <span className="text-sm font-medium text-slate-700">
-                  {progress?.stars || 0}
+                  {completedTutorials.length * 10}
                 </span>
               </div>
             </div>
@@ -82,7 +77,7 @@ export default function Home() {
         <TutorialSidebar 
           tutorials={tutorials}
           currentTutorial={currentTutorial}
-          completedTutorials={progress?.completedTutorials || []}
+          completedTutorials={completedTutorials}
           onTutorialSelect={setCurrentTutorial}
         />
 
@@ -106,10 +101,12 @@ export default function Home() {
               {currentTutorial ? (
                 <TutorialContent 
                   tutorial={currentTutorial}
-                  onComplete={completeTutorial}
-                  isCompleted={progress?.completedTutorials.includes(currentTutorial.id) || false}
-                  onNext={handleNextTutorial}
+                  onComplete={() => completeTutorial(currentTutorial.id)}
+                  isCompleted={completedTutorials.includes(currentTutorial.id)}
+                  onNext={goToNextTutorial}
                   hasNext={hasNextTutorial}
+                  userCode={userCode}
+                  onCodeChange={updateUserCode}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center">
