@@ -1,0 +1,117 @@
+import { useState, useEffect } from "react";
+import { useTutorial } from "@/hooks/use-tutorial";
+import TutorialSidebar from "@/components/tutorial-sidebar";
+import TutorialContent from "@/components/tutorial-content";
+import HelpModal from "@/components/help-modal";
+import { Code, Star, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+
+export default function Home() {
+  const { 
+    currentTutorial, 
+    tutorials, 
+    progress, 
+    isLoading, 
+    setCurrentTutorial,
+    completeTutorial 
+  } = useTutorial();
+  
+  const [showHelp, setShowHelp] = useState(false);
+
+  const progressPercentage = progress ? (progress.completedTutorials.length / tutorials.length) * 100 : 0;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
+                  <Code className="text-white" size={16} />
+                </div>
+                <h1 className="text-xl font-bold text-slate-800">JavaScript Adventure</h1>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-slate-600">Progress:</span>
+                <Progress value={progressPercentage} className="w-32" />
+                <span className="text-sm font-medium text-slate-700">
+                  {progress?.completedTutorials.length || 0}/{tutorials.length}
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-1">
+                <Star className="text-yellow-500 fill-current" size={16} />
+                <span className="text-sm font-medium text-slate-700">
+                  {progress?.stars || 0}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex h-screen pt-16">
+        {/* Sidebar */}
+        <TutorialSidebar 
+          tutorials={tutorials}
+          currentTutorial={currentTutorial}
+          completedTutorials={progress?.completedTutorials || []}
+          onTutorialSelect={setCurrentTutorial}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-hidden">
+          {currentTutorial ? (
+            <TutorialContent 
+              tutorial={currentTutorial}
+              onComplete={completeTutorial}
+              isCompleted={progress?.completedTutorials.includes(currentTutorial.id) || false}
+            />
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <Code className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                <h3 className="text-lg font-medium text-slate-800 mb-2">
+                  Select a tutorial to get started!
+                </h3>
+                <p className="text-slate-600">
+                  Choose a tutorial from the sidebar to begin your JavaScript adventure.
+                </p>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Floating Help Button */}
+      <Button
+        onClick={() => setShowHelp(true)}
+        className="fixed bottom-6 right-6 w-12 h-12 rounded-full gradient-primary shadow-lg hover:shadow-xl transition-all duration-200"
+        size="icon"
+      >
+        <HelpCircle size={20} />
+      </Button>
+
+      {/* Help Modal */}
+      <HelpModal 
+        isOpen={showHelp} 
+        onClose={() => setShowHelp(false)}
+        currentTutorial={currentTutorial}
+      />
+    </div>
+  );
+}
