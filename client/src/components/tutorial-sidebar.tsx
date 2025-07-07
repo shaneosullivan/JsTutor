@@ -10,15 +10,25 @@ interface TutorialSidebarProps {
   currentTutorial: Tutorial | null;
   completedTutorials: number[];
   onTutorialSelect: (tutorial: Tutorial) => void;
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
+  course?: {
+    id: number;
+    title: string;
+    description: string;
+    type: string;
+  };
 }
 
 export default function TutorialSidebar({
   tutorials,
   currentTutorial,
   completedTutorials,
-  onTutorialSelect
+  onTutorialSelect,
+  collapsed = false,
+  onToggleCollapsed,
+  course,
 }: TutorialSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const isUnlocked = (tutorial: Tutorial) => {
     if (tutorial.order === 1) return true;

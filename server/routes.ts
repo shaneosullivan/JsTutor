@@ -5,6 +5,39 @@ import { insertUserSchema, insertUserProgressSchema } from "@shared/schema";
 import OpenAI from "openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Course endpoints
+  app.get("/api/courses", async (req, res) => {
+    try {
+      const courses = await storage.getAllCourses();
+      res.json(courses);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch courses" });
+    }
+  });
+
+  app.get("/api/courses/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const course = await storage.getCourse(id);
+      if (!course) {
+        return res.status(404).json({ error: "Course not found" });
+      }
+      res.json(course);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch course" });
+    }
+  });
+
+  app.get("/api/courses/:id/tutorials", async (req, res) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const tutorials = await storage.getTutorialsByCourse(courseId);
+      res.json(tutorials);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch course tutorials" });
+    }
+  });
+
   // Get all tutorials
   app.get("/api/tutorials", async (req, res) => {
     try {
@@ -177,6 +210,145 @@ Tutorial Content: ${tutorial.content}`;
       console.error("AI chat error:", error);
       res.status(500).json({ error: "Failed to get AI response" });
     }
+  });
+
+  // Test data endpoints for Remote Data course
+  app.get("/api/test-data/user", (req, res) => {
+    res.json({
+      id: 1,
+      name: "Alice Johnson",
+      email: "alice@example.com",
+      age: 25,
+      city: "New York"
+    });
+  });
+
+  app.get("/api/test-data/user/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    if (id === 1) {
+      res.json({ id: 1, name: "Alice Johnson", email: "alice@example.com" });
+    } else if (id === 2) {
+      res.json({ id: 2, name: "Bob Smith", email: "bob@example.com" });
+    } else {
+      res.status(404).json({ error: "User not found" });
+    }
+  });
+
+  app.get("/api/test-data/posts", (req, res) => {
+    res.json([
+      { id: 1, title: "Learning JavaScript", content: "JavaScript is awesome!", author: "Alice" },
+      { id: 2, title: "Web Development Tips", content: "Here are some tips...", author: "Bob" },
+      { id: 3, title: "API Design", content: "Good API design is important", author: "Charlie" }
+    ]);
+  });
+
+  app.get("/api/test-data/posts/search", (req, res) => {
+    const query = req.query.q as string;
+    const allPosts = [
+      { id: 1, title: "Learning JavaScript", content: "JavaScript is awesome!" },
+      { id: 2, title: "Web Development Tips", content: "Here are some tips..." },
+      { id: 3, title: "API Design", content: "Good API design is important" }
+    ];
+    
+    const results = allPosts.filter(post => 
+      post.title.toLowerCase().includes(query.toLowerCase()) ||
+      post.content.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    res.json(results);
+  });
+
+  app.get("/api/test-data/protected", (req, res) => {
+    const auth = req.headers.authorization;
+    if (auth === "Bearer demo-token") {
+      res.json({ secret: "This is protected data!", timestamp: new Date().toISOString() });
+    } else {
+      res.status(401).json({ error: "Unauthorized" });
+    }
+  });
+
+  app.post("/api/test-data/users", (req, res) => {
+    const userData = req.body;
+    res.status(201).json({
+      id: Math.floor(Math.random() * 1000),
+      ...userData,
+      createdAt: new Date().toISOString()
+    });
+  });
+
+  app.post("/api/test-data/contact", (req, res) => {
+    const formData = req.body;
+    res.json({
+      message: "Thank you for your message!",
+      id: Math.floor(Math.random() * 1000),
+      submittedAt: new Date().toISOString(),
+      data: formData
+    });
+  });
+
+  app.post("/api/test-data/upload", (req, res) => {
+    const data = req.body;
+    res.json({
+      message: "Data uploaded successfully",
+      uploadId: Math.floor(Math.random() * 1000),
+      size: JSON.stringify(data).length,
+      uploadedAt: new Date().toISOString()
+    });
+  });
+
+  app.get("/api/test-data/success", (req, res) => {
+    res.json({ message: "Success!" });
+  });
+
+  app.get("/api/test-data/notfound", (req, res) => {
+    res.status(404).json({ error: "Not found" });
+  });
+
+  app.get("/api/test-data/server-error", (req, res) => {
+    res.status(500).json({ error: "Internal server error" });
+  });
+
+  app.get("/api/test-data/timeout", (req, res) => {
+    // Simulate a long request
+    setTimeout(() => {
+      res.json({ message: "Finally completed" });
+    }, 10000);
+  });
+
+  app.get("/api/test-data/unreliable", (req, res) => {
+    // Randomly fail to simulate unreliable endpoint
+    if (Math.random() < 0.7) {
+      res.status(500).json({ error: "Service temporarily unavailable" });
+    } else {
+      res.json({ message: "Success after retry!" });
+    }
+  });
+
+  app.get("/api/test-data/todos", (req, res) => {
+    res.json([
+      { id: 1, text: "Learn JavaScript", completed: true },
+      { id: 2, text: "Build a todo app", completed: false },
+      { id: 3, text: "Deploy to production", completed: false }
+    ]);
+  });
+
+  app.post("/api/test-data/todos", (req, res) => {
+    const todoData = req.body;
+    res.status(201).json({
+      id: Math.floor(Math.random() * 1000),
+      ...todoData,
+      createdAt: new Date().toISOString()
+    });
+  });
+
+  app.put("/api/test-data/todos/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const updateData = req.body;
+    res.json({
+      id,
+      ...updateData,
+      updatedAt: new Date().toISOString()
+    });
   });
 
   const httpServer = createServer(app);

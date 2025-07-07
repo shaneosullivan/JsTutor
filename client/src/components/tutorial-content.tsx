@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import CodeEditor from "@/components/code-editor";
 import DrawingCanvas from "@/components/drawing-canvas";
+import PrintDataDisplay from "@/components/print-data-display";
+import IframeDisplay from "@/components/iframe-display";
 import AiChat from "@/components/ai-chat";
 import type { Tutorial } from "@shared/schema";
 
@@ -17,6 +19,7 @@ interface TutorialContentProps {
   hasNext: boolean;
   userCode: string;
   onCodeChange: (code: string) => void;
+  courseType?: string;
 }
 
 export default function TutorialContent({ 
@@ -26,7 +29,8 @@ export default function TutorialContent({
   onNext,
   hasNext,
   userCode,
-  onCodeChange
+  onCodeChange,
+  courseType = 'canvas'
 }: TutorialContentProps) {
   const [output, setOutput] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
@@ -262,11 +266,29 @@ export default function TutorialContent({
                     canvasError={canvasError}
                   />
                 ) : (
-                  <DrawingCanvas 
-                    code={userCode} 
-                    onOutput={setOutput}
-                    onError={handleCanvasError}
-                  />
+                  <>
+                    {courseType === 'canvas' && (
+                      <DrawingCanvas 
+                        code={userCode} 
+                        onOutput={setOutput}
+                        onError={handleCanvasError}
+                      />
+                    )}
+                    {courseType === 'printData' && (
+                      <PrintDataDisplay 
+                        code={userCode} 
+                        onOutput={setOutput}
+                        onError={handleCanvasError}
+                      />
+                    )}
+                    {courseType === 'iframe' && (
+                      <IframeDisplay 
+                        code={userCode} 
+                        onOutput={setOutput}
+                        onError={handleCanvasError}
+                      />
+                    )}
+                  </>
                 )}
               </div>
             </div>

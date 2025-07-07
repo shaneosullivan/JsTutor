@@ -1,4 +1,4 @@
-import { users, userProgress, tutorials, type User, type InsertUser, type UserProgress, type InsertUserProgress, type Tutorial, type InsertTutorial } from "@shared/schema";
+import { users, userProgress, courses, tutorials, type User, type InsertUser, type UserProgress, type InsertUserProgress, type Course, type InsertCourse, type Tutorial, type InsertTutorial } from "@shared/schema";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -8,7 +8,12 @@ export interface IStorage {
   getUserProgress(userId: number): Promise<UserProgress | undefined>;
   updateUserProgress(userId: number, progress: Partial<InsertUserProgress>): Promise<UserProgress>;
   
+  getAllCourses(): Promise<Course[]>;
+  getCourse(id: number): Promise<Course | undefined>;
+  createCourse(course: InsertCourse): Promise<Course>;
+  
   getAllTutorials(): Promise<Tutorial[]>;
+  getTutorialsByCourse(courseId: number): Promise<Tutorial[]>;
   getTutorial(id: number): Promise<Tutorial | undefined>;
   createTutorial(tutorial: InsertTutorial): Promise<Tutorial>;
 }
@@ -16,26 +21,77 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private userProgress: Map<number, UserProgress>;
+  private courses: Map<number, Course>;
   private tutorials: Map<number, Tutorial>;
   private currentUserId: number;
   private currentProgressId: number;
+  private currentCourseId: number;
   private currentTutorialId: number;
 
   constructor() {
     this.users = new Map();
     this.userProgress = new Map();
+    this.courses = new Map();
     this.tutorials = new Map();
     this.currentUserId = 1;
     this.currentProgressId = 1;
+    this.currentCourseId = 1;
     this.currentTutorialId = 1;
     
-    // Initialize with sample tutorials
+    this.initializeCourses();
     this.initializeTutorials();
+  }
+
+  private initializeCourses() {
+    const courseData: InsertCourse[] = [
+      {
+        title: "Basics",
+        description: "Learn the fundamentals of JavaScript programming with visual drawing",
+        type: "canvas",
+        order: 1,
+        requiredCourse: null,
+      },
+      {
+        title: "Array Methods",
+        description: "Master array manipulation with forEach, map, filter, and more",
+        type: "printData",
+        order: 2,
+        requiredCourse: 1,
+      },
+      {
+        title: "DOM Manipulation",
+        description: "Learn to interact with web pages and HTML elements",
+        type: "iframe",
+        order: 3,
+        requiredCourse: 1,
+      },
+      {
+        title: "Algorithms",
+        description: "Explore problem-solving with recursion and algorithmic thinking",
+        type: "printData",
+        order: 4,
+        requiredCourse: 1,
+      },
+      {
+        title: "Remote Data",
+        description: "Work with APIs and fetch data from servers",
+        type: "printData",
+        order: 5,
+        requiredCourse: 1,
+      },
+    ];
+
+    courseData.forEach(course => {
+      const id = this.currentCourseId++;
+      this.courses.set(id, { ...course, id });
+    });
   }
 
   private initializeTutorials() {
     const tutorialData: InsertTutorial[] = [
+      // Basics Course (courseId: 1)
       {
+        courseId: 1,
         title: "Your First Variable",
         description: "Learn to store information",
         content: "Variables are like boxes that hold information. You can put numbers, text, or other things in them and use them later!\n\n🎨 About the Drawing Functions:\n• drawCircle(x, y, radius, color) - The first number (x) is how many pixels from the LEFT edge to place the center. The second number (y) is how many pixels from the TOP edge. The radius is how big the circle is (like measuring from the center to the edge).\n• drawText(x, y, text, color) - Places text at a position. X is pixels from left, Y is pixels from top.\n\n📍 Think of the canvas like a grid: (0,0) is the top-left corner, (400,400) is the bottom-right!\n\n🌟 Your Challenge:\nAfter trying the example, clear the code and write your own! Try creating a variable with your favorite number, then draw a circle using that number. Can you draw your initials on the canvas too?",
@@ -51,6 +107,7 @@ drawText(200, 300, myName, 'black');`,
         isLocked: false
       },
       {
+        courseId: 1,
         title: "Math is Fun!",
         description: "Add, subtract, and more",
         content: "JavaScript can do math just like you! You can add (+), subtract (-), multiply (*), and divide (/) numbers.\n\n🎨 New Drawing Function:\n• drawRect(x, y, width, height, color) - Draws a rectangle! X and Y tell us where the TOP-LEFT corner goes. Width is how wide (left to right), height is how tall (top to bottom). Think of it like drawing a box!\n\n🌟 Your Challenge:\nClear the code and try this on your own! Create variables for your age and your favorite number, then do some math with them. Draw rectangles using the results - maybe make a building or a robot face!",
@@ -64,358 +121,1500 @@ drawRect(x + 50, y, size * 2, size, 'green');
 drawRect(x + 150, y, size / 2, size, 'blue');`,
         expectedOutput: "Three rectangles of different sizes",
         order: 2,
-        isLocked: false
+        isLocked: true
       },
       {
-        title: "Making Decisions",
-        description: "Learn if/else statements",
-        content: "Sometimes we want our code to do different things depending on what's happening. That's where if/else comes in!\n\n🎨 New Drawing Function:\n• drawLine(x1, y1, x2, y2, color) - Draws a straight line! The first two numbers (x1, y1) are where the line STARTS. The next two numbers (x2, y2) are where the line ENDS. It's like drawing with a ruler!\n\n🌟 Your Challenge:\nTime to be creative! Clear the code and write your own if/else statement. Try: 'if my age is greater than 8, draw a happy face, else draw a sad face'. Use circles for the face and lines for the mouth!",
-        starterCode: `// Let's draw different things based on conditions!
-let isHappy = true;
-
-if (isHappy) {
-    // Draw a happy yellow sun
-    drawCircle(200, 200, 50, 'yellow');
-    drawCircle(185, 185, 5, 'black');
-    drawCircle(215, 185, 5, 'black');
-    drawLine(185, 215, 215, 215, 'black');
-} else {
-    // Draw a sad blue cloud
-    drawCircle(200, 200, 50, 'lightblue');
-    drawCircle(185, 185, 3, 'black');
-    drawCircle(215, 185, 3, 'black');
-    drawLine(185, 215, 215, 225, 'black');
+        courseId: 1,
+        title: "Repeating with Loops",
+        description: "Do the same thing many times",
+        content: "Loops let you repeat code! It's like telling the computer 'do this 10 times' instead of writing the same thing 10 times.\n\n🎨 New Drawing Function:\n• drawLine(x1, y1, x2, y2, color) - Draws a line from one point to another! The first two numbers (x1, y1) are where the line starts, and the next two (x2, y2) are where it ends.\n\n🌟 Your Challenge:\nTry creating your own pattern! Change the numbers in the loop to make different designs. Can you make a staircase? Or maybe a zigzag pattern?",
+        starterCode: `// Let's draw a pattern with a loop!
+for (let i = 0; i < 5; i++) {
+    let x = i * 50;
+    let y = i * 30;
+    drawRect(x, y, 40, 40, 'purple');
+    drawCircle(x + 20, y + 20, 15, 'yellow');
 }`,
-        expectedOutput: "A happy sun or sad cloud based on the condition",
+        expectedOutput: "A diagonal pattern of purple squares with yellow circles",
         order: 3,
         isLocked: true
       },
       {
-        title: "Creating Functions",
-        description: "Organize your code",
-        content: "Functions are like recipes - they tell the computer how to do something step by step. You can use them over and over!\n\n💡 Function Tip: Notice how we can put numbers in parentheses after the function name? These are called 'parameters' - they're like ingredients for our recipe! The drawHouse function takes an x position, y position, and color as its ingredients.\n\n🌟 Your Challenge:\nCreate your own function! Try making a 'drawStar' or 'drawTree' function. Start with a simple shape using rectangles and circles, then call your function multiple times to fill the canvas. Make each one a different color!",
-        starterCode: `// Let's create a function to draw a house!
-function drawHouse(x, y, color) {
-    drawRect(x, y, 60, 40, color);
-    drawRect(x + 20, y + 15, 20, 25, 'brown');
-    drawRect(x + 10, y + 10, 10, 10, 'lightblue');
-    drawRect(x + 40, y + 10, 10, 10, 'lightblue');
-}
-
-// Now let's use our function to draw three houses!
-drawHouse(100, 200, 'red');
-drawHouse(200, 200, 'blue');
-drawHouse(300, 200, 'green');`,
-        expectedOutput: "Three colorful houses in a row",
+        courseId: 1,
+        title: "Making Decisions",
+        description: "Computer choices with if statements",
+        content: "Sometimes you want your program to make choices! 'If' statements let the computer decide what to do.\n\n🎨 New Drawing Function:\n• drawPixel(x, y, color) - Draws a single tiny dot at a specific position! Perfect for making detailed patterns or stars in the sky.\n\n🌟 Your Challenge:\nTry changing the numbers to see different results! Can you make it so circles appear in different colors based on different conditions?",
+        starterCode: `// Let's make the computer choose colors!
+for (let i = 0; i < 10; i++) {
+    let x = i * 40;
+    let y = 200;
+    
+    if (i % 2 === 0) {
+        // Even numbers get blue circles
+        drawCircle(x, y, 20, 'blue');
+    } else {
+        // Odd numbers get red squares
+        drawRect(x - 10, y - 10, 20, 20, 'red');
+    }
+}`,
+        expectedOutput: "Alternating blue circles and red squares",
         order: 4,
         isLocked: true
       },
       {
-        title: "While Loops",
-        description: "Repeat until done",
-        content: "While loops keep doing something as long as a condition is true. It's like saying 'keep doing this until...'\n\n💡 Loop Tip: See how we change 'x', 'y', 'size', and 'count' each time? This makes each circle appear in a slightly different place and size, creating a spiral pattern! Without changing these values, all circles would be drawn in exactly the same spot.\n\n🌟 Your Challenge:\nWrite your own while loop from scratch! Try drawing a line of circles across the screen, or squares going down the canvas. Remember to change your variables inside the loop so it doesn't run forever!",
-        starterCode: `// Let's draw a spiral using a while loop!
+        courseId: 1,
+        title: "Listening to Keys",
+        description: "Make your program respond to keyboard input",
+        content: "Learn to make your programs interactive! You can make things happen when keys are pressed.\n\n🎮 New Functions:\n• onKeyPress(callback) - Runs your code when ANY key is pressed\n• onArrowKeys(callback) - Runs your code when arrow keys are pressed\n• onSpaceBar(callback) - Runs your code when spacebar is pressed\n• isKeyPressed(key) - Checks if a specific key is currently being held down\n\n🌟 Your Challenge:\nTry adding your own key controls! Can you make different shapes appear when different keys are pressed?",
+        starterCode: `// Let's make an interactive drawing!
 let x = 200;
 let y = 200;
-let size = 5;
-let count = 0;
 
-while (count < 20) {
-    drawCircle(x, y, size, 'purple');
-    x = x + size;
-    y = y + 2;
-    size = size + 1;
-    count = count + 1;
-}`,
-        expectedOutput: "A spiral pattern of purple circles",
+// Clear the canvas first
+clearCanvas();
+
+// Draw our starting position
+drawCircle(x, y, 10, 'blue');
+
+// Listen for arrow keys
+onArrowKeys((direction) => {
+    // Move based on arrow key direction
+    if (direction === 'up') y -= 10;
+    if (direction === 'down') y += 10;
+    if (direction === 'left') x -= 10;
+    if (direction === 'right') x += 10;
+    
+    // Clear and redraw
+    clearCanvas();
+    drawCircle(x, y, 10, 'blue');
+});
+
+// Listen for spacebar to change color
+onSpaceBar(() => {
+    clearCanvas();
+    drawCircle(x, y, 10, 'red');
+});`,
+        expectedOutput: "A blue circle that moves with arrow keys and turns red with spacebar",
         order: 5,
         isLocked: true
       },
       {
-        title: "For Loops",
-        description: "Count and repeat",
-        content: "For loops are perfect when you know exactly how many times you want to repeat something. Like counting from 1 to 10!\n\n💡 Array Tip: The 'colors' variable is an array - it's like a list that holds multiple colors! We use colors[i] to pick a different color each time through the loop. When i=0, we get 'red'. When i=1, we get 'orange', and so on!\n\n🌟 Your Challenge:\nCreate your own rainbow! Make an array with your favorite colors, then use a for loop to draw them. Try making circles instead of rectangles, or arrange them in a different pattern like a circle or zigzag!",
-        starterCode: `// Let's draw a rainbow using a for loop!
-let colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
-
-for (let i = 0; i < 6; i++) {
-    drawRect(50 + i * 50, 100, 40, 200, colors[i]);
-}
-
-// Let's also draw some stars
-for (let i = 0; i < 10; i++) {
-    drawCircle(100 + i * 30, 50, 5, 'yellow');
-}`,
-        expectedOutput: "A colorful rainbow with stars above",
-        order: 6,
-        isLocked: true
-      },
-      {
-        title: "Arrays & Lists",
-        description: "Store many things",
-        content: "Arrays are like lists that can hold many items. You can store numbers, colors, names, or anything else!\n\n💡 Array Tips:\n• Arrays use square brackets: ['red', 'blue', 'green']\n• We access items by their position: colors[0] gets the first item\n• arrays.length tells us how many items are in the list\n• Arrays start counting from 0, not 1! So the first item is [0], second is [1], etc.\n\n🌟 Your Challenge:\nBuild your own art gallery! Create two arrays - one with colors and one with sizes. Use a for loop to draw different sized shapes using both arrays. Try making each shape bigger and a different color!",
-        starterCode: `// Let's create an array of colors and use them!
-let colors = ['red', 'blue', 'green', 'yellow', 'purple'];
-let sizes = [10, 20, 30, 40, 50];
-
-for (let i = 0; i < colors.length; i++) {
-    drawCircle(100 + i * 70, 200, sizes[i], colors[i]);
-}`,
-        expectedOutput: "Circles of different sizes and colors",
-        order: 7,
-        isLocked: true
-      },
-      {
-        title: "Pattern Party",
-        description: "Draw cool patterns",
-        content: "Now let's combine everything we learned to create amazing patterns and designs!\n\n💡 Pattern Tip: This uses 'nested loops' - a loop inside another loop! The outer loop (x) makes columns, the inner loop (y) makes rows. The (x + y) % 2 is a math trick that alternates between 0 and 1, giving us the checkerboard pattern!\n\n🌟 Your Challenge:\nDesign your own pattern! Try changing the colors, using circles instead of rectangles, or creating a different mathematical pattern. What happens if you use (x * y) or (x + y + 1) instead? Be creative!",
-        starterCode: `// Let's create a checkerboard pattern!
-let colors = ['red', 'black'];
-
-for (let x = 0; x < 8; x++) {
-    for (let y = 0; y < 8; y++) {
-        let colorIndex = (x + y) % 2;
-        drawRect(x * 40, y * 40, 40, 40, colors[colorIndex]);
-    }
-}`,
-        expectedOutput: "A colorful checkerboard pattern",
-        order: 8,
-        isLocked: true
-      },
-      {
-        title: "Animation Fun",
-        description: "Make things move",
-        content: "Let's make our drawings move and change over time! This is where programming gets really exciting!\n\n🎨 New Drawing Function:\n• clearCanvas() - Erases everything on the canvas, making it white again!\n\n💡 Animation Tip: Math.sin() and Math.cos() create smooth, wave-like movements. They're like magic functions that make things move in circles and curves! The 'time' variable keeps track of how long the animation has been running.\n\n🌟 Your Challenge:\nCreate your own moving art! Try animating different shapes, changing colors over time, or making multiple objects move in different patterns. Can you make a bouncing ball or a spinning square?",
-        starterCode: `// Let's create a simple animation!
-let time = 0;
-
-function animate() {
-    clearCanvas();
-    
-    // Draw a bouncing ball
-    let x = 200 + Math.sin(time) * 150;
-    let y = 200 + Math.cos(time * 2) * 100;
-    
-    drawCircle(x, y, 20, 'red');
-    
-    // Draw a spinning flower
-    for (let i = 0; i < 8; i++) {
-        let angle = (time + i * 0.8) * Math.PI / 4;
-        let petalX = 300 + Math.cos(angle) * 30;
-        let petalY = 300 + Math.sin(angle) * 30;
-        drawCircle(petalX, petalY, 15, 'pink');
-    }
-    
-    time += 0.1;
-}
-
-// Start the animation
-setInterval(animate, 100);`,
-        expectedOutput: "A bouncing ball and spinning flower",
-        order: 9,
-        isLocked: true
-      },
-      {
-        title: "Listening to Keys",
-        description: "Make interactive art",
-        content: "Now let's learn how to make our programs respond to keyboard input! This is how we create interactive experiences.\n\n🎹 New Keyboard Functions:\n• onKeyPress(callback) - Runs your function when any key is pressed\n• onArrowKeys(callback) - Specifically listens for arrow keys\n• onSpaceBar(callback) - Listens just for the spacebar\n• isKeyPressed(key) - Checks if a key is currently being held down\n\n💡 Interactive Tip: The square remembers its position using variables. Each time you press an arrow key, we change the x or y position and redraw everything!\n\n🌟 Your Challenge:\nMake the square do something different! Try changing its color, size, or drawing a trail behind it as it moves. Can you make it wrap around the screen edges?",
-        starterCode: `// Let's create a square you can move with arrow keys!
-let squareX = 200;
-let squareY = 200;
-let squareColor = 'blue';
-
-function drawSquare() {
-    clearCanvas();
-    drawRect(squareX, squareY, 50, 50, squareColor);
-    drawText(150, 50, 'Use arrow keys to move!', 'black');
-}
-
-// Listen for arrow key presses
-onArrowKeys(function(direction) {
-    if (direction === 'up') squareY = squareY - 20;
-    if (direction === 'down') squareY = squareY + 20;
-    if (direction === 'left') squareX = squareX - 20;
-    if (direction === 'right') squareX = squareX + 20;
-    
-    drawSquare();
-});
-
-// Draw the initial square
-drawSquare();`,
-        expectedOutput: "A blue square that moves with arrow keys",
-        order: 10,
-        isLocked: true
-      },
-      {
-        title: "Spacebar Magic",
-        description: "Add special actions",
-        content: "The spacebar is perfect for special actions in games! Let's make our moving square even more fun by adding color changes.\n\n🎨 Color Fun:\n• We can store multiple colors in an array\n• Use % (modulo) to cycle through colors when we reach the end\n• The spacebar becomes like a magic wand that changes colors!\n\n💡 Array Cycling Tip: currentColorIndex % colors.length makes sure we never go past the last color. When we reach the end, it starts over at the beginning. This creates an endless cycle!\n\n🌟 Your Challenge:\nAdd more special spacebar actions! Try changing the square's size, making it leave a trail, or creating sparkle effects around it. What other magical powers can you give the spacebar?",
-        starterCode: `// Moving square with color-changing spacebar magic!
-let squareX = 200;
-let squareY = 200;
-let colors = ['red', 'green', 'blue', 'purple', 'orange', 'pink'];
-let currentColorIndex = 0;
-
-function drawSquare() {
-    clearCanvas();
-    drawRect(squareX, squareY, 50, 50, colors[currentColorIndex]);
-    drawText(130, 50, 'Arrow keys = move, Space = change color!', 'black');
-}
-
-// Listen for arrow keys
-onArrowKeys(function(direction) {
-    if (direction === 'up') squareY = squareY - 20;
-    if (direction === 'down') squareY = squareY + 20;
-    if (direction === 'left') squareX = squareX - 20;
-    if (direction === 'right') squareX = squareX + 20;
-    
-    drawSquare();
-});
-
-// Listen for spacebar
-onSpaceBar(function() {
-    currentColorIndex = (currentColorIndex + 1) % colors.length;
-    drawSquare();
-});
-
-// Draw the initial square
-drawSquare();`,
-        expectedOutput: "A colorful square controlled by arrow keys and spacebar",
-        order: 11,
-        isLocked: true
-      },
-      {
+        courseId: 1,
         title: "Snake Game",
-        description: "Build the classic game",
-        content: "Time to build the famous Snake game! This combines everything you've learned: arrays, loops, keyboard input, and game logic.\n\n🐍 Snake Game Elements:\n• The snake is an array of positions\n• Food appears at random locations\n• Arrow keys change the snake's direction\n• Spacebar starts a new game\n• The snake grows when it eats food!\n\n💡 Game Tips:\n• unshift() adds to the front of an array\n• pop() removes from the end of an array\n• Math.floor(Math.random() * 20) gives a random number from 0 to 19\n• The snake moves by adding a new head and removing the tail\n\n🌟 Your Final Challenge:\nYou're building a real game! Try adding a score display, making the snake faster as it grows, or adding obstacles. You've become a true game developer!",
-        starterCode: `// Let's build Snake!
-let snake = [{x: 10, y: 10}];
-let direction = {x: 0, y: 0};
-let food = {x: 15, y: 15};
-let gameRunning = false;
+        description: "Build a complete game using everything you've learned",
+        content: "Let's build a classic Snake game! This combines variables, loops, arrays, and keyboard controls.\n\n🐍 Game Rules:\n• Use arrow keys to move the snake\n• Eat the red food to grow\n• Don't hit the walls or yourself\n• Press spacebar to restart if you lose\n\n🌟 Your Challenge:\nOnce you understand how it works, try changing the colors, speed, or game size!",
+        starterCode: `// Snake Game!
+let snake = [{x: 200, y: 200}];
+let direction = 'right';
+let food = {x: 150, y: 150};
+let gameOver = false;
 
-function drawGame() {
+// Game loop
+setInterval(() => {
+    if (gameOver) return;
+    
+    // Move snake
+    let head = {...snake[0]};
+    if (direction === 'up') head.y -= 20;
+    if (direction === 'down') head.y += 20;
+    if (direction === 'left') head.x -= 20;
+    if (direction === 'right') head.x += 20;
+    
+    // Check walls
+    if (head.x < 0 || head.x >= 400 || head.y < 0 || head.y >= 400) {
+        gameOver = true;
+        return;
+    }
+    
+    // Check self collision
+    for (let segment of snake) {
+        if (head.x === segment.x && head.y === segment.y) {
+            gameOver = true;
+            return;
+        }
+    }
+    
+    snake.unshift(head);
+    
+    // Check food
+    if (head.x === food.x && head.y === food.y) {
+        food = {
+            x: Math.floor(Math.random() * 20) * 20,
+            y: Math.floor(Math.random() * 20) * 20
+        };
+    } else {
+        snake.pop();
+    }
+    
+    // Draw everything
     clearCanvas();
     
     // Draw snake
-    for (let i = 0; i < snake.length; i++) {
-        let segment = snake[i];
-        let color = i === 0 ? 'darkgreen' : 'green';
-        drawRect(segment.x * 20, segment.y * 20, 18, 18, color);
+    for (let segment of snake) {
+        drawRect(segment.x, segment.y, 20, 20, 'green');
     }
     
     // Draw food
-    drawCircle(food.x * 20 + 10, food.y * 20 + 10, 8, 'red');
+    drawRect(food.x, food.y, 20, 20, 'red');
     
-    // Draw instructions
-    if (!gameRunning) {
-        drawText(120, 50, 'Press SPACE to start!', 'black');
-        drawText(140, 350, 'Use arrow keys to move', 'black');
-    } else {
-        drawText(10, 30, 'Length: ' + snake.length, 'black');
+    if (gameOver) {
+        drawText(150, 200, 'Game Over!', 'black');
+        drawText(120, 230, 'Press Space to Restart', 'black');
     }
-}
+}, 200);
 
-function moveSnake() {
-    if (!gameRunning) return;
-    
-    let head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
-    
-    // Check if snake ate food
-    if (head.x === food.x && head.y === food.y) {
-        food = {x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20)};
-    } else {
-        snake.pop(); // Remove tail
-    }
-    
-    snake.unshift(head); // Add new head
-    drawGame();
-}
-
-// Arrow key controls
-onArrowKeys(function(dir) {
-    if (!gameRunning) return;
-    if (dir === 'up' && direction.y !== 1) direction = {x: 0, y: -1};
-    if (dir === 'down' && direction.y !== -1) direction = {x: 0, y: 1};
-    if (dir === 'left' && direction.x !== 1) direction = {x: -1, y: 0};
-    if (dir === 'right' && direction.x !== -1) direction = {x: 1, y: 0};
+// Controls
+onArrowKeys((dir) => {
+    if (dir === 'up' && direction !== 'down') direction = 'up';
+    if (dir === 'down' && direction !== 'up') direction = 'down';
+    if (dir === 'left' && direction !== 'right') direction = 'left';
+    if (dir === 'right' && direction !== 'left') direction = 'right';
 });
 
-// Spacebar to start
-onSpaceBar(function() {
-    snake = [{x: 10, y: 10}];
-    direction = {x: 0, y: 0};
-    gameRunning = true;
-    drawGame();
-});
-
-// Start game loop
-setInterval(moveSnake, 200);
-drawGame();`,
+onSpaceBar(() => {
+    if (gameOver) {
+        snake = [{x: 200, y: 200}];
+        direction = 'right';
+        food = {x: 150, y: 150};
+        gameOver = false;
+    }
+});`,
         expectedOutput: "A playable Snake game with arrow key controls",
-        order: 12,
+        order: 6,
+        isLocked: true
+      },
+
+      // Array Methods Course (courseId: 2)
+      {
+        courseId: 2,
+        title: "Introduction to Arrays",
+        description: "Learn what arrays are and how to use them",
+        content: "Arrays are like lists that can hold multiple items. Instead of having separate variables for each item, you can store them all in one place!\n\n🔍 What You'll Learn:\n• How to create arrays\n• How to access items in arrays\n• Why arrays are useful for organizing data\n\n🌟 Your Challenge:\nTry creating your own array with different items. Use printData() to see what's inside!",
+        starterCode: `// Let's create our first array!
+let fruits = ['apple', 'banana', 'orange', 'grape'];
+
+// Print the whole array
+printData(fruits);
+
+// Access individual items (arrays start counting from 0!)
+printData(fruits[0]); // First item
+printData(fruits[2]); // Third item
+
+// Check how many items we have
+printData(fruits.length);`,
+        expectedOutput: "Array contents and individual items displayed",
+        order: 1,
+        isLocked: false
+      },
+      {
+        courseId: 2,
+        title: "forEach - Do Something with Each Item",
+        description: "Loop through arrays the easy way",
+        content: "forEach is like a magic loop that goes through each item in your array automatically!\n\n🔍 What You'll Learn:\n• How forEach works\n• How to access each item and its position\n• Why forEach is better than regular for loops for arrays\n\n🌟 Your Challenge:\nTry using forEach with your own array. Maybe an array of your favorite colors or numbers!",
+        starterCode: `// Let's use forEach to go through an array!
+let numbers = [2, 4, 6, 8, 10];
+
+printData('Original array:');
+printData(numbers);
+
+printData('Each number doubled:');
+numbers.forEach((number, index) => {
+    let doubled = number * 2;
+    printData(\`Position \${index}: \${number} doubled is \${doubled}\`);
+});
+
+// Let's try with names
+let names = ['Alice', 'Bob', 'Charlie'];
+printData('Greeting each person:');
+names.forEach((name) => {
+    printData(\`Hello, \${name}!\`);
+});`,
+        expectedOutput: "Each array item processed and displayed",
+        order: 2,
         isLocked: true
       },
       {
-        title: "Your Own Game!",
-        description: "Build something awesome",
-        content: "Congratulations! You've learned so much! Now let's create your very own interactive game or art project!\n\n💡 Programming Power: You now know variables, if/else statements, functions, loops, arrays, keyboard input, and game logic. You're a real programmer! These are the same tools that professional game developers use.\n\n🌟 Your Final Challenge:\nCreate anything you want! Here are some ideas:\n• A drawing app that responds to keys\n• A simple platformer game\n• An interactive art piece\n• Your own version of a classic game\n• Something completely new that no one has thought of!\n\nThe only limit is your imagination. Show the world what you can create!",
-        starterCode: `// Your creative playground! Build anything you want!
-// Here's a simple starting point, but feel free to delete it all and start fresh
+        courseId: 2,
+        title: "map - Transform Each Item",
+        description: "Create a new array by changing each item",
+        content: "map is like a factory that takes each item in your array, transforms it, and creates a new array with the results!\n\n🔍 What You'll Learn:\n• How map transforms arrays\n• The difference between map and forEach\n• How to create new arrays from existing ones\n\n🌟 Your Challenge:\nTry mapping numbers to their squares, or words to their lengths!",
+        starterCode: `// Let's transform an array with map!
+let numbers = [1, 2, 3, 4, 5];
 
-let playerX = 200;
-let playerY = 200;
-let playerColor = 'blue';
+printData('Original numbers:');
+printData(numbers);
 
-function drawPlayer() {
-    clearCanvas();
-    drawRect(playerX, playerY, 30, 30, playerColor);
-    drawText(150, 50, 'This is YOUR creation!', 'black');
-    drawText(120, 350, 'What will you build today?', 'purple');
+// Create a new array with each number squared
+let squared = numbers.map(number => number * number);
+printData('Squared numbers:');
+printData(squared);
+
+// Let's try with words
+let words = ['cat', 'dog', 'elephant', 'ant'];
+printData('Original words:');
+printData(words);
+
+// Create a new array with word lengths
+let lengths = words.map(word => word.length);
+printData('Word lengths:');
+printData(lengths);
+
+// Make them all uppercase
+let uppercase = words.map(word => word.toUpperCase());
+printData('Uppercase words:');
+printData(uppercase);`,
+        expectedOutput: "Original and transformed arrays displayed",
+        order: 3,
+        isLocked: true
+      },
+      {
+        courseId: 2,
+        title: "filter - Keep Only Some Items",
+        description: "Create a new array with only the items you want",
+        content: "filter is like a gatekeeper that only lets certain items through to create a new array!\n\n🔍 What You'll Learn:\n• How filter selects items\n• How to write conditions for filtering\n• Creating subsets of your data\n\n🌟 Your Challenge:\nTry filtering for your favorite items, or numbers that meet certain conditions!",
+        starterCode: `// Let's filter an array!
+let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+printData('All numbers:');
+printData(numbers);
+
+// Keep only even numbers
+let evenNumbers = numbers.filter(number => number % 2 === 0);
+printData('Even numbers only:');
+printData(evenNumbers);
+
+// Keep only numbers greater than 5
+let bigNumbers = numbers.filter(number => number > 5);
+printData('Numbers greater than 5:');
+printData(bigNumbers);
+
+// Let's try with words
+let animals = ['cat', 'dog', 'elephant', 'ant', 'bear'];
+printData('All animals:');
+printData(animals);
+
+// Keep only animals with more than 3 letters
+let longNames = animals.filter(animal => animal.length > 3);
+printData('Animals with long names:');
+printData(longNames);`,
+        expectedOutput: "Original array and filtered results displayed",
+        order: 4,
+        isLocked: true
+      },
+      {
+        courseId: 2,
+        title: "reduce - Combine All Items",
+        description: "Combine all array items into a single value",
+        content: "reduce is like a blender that combines all your array items into one result!\n\n🔍 What You'll Learn:\n• How reduce combines items\n• How to use an accumulator\n• Common reduce patterns\n\n🌟 Your Challenge:\nTry using reduce to find the longest word, or to count how many times each item appears!",
+        starterCode: `// Let's use reduce to combine things!
+let numbers = [1, 2, 3, 4, 5];
+
+printData('Numbers to add:');
+printData(numbers);
+
+// Add all numbers together
+let sum = numbers.reduce((total, number) => total + number, 0);
+printData('Sum of all numbers:');
+printData(sum);
+
+// Find the largest number
+let largest = numbers.reduce((biggest, number) => {
+    return number > biggest ? number : biggest;
+}, numbers[0]);
+printData('Largest number:');
+printData(largest);
+
+// Let's try with words
+let words = ['Hello', 'world', 'this', 'is', 'awesome'];
+printData('Words to combine:');
+printData(words);
+
+// Combine all words into one sentence
+let sentence = words.reduce((text, word) => text + ' ' + word, '');
+printData('Combined sentence:');
+printData(sentence);`,
+        expectedOutput: "Various combinations and calculations displayed",
+        order: 5,
+        isLocked: true
+      },
+
+      // DOM Manipulation Course (courseId: 3)
+      {
+        courseId: 3,
+        title: "Finding Elements",
+        description: "Learn to find and select HTML elements",
+        content: "The DOM (Document Object Model) is like a map of your webpage. You can find any element and change it!\n\n🔍 What You'll Learn:\n• How to find elements by ID, class, and tag\n• The difference between querySelector and querySelectorAll\n• How to check if elements exist\n\n🌟 Your Challenge:\nTry finding different elements and changing their text!",
+        starterCode: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Finding Elements</title>
+</head>
+<body>
+    <h1 id="title">Welcome to DOM Manipulation!</h1>
+    <p class="text">This is a paragraph.</p>
+    <p class="text">This is another paragraph.</p>
+    <button id="myButton">Click me!</button>
+    <div id="output"></div>
+
+    <script>
+        // Find element by ID
+        let title = document.getElementById('title');
+        console.log('Found title:', title.textContent);
+
+        // Find element by class (gets the first one)
+        let firstParagraph = document.querySelector('.text');
+        console.log('First paragraph:', firstParagraph.textContent);
+
+        // Find all elements by class
+        let allParagraphs = document.querySelectorAll('.text');
+        console.log('Number of paragraphs:', allParagraphs.length);
+
+        // Change some text
+        title.textContent = 'I changed the title!';
+        firstParagraph.textContent = 'I changed this paragraph!';
+
+        // Change the output div
+        let output = document.getElementById('output');
+        output.innerHTML = '<p>I added this with JavaScript!</p>';
+    </script>
+</body>
+</html>`,
+        expectedOutput: "A webpage with modified elements",
+        order: 1,
+        isLocked: false
+      },
+      {
+        courseId: 3,
+        title: "Changing Styles",
+        description: "Make your webpage look different with JavaScript",
+        content: "You can change how elements look using JavaScript! Change colors, sizes, positions, and more.\n\n🔍 What You'll Learn:\n• How to change CSS properties with JavaScript\n• How to add and remove CSS classes\n• How to create visual effects\n\n🌟 Your Challenge:\nTry changing different style properties and see what happens!",
+        starterCode: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Changing Styles</title>
+    <style>
+        .highlight { background-color: yellow; }
+        .big-text { font-size: 24px; }
+        .colorful { color: rainbow; }
+    </style>
+</head>
+<body>
+    <h1 id="title">Style Me!</h1>
+    <p id="text">This text will change styles.</p>
+    <button id="colorBtn">Change Colors</button>
+    <button id="sizeBtn">Change Size</button>
+    <div id="box" style="width: 100px; height: 100px; background: blue;"></div>
+
+    <script>
+        let title = document.getElementById('title');
+        let text = document.getElementById('text');
+        let box = document.getElementById('box');
+
+        // Change styles directly
+        title.style.color = 'red';
+        title.style.fontSize = '36px';
+
+        // Add a CSS class
+        text.classList.add('highlight');
+
+        // Button to change colors
+        document.getElementById('colorBtn').addEventListener('click', () => {
+            box.style.backgroundColor = 'green';
+            title.style.color = 'purple';
+        });
+
+        // Button to change size
+        document.getElementById('sizeBtn').addEventListener('click', () => {
+            text.classList.add('big-text');
+            box.style.width = '200px';
+            box.style.height = '200px';
+        });
+
+        // Make the box move
+        let position = 0;
+        setInterval(() => {
+            position += 1;
+            box.style.marginLeft = position + 'px';
+            if (position > 100) position = 0;
+        }, 50);
+    </script>
+</body>
+</html>`,
+        expectedOutput: "A webpage with changing colors, sizes, and animations",
+        order: 2,
+        isLocked: true
+      },
+      {
+        courseId: 3,
+        title: "Creating New Elements",
+        description: "Add new HTML elements with JavaScript",
+        content: "You can create brand new HTML elements and add them to your page!\n\n🔍 What You'll Learn:\n• How to create new elements\n• How to add them to the page\n• How to remove elements\n\n🌟 Your Challenge:\nTry creating different types of elements and adding them in different places!",
+        starterCode: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Creating Elements</title>
+</head>
+<body>
+    <h1>Element Creator</h1>
+    <button id="addBtn">Add Paragraph</button>
+    <button id="addListBtn">Add List Item</button>
+    <button id="clearBtn">Clear All</button>
+    <div id="container"></div>
+    <ul id="list"></ul>
+
+    <script>
+        let container = document.getElementById('container');
+        let list = document.getElementById('list');
+        let counter = 1;
+
+        // Add paragraph button
+        document.getElementById('addBtn').addEventListener('click', () => {
+            // Create new paragraph element
+            let newParagraph = document.createElement('p');
+            newParagraph.textContent = \`This is paragraph number \${counter}\`;
+            newParagraph.style.color = 'blue';
+            
+            // Add it to the container
+            container.appendChild(newParagraph);
+            counter++;
+        });
+
+        // Add list item button
+        document.getElementById('addListBtn').addEventListener('click', () => {
+            let newListItem = document.createElement('li');
+            newListItem.textContent = \`List item \${counter}\`;
+            list.appendChild(newListItem);
+            counter++;
+        });
+
+        // Clear all button
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            container.innerHTML = '';
+            list.innerHTML = '';
+            counter = 1;
+        });
+
+        // Create some elements automatically
+        for (let i = 1; i <= 3; i++) {
+            let div = document.createElement('div');
+            div.textContent = \`Auto-created div \${i}\`;
+            div.style.backgroundColor = 'lightblue';
+            div.style.margin = '5px';
+            div.style.padding = '10px';
+            container.appendChild(div);
+        }
+    </script>
+</body>
+</html>`,
+        expectedOutput: "A webpage where you can create and remove elements",
+        order: 3,
+        isLocked: true
+      },
+      {
+        courseId: 3,
+        title: "Working with Forms",
+        description: "Get input from users with forms",
+        content: "Forms let users type information and interact with your webpage!\n\n🔍 What You'll Learn:\n• How to get values from input fields\n• How to respond to form submissions\n• How to validate user input\n\n🌟 Your Challenge:\nTry adding more form fields and creating a more complex form!",
+        starterCode: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Working with Forms</title>
+</head>
+<body>
+    <h1>User Information Form</h1>
+    
+    <form id="userForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required>
+        <br><br>
+        
+        <label for="age">Age:</label>
+        <input type="number" id="age" min="1" max="120">
+        <br><br>
+        
+        <label for="color">Favorite Color:</label>
+        <select id="color">
+            <option value="red">Red</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="yellow">Yellow</option>
+        </select>
+        <br><br>
+        
+        <button type="submit">Submit</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script>
+        let form = document.getElementById('userForm');
+        let result = document.getElementById('result');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Don't reload the page
+            
+            // Get values from form
+            let name = document.getElementById('name').value;
+            let age = document.getElementById('age').value;
+            let color = document.getElementById('color').value;
+            
+            // Validate input
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            if (!age || age < 1) {
+                alert('Please enter a valid age!');
+                return;
+            }
+            
+            // Display result
+            result.innerHTML = \`
+                <h2>Hello, \${name}!</h2>
+                <p>You are \${age} years old.</p>
+                <p>Your favorite color is <span style="color: \${color};">\${color}</span>.</p>
+            \`;
+            
+            // Change page background to their favorite color
+            document.body.style.backgroundColor = color;
+            
+            // Clear form
+            form.reset();
+        });
+
+        // Live preview as they type
+        document.getElementById('name').addEventListener('input', (event) => {
+            let preview = document.getElementById('preview');
+            if (!preview) {
+                preview = document.createElement('p');
+                preview.id = 'preview';
+                preview.style.fontStyle = 'italic';
+                form.appendChild(preview);
+            }
+            preview.textContent = event.target.value ? \`Hello, \${event.target.value}!\` : '';
+        });
+    </script>
+</body>
+</html>`,
+        expectedOutput: "A working form that collects and displays user information",
+        order: 4,
+        isLocked: true
+      },
+
+      // Algorithms Course (courseId: 4)
+      {
+        courseId: 4,
+        title: "What Are Algorithms?",
+        description: "Learn what algorithms are and why they're important",
+        content: "An algorithm is like a recipe - it's a set of steps to solve a problem!\n\n🔍 What You'll Learn:\n• What algorithms are\n• How to break down problems into steps\n• Why algorithms are everywhere\n\n🌟 Your Challenge:\nTry creating your own algorithm to solve a simple problem!",
+        starterCode: `// Let's create a simple algorithm!
+
+// Algorithm: Find the largest number in an array
+function findLargest(numbers) {
+    let largest = numbers[0]; // Start with the first number
+    
+    for (let i = 1; i < numbers.length; i++) {
+        if (numbers[i] > largest) {
+            largest = numbers[i];
+        }
+    }
+    
+    return largest;
 }
 
-// Your controls
-onArrowKeys(function(direction) {
-    if (direction === 'up') playerY -= 10;
-    if (direction === 'down') playerY += 10;
-    if (direction === 'left') playerX -= 10;
-    if (direction === 'right') playerX += 10;
-    drawPlayer();
-});
+// Test our algorithm
+let testNumbers = [3, 7, 2, 9, 1, 5];
+printData('Numbers to search:');
+printData(testNumbers);
 
-onSpaceBar(function() {
-    // What happens when you press space? You decide!
-    playerColor = playerColor === 'blue' ? 'red' : 'blue';
-    drawPlayer();
-});
+let result = findLargest(testNumbers);
+printData('Largest number found:');
+printData(result);
 
-// Start your creation
-drawPlayer();`,
-        expectedOutput: "Your own creative masterpiece",
-        order: 13,
+// Algorithm: Check if a word is a palindrome
+function isPalindrome(word) {
+    let reversed = word.split('').reverse().join('');
+    return word.toLowerCase() === reversed.toLowerCase();
+}
+
+// Test palindrome algorithm
+let testWords = ['racecar', 'hello', 'madam', 'javascript'];
+printData('Testing palindromes:');
+testWords.forEach(word => {
+    let result = isPalindrome(word);
+    printData(\`"\${word}" is \${result ? 'a palindrome' : 'not a palindrome'}\`);
+});`,
+        expectedOutput: "Algorithm results for finding largest number and checking palindromes",
+        order: 1,
+        isLocked: false
+      },
+      {
+        courseId: 4,
+        title: "Searching Algorithms",
+        description: "Learn different ways to find things in lists",
+        content: "There are many ways to search for items in a list. Let's explore the most common ones!\n\n🔍 What You'll Learn:\n• Linear search (checking each item one by one)\n• Binary search (for sorted lists)\n• When to use each method\n\n🌟 Your Challenge:\nTry searching for different items and see how many steps each algorithm takes!",
+        starterCode: `// Linear Search - Check each item one by one
+function linearSearch(array, target) {
+    let steps = 0;
+    for (let i = 0; i < array.length; i++) {
+        steps++;
+        if (array[i] === target) {
+            return { found: true, index: i, steps: steps };
+        }
+    }
+    return { found: false, index: -1, steps: steps };
+}
+
+// Binary Search - For sorted arrays only!
+function binarySearch(array, target) {
+    let left = 0;
+    let right = array.length - 1;
+    let steps = 0;
+    
+    while (left <= right) {
+        steps++;
+        let middle = Math.floor((left + right) / 2);
+        
+        if (array[middle] === target) {
+            return { found: true, index: middle, steps: steps };
+        } else if (array[middle] < target) {
+            left = middle + 1;
+        } else {
+            right = middle - 1;
+        }
+    }
+    
+    return { found: false, index: -1, steps: steps };
+}
+
+// Test both algorithms
+let numbers = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
+let target = 13;
+
+printData('Searching for:', target);
+printData('In array:', numbers);
+
+let linearResult = linearSearch(numbers, target);
+printData('Linear search result:');
+printData(linearResult);
+
+let binaryResult = binarySearch(numbers, target);
+printData('Binary search result:');
+printData(binaryResult);
+
+printData(\`Binary search was \${linearResult.steps - binaryResult.steps} steps faster!\`);`,
+        expectedOutput: "Comparison of linear and binary search algorithms",
+        order: 2,
         isLocked: true
-      }
+      },
+      {
+        courseId: 4,
+        title: "Sorting Algorithms",
+        description: "Learn how to put things in order",
+        content: "Sorting is putting things in order - like organizing your toys by size or alphabetically!\n\n🔍 What You'll Learn:\n• Bubble sort (compare neighbors)\n• Selection sort (find the smallest)\n• How different sorting methods work\n\n🌟 Your Challenge:\nTry sorting different types of data - numbers, words, or even custom objects!",
+        starterCode: `// Bubble Sort - Compare neighbors and swap if needed
+function bubbleSort(array) {
+    let arr = [...array]; // Make a copy
+    let steps = 0;
+    
+    for (let i = 0; i < arr.length; i++) {
+        for (let j = 0; j < arr.length - i - 1; j++) {
+            steps++;
+            if (arr[j] > arr[j + 1]) {
+                // Swap elements
+                let temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+    
+    return { sorted: arr, steps: steps };
+}
+
+// Selection Sort - Find the smallest and put it first
+function selectionSort(array) {
+    let arr = [...array]; // Make a copy
+    let steps = 0;
+    
+    for (let i = 0; i < arr.length; i++) {
+        let minIndex = i;
+        
+        for (let j = i + 1; j < arr.length; j++) {
+            steps++;
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j;
+            }
+        }
+        
+        // Swap if needed
+        if (minIndex !== i) {
+            let temp = arr[i];
+            arr[i] = arr[minIndex];
+            arr[minIndex] = temp;
+        }
+    }
+    
+    return { sorted: arr, steps: steps };
+}
+
+// Test both sorting algorithms
+let unsortedNumbers = [64, 34, 25, 12, 22, 11, 90];
+printData('Original array:');
+printData(unsortedNumbers);
+
+let bubbleResult = bubbleSort(unsortedNumbers);
+printData('Bubble sort result:');
+printData(bubbleResult);
+
+let selectionResult = selectionSort(unsortedNumbers);
+printData('Selection sort result:');
+printData(selectionResult);
+
+// Sort words alphabetically
+let words = ['banana', 'apple', 'cherry', 'date'];
+printData('Sorting words:');
+printData(words);
+printData('Sorted words:');
+printData(bubbleSort(words).sorted);`,
+        expectedOutput: "Comparison of bubble sort and selection sort algorithms",
+        order: 3,
+        isLocked: true
+      },
+      {
+        courseId: 4,
+        title: "Introduction to Recursion",
+        description: "Learn how functions can call themselves",
+        content: "Recursion is when a function calls itself! It's like looking in a mirror that reflects another mirror.\n\n🔍 What You'll Learn:\n• What recursion is\n• How to write recursive functions\n• When recursion is useful\n\n🌟 Your Challenge:\nTry writing your own recursive function to solve a problem!",
+        starterCode: `// Recursive function to calculate factorial
+// 5! = 5 × 4 × 3 × 2 × 1 = 120
+function factorial(n) {
+    printData(\`Calculating factorial of \${n}\`);
+    
+    // Base case - when to stop
+    if (n === 0 || n === 1) {
+        printData(\`Base case: \${n}! = 1\`);
+        return 1;
+    }
+    
+    // Recursive case - function calls itself
+    let result = n * factorial(n - 1);
+    printData(\`\${n}! = \${n} × \${n-1}! = \${result}\`);
+    return result;
+}
+
+// Test factorial
+printData('Computing 5!:');
+let fact5 = factorial(5);
+printData('Final result:', fact5);
+
+printData('---');
+
+// Recursive function to sum numbers from 1 to n
+function sumUpTo(n) {
+    if (n === 1) {
+        printData('Base case: sum up to 1 = 1');
+        return 1;
+    }
+    
+    let result = n + sumUpTo(n - 1);
+    printData(\`Sum up to \${n} = \${n} + sum up to \${n-1} = \${result}\`);
+    return result;
+}
+
+printData('Computing sum from 1 to 5:');
+let sum = sumUpTo(5);
+printData('Final sum:', sum);
+
+printData('---');
+
+// Fibonacci sequence using recursion
+function fibonacci(n) {
+    if (n <= 1) {
+        return n;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+printData('First 10 Fibonacci numbers:');
+for (let i = 0; i < 10; i++) {
+    printData(\`F(\${i}) = \${fibonacci(i)}\`);
+}`,
+        expectedOutput: "Step-by-step recursive calculations for factorial, sum, and Fibonacci",
+        order: 4,
+        isLocked: true
+      },
+      {
+        courseId: 4,
+        title: "Problem Solving Strategies",
+        description: "Learn how to approach complex problems",
+        content: "Breaking down big problems into smaller ones is the key to solving anything!\n\n🔍 What You'll Learn:\n• Divide and conquer approach\n• How to identify patterns\n• Step-by-step problem solving\n\n🌟 Your Challenge:\nTry solving a complex problem by breaking it down into smaller parts!",
+        starterCode: `// Problem: Find all anagrams of a word
+// An anagram is a word made by rearranging letters of another word
+
+// Step 1: Generate all permutations of a word
+function getPermutations(str) {
+    if (str.length <= 1) {
+        return [str];
+    }
+    
+    let permutations = [];
+    for (let i = 0; i < str.length; i++) {
+        let char = str[i];
+        let remainingChars = str.slice(0, i) + str.slice(i + 1);
+        let remainingPermutations = getPermutations(remainingChars);
+        
+        for (let perm of remainingPermutations) {
+            permutations.push(char + perm);
+        }
+    }
+    
+    return permutations;
+}
+
+// Step 2: Check if permutations are real words
+function findAnagrams(word, dictionary) {
+    let permutations = getPermutations(word.toLowerCase());
+    let anagrams = [];
+    
+    for (let perm of permutations) {
+        if (dictionary.includes(perm) && perm !== word.toLowerCase()) {
+            anagrams.push(perm);
+        }
+    }
+    
+    return [...new Set(anagrams)]; // Remove duplicates
+}
+
+// Test our anagram finder
+let testWord = 'cat';
+let simpleDictionary = ['act', 'tac', 'bat', 'tab', 'cat', 'dog'];
+
+printData(\`Finding anagrams of "\${testWord}":\`);
+printData('All permutations:');
+printData(getPermutations(testWord));
+
+printData('Valid anagrams:');
+printData(findAnagrams(testWord, simpleDictionary));
+
+printData('---');
+
+// Problem: Find the shortest path in a simple grid
+function findShortestPath(grid, start, end) {
+    let queue = [{pos: start, path: [start]}];
+    let visited = new Set();
+    visited.add(\`\${start[0]},\${start[1]}\`);
+    
+    let directions = [[0,1], [1,0], [0,-1], [-1,0]]; // right, down, left, up
+    
+    while (queue.length > 0) {
+        let {pos, path} = queue.shift();
+        let [x, y] = pos;
+        
+        if (x === end[0] && y === end[1]) {
+            return path;
+        }
+        
+        for (let [dx, dy] of directions) {
+            let newX = x + dx;
+            let newY = y + dy;
+            let newPos = [newX, newY];
+            let posKey = \`\${newX},\${newY}\`;
+            
+            if (newX >= 0 && newX < grid.length && 
+                newY >= 0 && newY < grid[0].length && 
+                grid[newX][newY] === 0 && 
+                !visited.has(posKey)) {
+                
+                visited.add(posKey);
+                queue.push({pos: newPos, path: [...path, newPos]});
+            }
+        }
+    }
+    
+    return null; // No path found
+}
+
+// Test pathfinding
+let grid = [
+    [0, 0, 1, 0],
+    [0, 1, 0, 0],
+    [0, 0, 0, 1],
+    [1, 0, 0, 0]
+];
+
+printData('Grid (0 = walkable, 1 = wall):');
+printData(grid);
+
+let path = findShortestPath(grid, [0, 0], [3, 3]);
+printData('Shortest path from [0,0] to [3,3]:');
+printData(path);`,
+        expectedOutput: "Solutions to complex problems broken down into steps",
+        order: 5,
+        isLocked: true
+      },
+
+      // Remote Data Course (courseId: 5)
+      {
+        courseId: 5,
+        title: "What is Remote Data?",
+        description: "Learn about APIs and fetching data from servers",
+        content: "Remote data means getting information from other computers on the internet!\n\n🔍 What You'll Learn:\n• What APIs are\n• How data travels over the internet\n• Why we need remote data\n\n🌟 Your Challenge:\nTry making your first API request and see what data you get back!",
+        starterCode: `// Let's fetch some data from a server!
+// We'll use a test API that returns fake data
+
+async function fetchUserData() {
+    try {
+        printData('Fetching user data...');
+        
+        // Make a request to get user information
+        let response = await fetch('/api/test-data/user');
+        
+        if (response.ok) {
+            let userData = await response.json();
+            printData('User data received:');
+            printData(userData);
+        } else {
+            printData('Error: Could not fetch user data');
+            printData('Status:', response.status);
+        }
+    } catch (error) {
+        printData('Network error:', error.message);
+    }
+}
+
+async function fetchPostList() {
+    try {
+        printData('Fetching blog posts...');
+        
+        let response = await fetch('/api/test-data/posts');
+        
+        if (response.ok) {
+            let posts = await response.json();
+            printData('Blog posts received:');
+            printData(posts);
+            
+            // Let's display just the titles
+            printData('Post titles:');
+            posts.forEach((post, index) => {
+                printData(\`\${index + 1}. \${post.title}\`);
+            });
+        } else {
+            printData('Error fetching posts');
+        }
+    } catch (error) {
+        printData('Error:', error.message);
+    }
+}
+
+// Make the requests
+fetchUserData();
+fetchPostList();
+
+printData('---');
+printData('Requests sent! Waiting for responses...');`,
+        expectedOutput: "Data fetched from remote APIs displayed",
+        order: 1,
+        isLocked: false
+      },
+      {
+        courseId: 5,
+        title: "GET Requests",
+        description: "Learn to retrieve data from servers",
+        content: "GET requests are how we ask servers for information, like asking a librarian for a book!\n\n🔍 What You'll Learn:\n• How to make GET requests\n• How to handle different response formats\n• Error handling for network requests\n\n🌟 Your Challenge:\nTry fetching different types of data and see how the format changes!",
+        starterCode: `// Different types of GET requests
+
+// 1. Get a single item by ID
+async function getUserById(id) {
+    try {
+        printData(\`Getting user with ID: \${id}\`);
+        
+        let response = await fetch(\`/api/test-data/user/\${id}\`);
+        
+        if (response.ok) {
+            let user = await response.json();
+            printData('User found:');
+            printData(user);
+        } else if (response.status === 404) {
+            printData('User not found!');
+        } else {
+            printData('Error:', response.status);
+        }
+    } catch (error) {
+        printData('Network error:', error.message);
+    }
+}
+
+// 2. Get a list with query parameters
+async function searchPosts(query) {
+    try {
+        printData(\`Searching for posts about: \${query}\`);
+        
+        let response = await fetch(\`/api/test-data/posts/search?q=\${query}\`);
+        
+        if (response.ok) {
+            let results = await response.json();
+            printData('Search results:');
+            printData(results);
+            
+            if (results.length === 0) {
+                printData('No posts found matching your search.');
+            }
+        } else {
+            printData('Search failed:', response.status);
+        }
+    } catch (error) {
+        printData('Error:', error.message);
+    }
+}
+
+// 3. Get data with headers
+async function getProtectedData() {
+    try {
+        printData('Getting protected data...');
+        
+        let response = await fetch('/api/test-data/protected', {
+            headers: {
+                'Authorization': 'Bearer demo-token',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            let data = await response.json();
+            printData('Protected data:');
+            printData(data);
+        } else if (response.status === 401) {
+            printData('Unauthorized: Need valid token');
+        } else {
+            printData('Error:', response.status);
+        }
+    } catch (error) {
+        printData('Error:', error.message);
+    }
+}
+
+// Test all different GET requests
+getUserById(1);
+getUserById(999); // This should give a 404 error
+searchPosts('javascript');
+getProtectedData();
+
+printData('All GET requests sent!');`,
+        expectedOutput: "Various GET requests with different responses and error handling",
+        order: 2,
+        isLocked: true
+      },
+      {
+        courseId: 5,
+        title: "POST Requests",
+        description: "Learn to send data to servers",
+        content: "POST requests let us send information to servers, like filling out a form!\n\n🔍 What You'll Learn:\n• How to send data with POST requests\n• Different data formats (JSON, form data)\n• Handling server responses\n\n🌟 Your Challenge:\nTry creating different types of data and sending them to the server!",
+        starterCode: `// Different types of POST requests
+
+// 1. Create a new user
+async function createUser(userData) {
+    try {
+        printData('Creating new user...');
+        printData('Data to send:', userData);
+        
+        let response = await fetch('/api/test-data/users', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+        });
+        
+        if (response.ok) {
+            let newUser = await response.json();
+            printData('User created successfully:');
+            printData(newUser);
+        } else {
+            printData('Failed to create user:', response.status);
+        }
+    } catch (error) {
+        printData('Error:', error.message);
+    }
+}
+
+// 2. Submit a form
+async function submitContactForm(formData) {
+    try {
+        printData('Submitting contact form...');
+        printData('Form data:', formData);
+        
+        let response = await fetch('/api/test-data/contact', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            let result = await response.json();
+            printData('Form submitted successfully:');
+            printData(result);
+        } else {
+            printData('Form submission failed:', response.status);
+        }
+    } catch (error) {
+        printData('Error:', error.message);
+    }
+}
+
+// 3. Upload some data
+async function uploadData(data) {
+    try {
+        printData('Uploading data...');
+        
+        let response = await fetch('/api/test-data/upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            let result = await response.json();
+            printData('Data uploaded:');
+            printData(result);
+        } else {
+            printData('Upload failed:', response.status);
+        }
+    } catch (error) {
+        printData('Error:', error.message);
+    }
+}
+
+// Test POST requests
+createUser({
+    name: 'Alice Johnson',
+    email: 'alice@example.com',
+    age: 25
+});
+
+submitContactForm({
+    name: 'Bob Smith',
+    email: 'bob@example.com',
+    message: 'Hello from the course!'
+});
+
+uploadData({
+    type: 'learning-progress',
+    course: 'Remote Data',
+    completed: true,
+    score: 95
+});
+
+printData('All POST requests sent!');`,
+        expectedOutput: "Various POST requests sending data to the server",
+        order: 3,
+        isLocked: true
+      },
+      {
+        courseId: 5,
+        title: "Error Handling",
+        description: "Learn to handle different types of errors",
+        content: "Sometimes things go wrong when talking to servers. Let's learn how to handle errors gracefully!\n\n🔍 What You'll Learn:\n• Different types of errors (network, server, client)\n• HTTP status codes\n• How to retry failed requests\n\n🌟 Your Challenge:\nTry making requests that will fail and see how to handle them!",
+        starterCode: `// Error handling for different scenarios
+
+// 1. Network timeout
+async function fetchWithTimeout(url, timeout = 5000) {
+    try {
+        printData(\`Fetching \${url} with \${timeout}ms timeout...\`);
+        
+        let controller = new AbortController();
+        let timeoutId = setTimeout(() => controller.abort(), timeout);
+        
+        let response = await fetch(url, {
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+            let data = await response.json();
+            printData('Data received:');
+            printData(data);
+        } else {
+            printData('Server error:', response.status);
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            printData('Request timed out!');
+        } else {
+            printData('Network error:', error.message);
+        }
+    }
+}
+
+// 2. Retry mechanism
+async function fetchWithRetry(url, maxRetries = 3) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            printData(\`Attempt \${attempt} of \${maxRetries}\`);
+            
+            let response = await fetch(url);
+            
+            if (response.ok) {
+                let data = await response.json();
+                printData('Success on attempt', attempt);
+                printData(data);
+                return data;
+            } else {
+                printData(\`Attempt \${attempt} failed with status: \${response.status}\`);
+                
+                if (attempt === maxRetries) {
+                    printData('All attempts failed!');
+                }
+            }
+        } catch (error) {
+            printData(\`Attempt \${attempt} error: \${error.message}\`);
+            
+            if (attempt === maxRetries) {
+                printData('All retry attempts failed!');
+            }
+        }
+        
+        // Wait before retry (except on last attempt)
+        if (attempt < maxRetries) {
+            printData('Waiting 1 second before retry...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+}
+
+// 3. Handle different error types
+async function handleDifferentErrors() {
+    let testUrls = [
+        '/api/test-data/success',      // Should work
+        '/api/test-data/notfound',     // 404 error
+        '/api/test-data/server-error', // 500 error
+        '/api/test-data/timeout'       // Timeout error
+    ];
+    
+    for (let url of testUrls) {
+        try {
+            printData(\`Testing: \${url}\`);
+            
+            let response = await fetch(url);
+            
+            if (response.ok) {
+                let data = await response.json();
+                printData('✓ Success:', data);
+            } else {
+                // Handle specific error codes
+                switch (response.status) {
+                    case 404:
+                        printData('✗ Not Found: The resource does not exist');
+                        break;
+                    case 500:
+                        printData('✗ Server Error: Something went wrong on the server');
+                        break;
+                    case 403:
+                        printData('✗ Forbidden: You do not have permission');
+                        break;
+                    default:
+                        printData(\`✗ Error: \${response.status} - \${response.statusText}\`);
+                }
+            }
+        } catch (error) {
+            printData(\`✗ Network Error: \${error.message}\`);
+        }
+        
+        printData('---');
+    }
+}
+
+// Test all error handling
+fetchWithTimeout('/api/test-data/user', 3000);
+fetchWithRetry('/api/test-data/unreliable');
+handleDifferentErrors();`,
+        expectedOutput: "Different error scenarios and how to handle them",
+        order: 4,
+        isLocked: true
+      },
+      {
+        courseId: 5,
+        title: "Real-World API Integration",
+        description: "Put it all together with a complete example",
+        content: "Let's build a complete application that uses everything we've learned!\n\n🔍 What You'll Learn:\n• Combining GET and POST requests\n• Managing application state\n• Creating a real user interface\n\n🌟 Your Challenge:\nTry extending this example with more features!",
+        starterCode: `// A complete todo list application using remote data
+
+class TodoApp {
+    constructor() {
+        this.todos = [];
+        this.init();
+    }
+    
+    async init() {
+        printData('Starting Todo App...');
+        await this.loadTodos();
+        this.displayTodos();
+    }
+    
+    async loadTodos() {
+        try {
+            printData('Loading todos from server...');
+            
+            let response = await fetch('/api/test-data/todos');
+            
+            if (response.ok) {
+                this.todos = await response.json();
+                printData(\`Loaded \${this.todos.length} todos\`);
+            } else {
+                printData('Failed to load todos, using empty list');
+                this.todos = [];
+            }
+        } catch (error) {
+            printData('Error loading todos:', error.message);
+            this.todos = [];
+        }
+    }
+    
+    async addTodo(text) {
+        try {
+            printData(\`Adding todo: "\${text}"\`);
+            
+            let response = await fetch('/api/test-data/todos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: text,
+                    completed: false
+                })
+            });
+            
+            if (response.ok) {
+                let newTodo = await response.json();
+                this.todos.push(newTodo);
+                printData('Todo added successfully');
+                this.displayTodos();
+            } else {
+                printData('Failed to add todo');
+            }
+        } catch (error) {
+            printData('Error adding todo:', error.message);
+        }
+    }
+    
+    async toggleTodo(id) {
+        try {
+            let todo = this.todos.find(t => t.id === id);
+            if (!todo) return;
+            
+            printData(\`Toggling todo: "\${todo.text}"\`);
+            
+            let response = await fetch(\`/api/test-data/todos/\${id}\`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    completed: !todo.completed
+                })
+            });
+            
+            if (response.ok) {
+                todo.completed = !todo.completed;
+                printData('Todo updated successfully');
+                this.displayTodos();
+            } else {
+                printData('Failed to update todo');
+            }
+        } catch (error) {
+            printData('Error updating todo:', error.message);
+        }
+    }
+    
+    displayTodos() {
+        printData('=== Current Todos ===');
+        
+        if (this.todos.length === 0) {
+            printData('No todos yet! Add some tasks.');
+            return;
+        }
+        
+        this.todos.forEach((todo, index) => {
+            let status = todo.completed ? '✓' : '○';
+            printData(\`\${index + 1}. \${status} \${todo.text}\`);
+        });
+        
+        let completed = this.todos.filter(t => t.completed).length;
+        printData(\`\${completed} of \${this.todos.length} completed\`);
+    }
+    
+    getStats() {
+        let total = this.todos.length;
+        let completed = this.todos.filter(t => t.completed).length;
+        let remaining = total - completed;
+        
+        return {
+            total,
+            completed,
+            remaining,
+            completionRate: total > 0 ? Math.round((completed / total) * 100) : 0
+        };
+    }
+}
+
+// Create and use the todo app
+let app = new TodoApp();
+
+// Simulate user interactions
+setTimeout(() => {
+    app.addTodo('Learn about APIs');
+}, 1000);
+
+setTimeout(() => {
+    app.addTodo('Build a todo app');
+}, 2000);
+
+setTimeout(() => {
+    app.addTodo('Deploy to production');
+}, 3000);
+
+setTimeout(() => {
+    // Mark first todo as completed
+    if (app.todos.length > 0) {
+        app.toggleTodo(app.todos[0].id);
+    }
+}, 4000);
+
+setTimeout(() => {
+    printData('=== Final Stats ===');
+    printData(app.getStats());
+}, 5000);`,
+        expectedOutput: "A complete todo application with remote data integration",
+        order: 5,
+        isLocked: true
+      },
     ];
 
     tutorialData.forEach(tutorial => {
       const id = this.currentTutorialId++;
-      this.tutorials.set(id, { 
-        ...tutorial, 
-        id,
-        expectedOutput: tutorial.expectedOutput ?? null,
-        isLocked: tutorial.isLocked ?? false
-      });
+      this.tutorials.set(id, { ...tutorial, id });
     });
   }
 
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    for (const user of this.users.values()) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -424,19 +1623,21 @@ drawPlayer();`,
     this.users.set(id, user);
     
     // Create initial progress
-    const progressId = this.currentProgressId++;
     const progress: UserProgress = {
-      id: progressId,
+      id: this.currentProgressId++,
       userId: id,
       completedTutorials: [],
       currentTutorial: 1,
-      stars: 0
+      currentCourse: 1,
+      completedCourses: [],
+      stars: 0,
     };
     this.userProgress.set(id, progress);
     
     return user;
   }
 
+  // Progress methods
   async getUserProgress(userId: number): Promise<UserProgress | undefined> {
     return this.userProgress.get(userId);
   }
@@ -444,7 +1645,7 @@ drawPlayer();`,
   async updateUserProgress(userId: number, progress: Partial<InsertUserProgress>): Promise<UserProgress> {
     const existing = this.userProgress.get(userId);
     if (!existing) {
-      throw new Error('User progress not found');
+      throw new Error(`User progress not found for user ${userId}`);
     }
     
     const updated: UserProgress = { ...existing, ...progress };
@@ -452,8 +1653,31 @@ drawPlayer();`,
     return updated;
   }
 
+  // Course methods
+  async getAllCourses(): Promise<Course[]> {
+    return Array.from(this.courses.values()).sort((a, b) => a.order - b.order);
+  }
+
+  async getCourse(id: number): Promise<Course | undefined> {
+    return this.courses.get(id);
+  }
+
+  async createCourse(course: InsertCourse): Promise<Course> {
+    const id = this.currentCourseId++;
+    const newCourse: Course = { ...course, id };
+    this.courses.set(id, newCourse);
+    return newCourse;
+  }
+
+  // Tutorial methods
   async getAllTutorials(): Promise<Tutorial[]> {
     return Array.from(this.tutorials.values()).sort((a, b) => a.order - b.order);
+  }
+
+  async getTutorialsByCourse(courseId: number): Promise<Tutorial[]> {
+    return Array.from(this.tutorials.values())
+      .filter(t => t.courseId === courseId)
+      .sort((a, b) => a.order - b.order);
   }
 
   async getTutorial(id: number): Promise<Tutorial | undefined> {
@@ -462,12 +1686,7 @@ drawPlayer();`,
 
   async createTutorial(tutorial: InsertTutorial): Promise<Tutorial> {
     const id = this.currentTutorialId++;
-    const newTutorial: Tutorial = { 
-      ...tutorial, 
-      id,
-      expectedOutput: tutorial.expectedOutput ?? null,
-      isLocked: tutorial.isLocked ?? false
-    };
+    const newTutorial: Tutorial = { ...tutorial, id };
     this.tutorials.set(id, newTutorial);
     return newTutorial;
   }
