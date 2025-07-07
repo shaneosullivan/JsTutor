@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserSchema, insertUserProgressSchema } from "@shared/schema";
+import OpenAI from "openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get all tutorials
@@ -75,6 +76,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to execute code" });
+    }
+  });
+
+  // Initialize OpenAI client
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  // AI Assistant endpoint
+  app.post("/api/ai-chat", async (req, res) => {
+    try {
+      const { messages, tutorialId, code, isFirstMessage } = req.body;
+
+      if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ error: "Invalid messages format" });
+      }
+
+      let systemMessage = "";
+      
+      if (isFirstMessage && tutorialId) {
+        // Get tutorial context for first message
+        const tutorial = await storage.getTutorial(tutorialId);
+        if (tutorial) {
+          systemMessage = `You are a friendly AI assistant helping a 9-year-old child learn JavaScript programming. 
+
+Current Tutorial: "${tutorial.title}"
+Tutorial Description: ${tutorial.description}
+Tutorial Content: ${tutorial.content}
+Current Code: ${code || "No code yet"}
+
+The child is working on this tutorial and may need help with:
+- Understanding programming concepts in simple terms
+- Finding and explaining bugs in their code
+- Suggestions for next steps or improvements
+- Encouragement and positive feedback
+
+IMPORTANT RULES:
+1. NEVER write or fix code for the child - only explain what might be wrong and how they can fix it
+2. Use simple, encouraging language appropriate for a 9-year-old
+3. If there are bugs, explain them step by step
+4. Suggest next steps but let the child implement them
+5. Be patient and supportive
+6. Focus on learning and understanding, not just getting the "right" answer
+
+Available drawing functions they can use:
+- drawCircle(x, y, radius, color)
+- drawRect(x, y, width, height, color)  
+- drawLine(x1, y1, x2, y2, color)
+- drawText(x, y, text, color)
+- drawPixel(x, y, color)
+- clearCanvas()
+
+Canvas size is 400x400 pixels, with (0,0) at top-left corner.`;
+        }
+      }
+
+      const chatMessages = systemMessage 
+        ? [{ role: "system", content: systemMessage }, ...messages]
+        : messages;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: chatMessages,
+        max_tokens: 500,
+        temperature: 0.7,
+      });
+
+      const assistantMessage = response.choices[0].message.content;
+      
+      res.json({
+        message: assistantMessage,
+        usage: response.usage
+      });
+    } catch (error) {
+      console.error("AI chat error:", error);
+      res.status(500).json({ error: "Failed to get AI response" });
     }
   });
 

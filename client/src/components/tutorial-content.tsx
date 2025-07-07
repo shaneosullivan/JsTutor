@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import { RotateCcw, ArrowRight, Eraser, Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
+import { RotateCcw, ArrowRight, Eraser, Lightbulb, ChevronDown, ChevronUp, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import CodeEditor from "@/components/code-editor";
 import DrawingCanvas from "@/components/drawing-canvas";
+import AiChat from "@/components/ai-chat";
 import type { Tutorial } from "@shared/schema";
 
 interface TutorialContentProps {
@@ -27,6 +28,7 @@ export default function TutorialContent({
   const [isRunning, setIsRunning] = useState(false);
   const [isExplanationOpen, setIsExplanationOpen] = useState(true); // Start expanded for first-time reading
   const [hasBeenOpened, setHasBeenOpened] = useState(false);
+  const [showAiChat, setShowAiChat] = useState(false);
 
   // Reset code when tutorial changes and auto-expand explanation for new tutorials
   useEffect(() => {
@@ -34,6 +36,7 @@ export default function TutorialContent({
     setOutput([]);
     setIsExplanationOpen(true); // Auto-expand for each new tutorial
     setHasBeenOpened(false);
+    setShowAiChat(false); // Close AI chat when switching tutorials
   }, [tutorial.id, tutorial.starterCode]);
 
   // Handle explanation section open/close
@@ -214,36 +217,72 @@ export default function TutorialContent({
         <div className="w-1/2 flex flex-col bg-white border-l border-slate-200">
           {/* Canvas Header */}
           <div className="p-4 border-b border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-800">
-              <span className="text-pink-500">🎨</span> Your Drawing Canvas
-            </h3>
-            <p className="text-sm text-slate-600">Watch your code come to life!</p>
-          </div>
-
-          {/* Canvas Area */}
-          <div className="flex-1 p-6 bg-slate-50">
-            <DrawingCanvas code={code} onOutput={setOutput} />
-          </div>
-
-          {/* Output Console */}
-          <div className="bg-slate-800 p-4 border-t border-slate-700">
-            <h4 className="text-white font-medium mb-2">
-              <span className="text-green-400">📟</span> Console Output
-            </h4>
-            <div className="bg-slate-900 rounded p-3 text-sm font-mono text-green-400 h-20 overflow-y-auto">
-              {output.length > 0 ? (
-                output.map((line, i) => (
-                  <div key={i} className="mb-1">
-                    <span className="text-blue-400">&gt;</span> {line}
-                  </div>
-                ))
-              ) : (
-                <div className="text-slate-500">
-                  <span className="text-blue-400">&gt;</span> Click "Run Code" to see output here!
-                </div>
-              )}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-800">
+                  <span className="text-pink-500">🎨</span> {showAiChat ? "AI Assistant" : "Your Drawing Canvas"}
+                </h3>
+                <p className="text-sm text-slate-600">
+                  {showAiChat ? "Get help with your code!" : "Watch your code come to life!"}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowAiChat(!showAiChat)}
+                  variant={showAiChat ? "default" : "outline"}
+                  size="sm"
+                >
+                  <Bot size={16} className="mr-2" />
+                  {showAiChat ? "Show Canvas" : "Help Me"}
+                </Button>
+                {!showAiChat && (
+                  <Button
+                    onClick={handleClearCanvas}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Eraser size={16} className="mr-2" />
+                    Clear Canvas
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* Canvas Area or AI Chat */}
+          <div className="flex-1 p-6 bg-slate-50">
+            {showAiChat ? (
+              <AiChat
+                tutorialId={tutorial.id}
+                code={code}
+                onClose={() => setShowAiChat(false)}
+              />
+            ) : (
+              <DrawingCanvas code={code} onOutput={setOutput} />
+            )}
+          </div>
+
+          {/* Output Console - Only show when not using AI chat */}
+          {!showAiChat && (
+            <div className="bg-slate-800 p-4 border-t border-slate-700">
+              <h4 className="text-white font-medium mb-2">
+                <span className="text-green-400">📟</span> Console Output
+              </h4>
+              <div className="bg-slate-900 rounded p-3 text-sm font-mono text-green-400 h-20 overflow-y-auto">
+                {output.length > 0 ? (
+                  output.map((line, i) => (
+                    <div key={i} className="mb-1">
+                      <span className="text-blue-400">&gt;</span> {line}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-slate-500">
+                    <span className="text-blue-400">&gt;</span> Code output will appear here...
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
