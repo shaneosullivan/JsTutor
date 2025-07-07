@@ -63,6 +63,8 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
           ? `"${canvasError.message}" on line ${canvasError.line}`
           : `"${canvasError.message}"`;
         initialContent = `Hi! I'm having trouble with my code. I'm getting this error: ${errorText}. Can you help me understand what's wrong and how to fix it?`;
+        // Mark this error as already sent to prevent duplicate messages
+        setLastErrorSent(canvasError);
       } else {
         initialContent = "Hi! I'm working on this tutorial and could use some help. Can you look at my code and let me know if there are any bugs or suggest what I should try next?";
       }
@@ -79,7 +81,7 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
     }
   }, [hasInitialized, messages.length, apiKey, showSetup, isVisible, canvasError]);
 
-  // Send error message when chat becomes visible and there's a new error
+  // Send error message when chat becomes visible and there's a new error (but not during initialization)
   useEffect(() => {
     if (hasInitialized && isVisible && canvasError && apiKey && !showSetup && !isLoading && 
         JSON.stringify(canvasError) !== JSON.stringify(lastErrorSent)) {
