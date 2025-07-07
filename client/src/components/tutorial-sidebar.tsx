@@ -89,25 +89,32 @@ export default function TutorialSidebar({
   return (
     <div className={cn(
       "bg-white border-r border-slate-200 flex flex-col transition-all duration-300",
-      isCollapsed ? "w-16" : "w-80"
+      collapsed ? "w-16" : "w-80"
     )}>
       {/* Header */}
       <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-        {!isCollapsed && (
-          <h2 className="text-lg font-semibold text-slate-800">Learn JavaScript</h2>
+        {!collapsed && (
+          <div>
+            <h2 className="text-lg font-semibold text-slate-800">{course?.title || 'Course'}</h2>
+            {course?.description && (
+              <p className="text-sm text-slate-600 mt-1">{course.description}</p>
+            )}
+          </div>
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="p-1 h-8 w-8"
-        >
-          {isCollapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
-        </Button>
+        {onToggleCollapsed && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleCollapsed}
+            className="p-1 h-8 w-8"
+          >
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Tutorial List */}
@@ -119,13 +126,13 @@ export default function TutorialSidebar({
               onClick={() => isUnlocked(tutorial) && onTutorialSelect(tutorial)}
               className={cn(
                 getTutorialClassName(tutorial),
-                isCollapsed ? "p-3 justify-center" : "p-4 space-x-3"
+                collapsed ? "p-3 justify-center" : "p-4 space-x-3"
               )}
               disabled={!isUnlocked(tutorial)}
             >
               {getStatusIcon(tutorial)}
               
-              {!isCollapsed && (
+              {!collapsed && (
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-sm leading-tight">
                     {tutorial.title}
@@ -137,12 +144,12 @@ export default function TutorialSidebar({
               )}
 
               {/* Progress indicator for collapsed state */}
-              {isCollapsed && completedTutorials.includes(tutorial.id) && (
+              {collapsed && completedTutorials.includes(tutorial.id) && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
               )}
               
               {/* Current tutorial indicator for collapsed state */}
-              {isCollapsed && currentTutorial?.id === tutorial.id && (
+              {collapsed && currentTutorial?.id === tutorial.id && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full border-2 border-white" />
               )}
             </button>
@@ -151,7 +158,7 @@ export default function TutorialSidebar({
       </ScrollArea>
 
       {/* Footer */}
-      {!isCollapsed && (
+      {!collapsed && (
         <div className="p-4 border-t border-slate-200">
           <div className="text-center">
             <div className="text-sm text-slate-600 mb-1">Progress</div>
