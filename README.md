@@ -25,7 +25,7 @@ An interactive JavaScript learning platform designed for children, featuring han
 
 - **Node.js**: Version 18 or higher
 - **npm**: Version 8 or higher
-- **OpenAI API Key**: Required for AI assistance features
+- **OpenAI API Key**: Optional, but recommended for AI assistance features
 
 ## Environment Variables
 
@@ -48,14 +48,13 @@ NODE_ENV=development
 PORT=5000
 ```
 
-### Required Environment Variables
+### Optional Environment Variables
 
 1. **OPENAI_API_KEY**: 
    - Get from: https://platform.openai.com/api-keys
    - Used for: AI-powered coding assistance and help features
    - Note: Users can also provide their own API keys through the application interface
-
-### Optional Environment Variables
+   - If not provided, AI features will prompt users to enter their own API key
 
 2. **Database Variables**: 
    - Only needed if you want persistent data storage
