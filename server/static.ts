@@ -17,13 +17,32 @@ export function log(message: string, source = "express") {
 }
 
 export function serveStatic(app: Express) {
-  // In production, the public files are built to dist/public from project root
-  // The server runs as dist/index.js, so public files are at ./public relative to server
-  const distPath = path.resolve(__dirname, "public");
-
-  if (!fs.existsSync(distPath)) {
+  // In Vercel, try multiple possible paths for the static files
+  const possiblePaths = [
+    path.resolve(__dirname, "public"),
+    path.resolve(process.cwd(), "dist", "public"),
+    path.resolve(process.cwd(), "public"),
+    path.resolve(__dirname, "..", "public"),
+    path.resolve(__dirname, "..", "dist", "public")
+  ];
+  
+  let distPath = "";
+  for (const possiblePath of possiblePaths) {
+    if (fs.existsSync(possiblePath)) {
+      distPath = possiblePath;
+      break;
+    }
+  }
+  
+  if (!distPath) {
+    // Log available paths for debugging
+    console.log("Available directories:");
+    console.log("__dirname:", __dirname);
+    console.log("process.cwd():", process.cwd());
+    console.log("Checked paths:", possiblePaths);
+    
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find the build directory in any of: ${possiblePaths.join(", ")}`
     );
   }
 
