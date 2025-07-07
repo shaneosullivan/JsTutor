@@ -34,25 +34,21 @@ export default function TutorialContent({
 }: TutorialContentProps) {
   const [output, setOutput] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [isExplanationOpen, setIsExplanationOpen] = useState(true); // Start expanded for first-time reading
-  const [hasBeenOpened, setHasBeenOpened] = useState(false);
+  const [isExplanationOpen, setIsExplanationOpen] = useState(true);
   const [showAiChat, setShowAiChat] = useState(false);
   const [canvasError, setCanvasError] = useState<{message: string; line?: number} | null>(null);
 
-  // Reset when tutorial changes
+  // Auto-expand "What You'll Learn" when tutorial changes
   useEffect(() => {
     setOutput([]);
     setIsRunning(false);
     setCanvasError(null);
-    setIsExplanationOpen(!hasBeenOpened); // Auto-open for first time viewers
+    setIsExplanationOpen(true); // Always expand when moving to a new tutorial
     // Don't reset showAiChat here - let it persist but the AI chat will reset its own state
-  }, [tutorial.id, hasBeenOpened]);
+  }, [tutorial.id]);
 
-  // Track explanation opening
+  // Handle explanation toggle
   const handleExplanationToggle = () => {
-    if (!hasBeenOpened) {
-      setHasBeenOpened(true);
-    }
     setIsExplanationOpen(!isExplanationOpen);
   };
 
