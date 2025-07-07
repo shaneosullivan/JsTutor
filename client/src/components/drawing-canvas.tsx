@@ -18,13 +18,21 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
   const [error, setError] = useState<string | null>(null);
   const intervalsRef = useRef<number[]>([]);
   const timeoutsRef = useRef<number[]>([]);
+  const cleanupRef = useRef<{ eventListeners: Array<{ element: any; event: string; handler: any }> }>({ eventListeners: [] });
 
-  // Cleanup function to clear all intervals and timeouts
-  const cleanupTimers = () => {
+  // Cleanup function to clear all intervals, timeouts, and event listeners
+  const cleanupAll = () => {
+    // Clear intervals and timeouts
     intervalsRef.current.forEach(id => clearInterval(id));
     timeoutsRef.current.forEach(id => clearTimeout(id));
     intervalsRef.current = [];
     timeoutsRef.current = [];
+    
+    // Clear event listeners
+    cleanupRef.current.eventListeners.forEach(({ element, event, handler }) => {
+      element.removeEventListener(event, handler);
+    });
+    cleanupRef.current.eventListeners = [];
   };
 
   useEffect(() => {
@@ -34,8 +42,8 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Cleanup previous timers
-    cleanupTimers();
+    // Cleanup previous timers and event listeners
+    cleanupAll();
 
     // Set canvas size
     canvas.width = 400;
@@ -47,8 +55,8 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     try {
-      // Create canvas API
-      const canvasAPI = createCanvasAPI(ctx);
+      // Create canvas API with cleanup tracking
+      const canvasAPI = createCanvasAPI(ctx, cleanupRef.current);
       
       // Create wrapped timer functions that track their IDs
       const wrappedSetInterval = (callback: () => void, delay: number) => {
@@ -123,7 +131,7 @@ export default function DrawingCanvas({ code, onOutput, onError }: DrawingCanvas
     }
 
     // Cleanup on unmount
-    return cleanupTimers;
+    return cleanupAll;
   }, [code, onOutput]);
 
   return (

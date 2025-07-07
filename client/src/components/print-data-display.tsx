@@ -20,6 +20,16 @@ export default function PrintDataDisplay({ code, onOutput, onError }: PrintDataD
   const [outputItems, setOutputItems] = useState<OutputItem[]>([]);
   const outputRef = useRef<HTMLDivElement>(null);
   const nextId = useRef(1);
+  const intervalsRef = useRef<number[]>([]);
+  const timeoutsRef = useRef<number[]>([]);
+
+  // Cleanup function to clear all intervals and timeouts
+  const cleanupAll = () => {
+    intervalsRef.current.forEach(id => clearInterval(id));
+    timeoutsRef.current.forEach(id => clearTimeout(id));
+    intervalsRef.current = [];
+    timeoutsRef.current = [];
+  };
 
   const printData = (data: any) => {
     const newItem: OutputItem = {
@@ -56,10 +66,26 @@ export default function PrintDataDisplay({ code, onOutput, onError }: PrintDataD
       return;
     }
 
+    // Cleanup previous timers
+    cleanupAll();
+
     // Clear previous output
     setOutputItems([]);
     
     try {
+      // Create wrapped timer functions that track their IDs
+      const wrappedSetTimeout = (fn: Function, delay: number) => {
+        const id = window.setTimeout(fn, delay);
+        timeoutsRef.current.push(id);
+        return id;
+      };
+
+      const wrappedSetInterval = (fn: Function, delay: number) => {
+        const id = window.setInterval(fn, delay);
+        intervalsRef.current.push(id);
+        return id;
+      };
+
       // Create a custom console that captures output
       const customGlobal = {
         printData,
@@ -80,14 +106,8 @@ export default function PrintDataDisplay({ code, onOutput, onError }: PrintDataD
         parseInt,
         parseFloat,
         isNaN,
-        setTimeout: (fn: Function, delay: number) => {
-          const id = window.setTimeout(fn, delay);
-          return id;
-        },
-        setInterval: (fn: Function, delay: number) => {
-          const id = window.setInterval(fn, delay);
-          return id;
-        },
+        setTimeout: wrappedSetTimeout,
+        setInterval: wrappedSetInterval,
         clearTimeout: window.clearTimeout.bind(window),
         clearInterval: window.clearInterval.bind(window)
       };
@@ -115,6 +135,9 @@ export default function PrintDataDisplay({ code, onOutput, onError }: PrintDataD
       addError(errorInfo.message, errorInfo.line);
       onError?.(errorInfo);
     }
+    
+    // Cleanup on unmount
+    return cleanupAll;
   }, [code]);
 
   // Update parent with output strings

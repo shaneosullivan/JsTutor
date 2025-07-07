@@ -30,32 +30,28 @@ export interface CanvasAPI {
   isKeyPressed: (key: string) => boolean;
 }
 
-export function createCanvasAPI(ctx: CanvasRenderingContext2D): CanvasAPI {
+export function createCanvasAPI(ctx: CanvasRenderingContext2D, cleanup: { eventListeners: Array<{ element: any; event: string; handler: any }> }): CanvasAPI {
   const canvas = ctx.canvas;
 
-  // Track pressed keys globally
-  if (!(window as any).canvasKeyTracker) {
-    const pressedKeys = new Set<string>();
+  // Track pressed keys with proper cleanup
+  const pressedKeys = new Set<string>();
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      pressedKeys.add(e.key.toLowerCase());
-    };
+  const handleKeyDown = (e: KeyboardEvent) => {
+    pressedKeys.add(e.key.toLowerCase());
+  };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
-      pressedKeys.delete(e.key.toLowerCase());
-    };
+  const handleKeyUp = (e: KeyboardEvent) => {
+    pressedKeys.delete(e.key.toLowerCase());
+  };
 
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("keyup", handleKeyUp);
-
-    (window as any).canvasKeyTracker = {
-      pressedKeys,
-      handleKeyDown,
-      handleKeyUp,
-    };
-  }
-
-  const keyTracker = (window as any).canvasKeyTracker;
+  // Add these listeners to cleanup tracking
+  document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("keyup", handleKeyUp);
+  
+  cleanup.eventListeners.push(
+    { element: document, event: "keydown", handler: handleKeyDown },
+    { element: document, event: "keyup", handler: handleKeyUp }
+  );
 
   return {
     drawPixel: (x: number, y: number, color: string) => {
@@ -119,7 +115,7 @@ export function createCanvasAPI(ctx: CanvasRenderingContext2D): CanvasAPI {
         callback(e.key.toLowerCase(), preventDefault);
       };
       document.addEventListener("keydown", handler);
-      return () => document.removeEventListener("keydown", handler);
+      cleanup.eventListeners.push({ element: document, event: "keydown", handler });
     },
 
     onArrowKeys: (
@@ -151,7 +147,7 @@ export function createCanvasAPI(ctx: CanvasRenderingContext2D): CanvasAPI {
         }
       };
       document.addEventListener("keydown", handler);
-      return () => document.removeEventListener("keydown", handler);
+      cleanup.eventListeners.push({ element: document, event: "keydown", handler });
     },
 
     onSpaceBar: (callback: () => void) => {
@@ -162,11 +158,11 @@ export function createCanvasAPI(ctx: CanvasRenderingContext2D): CanvasAPI {
         }
       };
       document.addEventListener("keydown", handler);
-      return () => document.removeEventListener("keydown", handler);
+      cleanup.eventListeners.push({ element: document, event: "keydown", handler });
     },
 
     isKeyPressed: (key: string) => {
-      return keyTracker.pressedKeys.has(key.toLowerCase());
+      return pressedKeys.has(key.toLowerCase());
     },
   };
 }

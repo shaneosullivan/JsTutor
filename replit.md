@@ -177,6 +177,14 @@ Changelog:
   - "Advanced Repeating" tutorial teaches for loops and compares them to while loops
   - Updated all subsequent tutorial order numbers to maintain proper sequence
   - Now 15 total tutorials in Basics course with comprehensive programming foundation
+- July 07, 2025: Fixed setInterval/setTimeout cleanup system to prevent persistent timers
+  - Added automatic cleanup of all intervals and timeouts when code changes or tutorials switch
+  - Enhanced canvas API to track and clean up DOM event listeners (onKeyPress, onArrowKeys, onSpaceBar)
+  - Fixed bug where keyboard events from previous tutorials would interfere with new ones
+  - Updated both DrawingCanvas and PrintDataDisplay components with comprehensive cleanup
+  - Wrapped setInterval and setTimeout to track all timer IDs for proper cleanup
+  - Added cleanup tracking for all event listeners to prevent memory leaks and interference
+  - Ensured tutorials are fully isolated - no timers or events persist between tutorial switches
 
 ## User Preferences
 
