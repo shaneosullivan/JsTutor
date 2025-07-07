@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { insertUserSchema, insertUserProgressSchema } from "@shared/schema";
+import { storage } from "./storage.js";
+import { insertUserSchema, insertUserProgressSchema } from "../shared/schema.js";
 import OpenAI from "openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
