@@ -39,9 +39,9 @@ export default function TutorialContent({
   useEffect(() => {
     setOutput([]);
     setIsRunning(false);
-    setShowAiChat(false);
     setCanvasError(null);
     setIsExplanationOpen(!hasBeenOpened); // Auto-open for first time viewers
+    // Don't reset showAiChat here - let it persist but the AI chat will reset its own state
   }, [tutorial.id, hasBeenOpened]);
 
   // Track explanation opening

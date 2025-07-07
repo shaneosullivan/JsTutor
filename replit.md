@@ -124,6 +124,8 @@ Changelog:
   - Chat input always stays visible at bottom with messages scrolling independently in dedicated area
   - Made "Help Me" button more playful with gradient colors, emojis, and hover animations for child appeal
   - Button features purple-to-pink gradient with scaling animation and robot emoji for fun factor
+  - Fixed AI chat context persistence - now only resets conversation when changing tutorials, not when hiding/showing chat
+  - AI chat replaces only canvas area while keeping code editor visible and usable during conversations
 - July 07, 2025: Fixed setInterval/setTimeout cleanup system to prevent persistent timers
   - Added automatic cleanup of all intervals and timeouts when code changes or tutorials switch
   - Wrapped setInterval and setTimeout to track all timer IDs for proper cleanup

@@ -46,6 +46,13 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Reset chat when tutorial changes
+  useEffect(() => {
+    setMessages([]);
+    setHasInitialized(false);
+    setLastErrorSent(null);
+  }, [tutorialId]);
+
   // Initialize chat with context when first shown (only if API key is available)
   useEffect(() => {
     if (!hasInitialized && messages.length === 0 && apiKey && !showSetup && isVisible) {
