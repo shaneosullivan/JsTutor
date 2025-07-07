@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { useTutorial } from "@/hooks/use-tutorial";
+import { useTutorial } from "@/hooks/use-course-tutorial";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import TutorialContent from "@/components/tutorial-content";
 import HelpModal from "@/components/help-modal";
@@ -28,39 +28,161 @@ export default function Home() {
 
   // Check for last visited course on component mount
   useEffect(() => {
-    const lastCourseId = localStorage.getItem('lastCourseId');
-    
+    const lastCourseId = localStorage.getItem("lastCourseId");
+
+    if (!lastCourseId && courses.length > 0) {
+      // No course selected, redirect to course selection
+      setLocation("/courses");
+      return;
+    }
+
     if (lastCourseId && courses.length > 0) {
       // Verify the course still exists
-      const courseExists = courses.some(course => course.id === parseInt(lastCourseId));
+      const courseExists = courses.some(
+        (course) => course.id === parseInt(lastCourseId)
+      );
       if (courseExists && parseInt(lastCourseId) !== 1) {
         // Redirect to the last course if it's not the Basics course (which is already on home)
         setLocation(`/course/${lastCourseId}`);
         return;
       }
     }
-    
-    // If no last course or it's the Basics course, stay on home page
-    // The home page shows the Basics course content
+
+    // If the Basics course (id=1) is selected, stay on home page
   }, [courses, setLocation]);
-  const {
-    currentTutorial,
-    tutorials,
-    completedTutorials,
-    userCode,
-    isLoading,
-    completeTutorial,
-    goToNextTutorial,
-    setCurrentTutorial,
-    updateUserCode,
-  } = useTutorial();
+  // Get tutorials for the Basics course (course ID 1)
+  const { data: tutorials = [], isLoading: tutorialsLoading } = useQuery<any[]>(
+    {
+      queryKey: [`/api/courses/1/tutorials`],
+    }
+  );
+
+  const { userCode, setUserCode, sidebarCollapsed, setSidebarCollapsed } =
+    useTutorial();
+
+  // Local state for course-specific progress (similar to course.tsx)
+  const getCompletedTutorials = (): number[] => {
+    const saved = localStorage.getItem(`completedTutorials_course_1`);
+    return saved ? JSON.parse(saved) : [];
+  };
+
+  const getCurrentTutorial = (): number => {
+    const saved = localStorage.getItem(`currentTutorial_course_1`);
+    return saved ? parseInt(saved) : 1;
+  };
+
+  const [completedTutorials, setCompletedTutorials] = useState<number[]>(
+    getCompletedTutorials
+  );
+  const [currentTutorialOrder, setCurrentTutorialOrder] =
+    useState<number>(getCurrentTutorial);
+
+  const isLoading = tutorialsLoading;
+
+  // Save progress to localStorage
+  useEffect(() => {
+    localStorage.setItem(
+      `completedTutorials_course_1`,
+      JSON.stringify(completedTutorials)
+    );
+  }, [completedTutorials]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      `currentTutorial_course_1`,
+      currentTutorialOrder.toString()
+    );
+  }, [currentTutorialOrder]);
+
+  // Tutorial completion logic
+  const markTutorialComplete = (tutorialOrder: number) => {
+    const tutorial = tutorials.find((t: any) => t.order === tutorialOrder);
+    if (!tutorial) return;
+
+    if (!completedTutorials.includes(tutorial.id)) {
+      setCompletedTutorials((prev) => [...prev, tutorial.id]);
+    }
+
+    // Check if this is the last tutorial in the course
+    const isLastTutorial =
+      tutorials.length > 0
+        ? tutorialOrder === Math.max(...tutorials.map((t: any) => t.order))
+        : false;
+    if (isLastTutorial) {
+      // Mark course as completed
+      const completedCourses = JSON.parse(
+        localStorage.getItem("completedCourses") || "[]"
+      );
+      if (!completedCourses.includes(1)) {
+        localStorage.setItem(
+          "completedCourses",
+          JSON.stringify([...completedCourses, 1])
+        );
+      }
+    }
+  };
+
+  const goToNextTutorial = () => {
+    const nextOrder = currentTutorialOrder + 1;
+    const nextTutorial = tutorials.find((t: any) => t.order === nextOrder);
+    if (nextTutorial) {
+      setCurrentTutorialOrder(nextOrder);
+    }
+  };
+
+  const selectTutorial = (tutorial: any) => {
+    setCurrentTutorialOrder(tutorial.order);
+  };
+
+  // Check if tutorial is unlocked
+  const isTutorialUnlocked = (tutorial: any): boolean => {
+    if (tutorial.order === 1) return true;
+    const prevTutorial = tutorials.find(
+      (t: any) => t.order === tutorial.order - 1
+    );
+    return prevTutorial ? completedTutorials.includes(prevTutorial.id) : false;
+  };
+
+  const currentTutorial = tutorials.find(
+    (t: any) => t.order === currentTutorialOrder
+  );
+  const isCurrentCompleted = currentTutorial
+    ? completedTutorials.includes(currentTutorial.id)
+    : false;
+  const hasNextTutorial =
+    tutorials.length > 0
+      ? currentTutorialOrder < Math.max(...tutorials.map((t: any) => t.order))
+      : false;
+
+  // Load starter code when tutorial changes
+  useEffect(() => {
+    if (currentTutorial && currentTutorial.starterCode) {
+      // Check if we have saved user code for this tutorial
+      const savedCode = localStorage.getItem(
+        `userCode_tutorial_${currentTutorial.id}`
+      );
+      if (savedCode) {
+        setUserCode(savedCode);
+      } else {
+        // Load the starter code
+        setUserCode(currentTutorial.starterCode);
+      }
+    }
+  }, [currentTutorial, setUserCode]);
+
+  // Save user code when it changes
+  useEffect(() => {
+    if (currentTutorial && userCode) {
+      localStorage.setItem(`userCode_tutorial_${currentTutorial.id}`, userCode);
+    }
+  }, [currentTutorial, userCode]);
 
   const [showHelp, setShowHelp] = useState(false);
 
-  const hasNextTutorial = currentTutorial ? 
-    tutorials.some((t: any) => t.order === currentTutorial.order + 1) : false;
-
-  const progressPercentage = tutorials.length > 0 ? (completedTutorials.length / tutorials.length) * 100 : 0;
+  const progressPercentage =
+    tutorials.length > 0
+      ? (completedTutorials.length / tutorials.length) * 100
+      : 0;
 
   if (isLoading) {
     return (
@@ -81,18 +203,20 @@ export default function Home() {
                 <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
                   <Code className="text-white" size={16} />
                 </div>
-                <h1 className="text-xl font-bold text-slate-800">JavaScript Adventure</h1>
+                <h1 className="text-xl font-bold text-slate-800">
+                  JavaScript Adventure
+                </h1>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation('/courses')}
+                onClick={() => setLocation("/courses")}
                 className="text-slate-600 hover:text-slate-800"
               >
                 All Courses
               </Button>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-slate-600">Progress:</span>
@@ -101,7 +225,7 @@ export default function Home() {
                   {completedTutorials.length}/{tutorials.length}
                 </span>
               </div>
-              
+
               <div className="flex items-center space-x-1">
                 <Star className="text-yellow-500 fill-current" size={16} />
                 <span className="text-sm font-medium text-slate-700">
@@ -115,11 +239,47 @@ export default function Home() {
 
       <div className="flex h-screen pt-16">
         {/* Sidebar */}
-        <TutorialSidebar 
-          tutorials={tutorials}
-          currentTutorial={currentTutorial}
+        <TutorialSidebar
+          tutorials={tutorials
+            .sort((a: any, b: any) => a.order - b.order)
+            .map((t: any) => ({
+              id: t.id,
+              courseId: t.courseId,
+              title: t.title,
+              description: t.description,
+              content: t.content,
+              starterCode: t.starterCode,
+              expectedOutput: t.expectedOutput || "",
+              order: t.order,
+              isLocked: !isTutorialUnlocked(t),
+            }))}
+          currentTutorial={
+            currentTutorial
+              ? {
+                  id: currentTutorial.id,
+                  courseId: currentTutorial.courseId,
+                  title: currentTutorial.title,
+                  description: currentTutorial.description,
+                  content: currentTutorial.content,
+                  starterCode: currentTutorial.starterCode,
+                  expectedOutput: currentTutorial.expectedOutput || "",
+                  order: currentTutorial.order,
+                  isLocked: false,
+                }
+              : null
+          }
           completedTutorials={completedTutorials}
-          onTutorialSelect={setCurrentTutorial}
+          onTutorialSelect={selectTutorial}
+          collapsed={sidebarCollapsed}
+          onToggleCollapsed={() => setSidebarCollapsed(!sidebarCollapsed)}
+          course={{
+            id: 1,
+            title: "JavaScript Basics",
+            description: "Learn the fundamentals",
+            type: "printData",
+            order: 1,
+            requiredCourse: null,
+          }}
         />
 
         {/* Main Content */}
@@ -127,27 +287,46 @@ export default function Home() {
           <Tabs defaultValue="tutorial" className="h-full flex flex-col">
             <div className="border-b border-slate-200 bg-white px-6 py-3">
               <TabsList className="grid w-full grid-cols-2 max-w-md">
-                <TabsTrigger value="tutorial" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="tutorial"
+                  className="flex items-center gap-2"
+                >
                   <Code className="w-4 h-4" />
                   Tutorial
                 </TabsTrigger>
-                <TabsTrigger value="reference" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="reference"
+                  className="flex items-center gap-2"
+                >
                   <Book className="w-4 h-4" />
                   Reference
                 </TabsTrigger>
               </TabsList>
             </div>
-            
-            <TabsContent value="tutorial" className="flex-1 overflow-hidden mt-0">
+
+            <TabsContent
+              value="tutorial"
+              className="flex-1 overflow-hidden mt-0"
+            >
               {currentTutorial ? (
-                <TutorialContent 
-                  tutorial={currentTutorial}
-                  onComplete={() => completeTutorial(currentTutorial.id)}
-                  isCompleted={completedTutorials.includes(currentTutorial.id)}
-                  onNext={goToNextTutorial}
+                <TutorialContent
+                  tutorial={{
+                    id: currentTutorial.id,
+                    courseId: currentTutorial.courseId,
+                    title: currentTutorial.title,
+                    description: currentTutorial.description,
+                    content: currentTutorial.content,
+                    starterCode: currentTutorial.starterCode,
+                    expectedOutput: currentTutorial.expectedOutput || "",
+                    order: currentTutorial.order,
+                    isLocked: false,
+                  }}
+                  onComplete={() => markTutorialComplete(currentTutorialOrder)}
+                  isCompleted={isCurrentCompleted}
+                  onNext={hasNextTutorial ? goToNextTutorial : undefined}
                   hasNext={hasNextTutorial}
                   userCode={userCode}
-                  onCodeChange={updateUserCode}
+                  onCodeChange={setUserCode}
                 />
               ) : (
                 <div className="h-full flex items-center justify-center">
@@ -157,14 +336,18 @@ export default function Home() {
                       Select a tutorial to get started!
                     </h3>
                     <p className="text-slate-600">
-                      Choose a tutorial from the sidebar to begin your JavaScript adventure.
+                      Choose a tutorial from the sidebar to begin your
+                      JavaScript adventure.
                     </p>
                   </div>
                 </div>
               )}
             </TabsContent>
-            
-            <TabsContent value="reference" className="flex-1 overflow-hidden mt-0">
+
+            <TabsContent
+              value="reference"
+              className="flex-1 overflow-hidden mt-0"
+            >
               <ApiDocumentation />
             </TabsContent>
           </Tabs>
@@ -181,8 +364,8 @@ export default function Home() {
       </Button>
 
       {/* Help Modal */}
-      <HelpModal 
-        isOpen={showHelp} 
+      <HelpModal
+        isOpen={showHelp}
         onClose={() => setShowHelp(false)}
         currentTutorial={currentTutorial}
       />

@@ -29,11 +29,14 @@ export default function TutorialSidebar({
   onToggleCollapsed,
   course,
 }: TutorialSidebarProps) {
-
   const isUnlocked = (tutorial: Tutorial) => {
     if (tutorial.order === 1) return true;
-    const previousTutorial = tutorials.find(t => t.order === tutorial.order - 1);
-    return previousTutorial ? completedTutorials.includes(previousTutorial.id) : false;
+    const previousTutorial = tutorials.find(
+      (t) => t.order === tutorial.order - 1
+    );
+    return previousTutorial
+      ? completedTutorials.includes(previousTutorial.id)
+      : false;
   };
 
   const getStatusIcon = (tutorial: Tutorial) => {
@@ -44,15 +47,17 @@ export default function TutorialSidebar({
         </div>
       );
     }
-    
+
     if (currentTutorial?.id === tutorial.id) {
       return (
         <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-          <span className="text-purple-600 font-bold text-sm">{tutorial.order}</span>
+          <span className="text-purple-600 font-bold text-sm">
+            {tutorial.order}
+          </span>
         </div>
       );
     }
-    
+
     if (!isUnlocked(tutorial)) {
       return (
         <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center">
@@ -60,44 +65,56 @@ export default function TutorialSidebar({
         </div>
       );
     }
-    
+
     return (
       <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center">
-        <span className="text-slate-600 font-bold text-sm">{tutorial.order}</span>
+        <span className="text-slate-600 font-bold text-sm">
+          {tutorial.order}
+        </span>
       </div>
     );
   };
 
   const getTutorialClassName = (tutorial: Tutorial) => {
-    const baseClasses = "flex items-center w-full text-left transition-all duration-200 relative group";
-    
+    const baseClasses =
+      "flex items-center w-full text-left transition-all duration-200 relative group";
+
     if (!isUnlocked(tutorial)) {
       return cn(baseClasses, "opacity-50 cursor-not-allowed");
     }
-    
+
     if (currentTutorial?.id === tutorial.id) {
-      return cn(baseClasses, "bg-gradient-to-r from-purple-600 to-pink-600 text-white");
+      return cn(
+        baseClasses,
+        "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+      );
     }
-    
+
     if (completedTutorials.includes(tutorial.id)) {
       return cn(baseClasses, "hover:bg-green-50 text-green-700");
     }
-    
+
     return cn(baseClasses, "hover:bg-purple-50 text-slate-700");
   };
 
   return (
-    <div className={cn(
-      "bg-white border-r border-slate-200 flex flex-col transition-all duration-300",
-      collapsed ? "w-16" : "w-80"
-    )}>
+    <div
+      className={cn(
+        "bg-white border-r border-slate-200 flex flex-col transition-all duration-300",
+        collapsed ? "w-16" : "w-80"
+      )}
+    >
       {/* Header */}
       <div className="p-4 border-b border-slate-200 flex items-center justify-between">
         {!collapsed && (
           <div>
-            <h2 className="text-lg font-semibold text-slate-800">{course?.title || 'Course'}</h2>
+            <h2 className="text-lg font-semibold text-slate-800">
+              {course?.title || "Course"}
+            </h2>
             {course?.description && (
-              <p className="text-sm text-slate-600 mt-1">{course.description}</p>
+              <p className="text-sm text-slate-600 mt-1">
+                {course.description}
+              </p>
             )}
           </div>
         )}
@@ -131,7 +148,7 @@ export default function TutorialSidebar({
               disabled={!isUnlocked(tutorial)}
             >
               {getStatusIcon(tutorial)}
-              
+
               {!collapsed && (
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-sm leading-tight">
@@ -147,7 +164,7 @@ export default function TutorialSidebar({
               {collapsed && completedTutorials.includes(tutorial.id) && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
               )}
-              
+
               {/* Current tutorial indicator for collapsed state */}
               {collapsed && currentTutorial?.id === tutorial.id && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full border-2 border-white" />

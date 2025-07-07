@@ -1,17 +1,29 @@
-import { type User, type InsertUser, type UserProgress, type InsertUserProgress, type Course, type InsertCourse, type Tutorial, type InsertTutorial } from "../shared/schema.js";
+import {
+  type User,
+  type InsertUser,
+  type UserProgress,
+  type InsertUserProgress,
+  type Course,
+  type InsertCourse,
+  type Tutorial,
+  type InsertTutorial,
+} from "../shared/schema.js";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
+
   getUserProgress(userId: number): Promise<UserProgress | undefined>;
-  updateUserProgress(userId: number, progress: Partial<InsertUserProgress>): Promise<UserProgress>;
-  
+  updateUserProgress(
+    userId: number,
+    progress: Partial<InsertUserProgress>
+  ): Promise<UserProgress>;
+
   getAllCourses(): Promise<Course[]>;
   getCourse(id: number): Promise<Course | undefined>;
   createCourse(course: InsertCourse): Promise<Course>;
-  
+
   getAllTutorials(): Promise<Tutorial[]>;
   getTutorialsByCourse(courseId: number): Promise<Tutorial[]>;
   getTutorial(id: number): Promise<Tutorial | undefined>;
@@ -37,7 +49,7 @@ export class MemStorage implements IStorage {
     this.currentProgressId = 1;
     this.currentCourseId = 1;
     this.currentTutorialId = 1;
-    
+
     this.initializeCourses();
     this.initializeTutorials();
   }
@@ -46,14 +58,16 @@ export class MemStorage implements IStorage {
     const courseData: InsertCourse[] = [
       {
         title: "Basics",
-        description: "Learn the fundamentals of JavaScript programming with visual drawing",
+        description:
+          "Learn the fundamentals of JavaScript programming with visual drawing",
         type: "canvas",
         order: 1,
         requiredCourse: null,
       },
       {
         title: "Array Methods",
-        description: "Master array manipulation with forEach, map, filter, and more",
+        description:
+          "Master array manipulation with forEach, map, filter, and more",
         type: "printData",
         order: 2,
         requiredCourse: 1,
@@ -67,7 +81,8 @@ export class MemStorage implements IStorage {
       },
       {
         title: "Algorithms",
-        description: "Explore problem-solving with recursion and algorithmic thinking",
+        description:
+          "Explore problem-solving with recursion and algorithmic thinking",
         type: "printData",
         order: 4,
         requiredCourse: 1,
@@ -81,7 +96,7 @@ export class MemStorage implements IStorage {
       },
     ];
 
-    courseData.forEach(course => {
+    courseData.forEach((course) => {
       const id = this.currentCourseId++;
       this.courses.set(id, { ...course, id });
     });
@@ -94,7 +109,8 @@ export class MemStorage implements IStorage {
         courseId: 1,
         title: "Your First Variable",
         description: "Learn to store information",
-        content: "Variables are like boxes that hold information. You can put numbers, text, or other things in them and use them later!\n\n🎨 About the Drawing Functions:\n• drawCircle(x, y, radius, color) - The first number (x) is how many pixels from the LEFT edge to place the center. The second number (y) is how many pixels from the TOP edge. The radius is how big the circle is (like measuring from the center to the edge).\n• drawText(x, y, text, color) - Places text at a position. X is pixels from left, Y is pixels from top.\n\n📍 Think of the canvas like a grid: (0,0) is the top-left corner, (400,400) is the bottom-right!\n\n🌟 Your Challenge:\nAfter trying the example, clear the code and write your own! Try creating a variable with your favorite number, then draw a circle using that number. Can you draw your initials on the canvas too?",
+        content:
+          "Variables are like boxes that hold information. You can put numbers, text, or other things in them and use them later!\n\n🎨 About the Drawing Functions:\n• drawCircle(x, y, radius, color) - The first number (x) is how many pixels from the LEFT edge to place the center. The second number (y) is how many pixels from the TOP edge. The radius is how big the circle is (like measuring from the center to the edge).\n• drawText(x, y, text, color) - Places text at a position. X is pixels from left, Y is pixels from top.\n\n📍 Think of the canvas like a grid: (0,0) is the top-left corner, (400,400) is the bottom-right!\n\n🌟 Your Challenge:\nAfter trying the example, clear the code and write your own! Try creating a variable with your favorite number, then draw a circle using that number. Can you draw your initials on the canvas too?",
         starterCode: `// Let's create our first variable!
 let myName = "Your Name";
 let age = 9;
@@ -104,13 +120,14 @@ drawCircle(200, 200, age * 5, 'blue');
 drawText(200, 300, myName, 'black');`,
         expectedOutput: "A blue circle and your name displayed",
         order: 1,
-        isLocked: false
+        isLocked: false,
       },
       {
         courseId: 1,
         title: "Math is Fun!",
         description: "Add, subtract, and more",
-        content: "JavaScript can do math just like you! You can add (+), subtract (-), multiply (*), and divide (/) numbers.\n\n🎨 New Drawing Function:\n• drawRect(x, y, width, height, color) - Draws a rectangle! X and Y tell us where the TOP-LEFT corner goes. Width is how wide (left to right), height is how tall (top to bottom). Think of it like drawing a box!\n\n🌟 Your Challenge:\nClear the code and try this on your own! Create variables for your age and your favorite number, then do some math with them. Draw rectangles using the results - maybe make a building or a robot face!",
+        content:
+          "JavaScript can do math just like you! You can add (+), subtract (-), multiply (*), and divide (/) numbers.\n\n🎨 New Drawing Function:\n• drawRect(x, y, width, height, color) - Draws a rectangle! X and Y tell us where the TOP-LEFT corner goes. Width is how wide (left to right), height is how tall (top to bottom). Think of it like drawing a box!\n\n🌟 Your Challenge:\nClear the code and try this on your own! Create variables for your age and your favorite number, then do some math with them. Draw rectangles using the results - maybe make a building or a robot face!",
         starterCode: `// Let's do some math and draw with it!
 let x = 100;
 let y = 150;
@@ -121,13 +138,14 @@ drawRect(x + 50, y, size * 2, size, 'green');
 drawRect(x + 150, y, size / 2, size, 'blue');`,
         expectedOutput: "Three rectangles of different sizes",
         order: 2,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Shortcuts with Math",
         description: "Learn faster ways to do math with variables",
-        content: "Sometimes you want to change a variable by adding or subtracting from it. There are shortcuts that make this easier!\n\n🚀 Math Shortcuts:\n• += means 'add to this variable' (like score += 10 means score = score + 10)\n• -= means 'subtract from this variable' (like lives -= 1 means lives = lives - 1)\n• *= means 'multiply this variable' (like size *= 2 means size = size * 2)\n• /= means 'divide this variable' (like speed /= 2 means speed = speed / 2)\n\n✨ Why Use Shortcuts?\n• They're faster to type\n• They're easier to read\n• They help prevent mistakes\n• Real programmers use them all the time!\n\n🌟 Your Challenge:\nTry changing the code to use different shortcuts. What happens if you use *= instead of +=? Can you make the squares get smaller instead of bigger?",
+        content:
+          "Sometimes you want to change a variable by adding or subtracting from it. There are shortcuts that make this easier!\n\n🚀 Math Shortcuts:\n• += means 'add to this variable' (like score += 10 means score = score + 10)\n• -= means 'subtract from this variable' (like lives -= 1 means lives = lives - 1)\n• *= means 'multiply this variable' (like size *= 2 means size = size * 2)\n• /= means 'divide this variable' (like speed /= 2 means speed = speed / 2)\n\n✨ Why Use Shortcuts?\n• They're faster to type\n• They're easier to read\n• They help prevent mistakes\n• Real programmers use them all the time!\n\n🌟 Your Challenge:\nTry changing the code to use different shortcuts. What happens if you use *= instead of +=? Can you make the squares get smaller instead of bigger?",
         starterCode: `// Let's practice math shortcuts!
 let score = 0;
 let lives = 5;
@@ -163,13 +181,14 @@ drawRect(x, 100, size, size, 'green');
 drawText(x, 130, 'Final Score: ' + score, 'green');`,
         expectedOutput: "Three rectangles showing math shortcuts in action",
         order: 3,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Simple Repeating",
         description: "Learn while loops - the easiest way to repeat code",
-        content: "While loops are the simplest way to repeat code! They keep going 'while' something is true.\n\n🔄 How While Loops Work:\n• while (condition) means 'keep doing this while condition is true'\n• We need a counter variable to track how many times we've done something\n• We must change the counter inside the loop or it will go forever!\n• Much easier to understand than for loops\n\n🎨 New Drawing Function:\n• drawLine(x1, y1, x2, y2, color) - Draws a line from one point to another! The first two numbers (x1, y1) are where the line starts, and the next two (x2, y2) are where it ends.\n\n🌟 Your Challenge:\nTry changing the condition! What happens if you change 'i < 5' to 'i < 8'? Can you make the circles change color each time?",
+        content:
+          "While loops are the simplest way to repeat code! They keep going 'while' something is true.\n\n🔄 How While Loops Work:\n• while (condition) means 'keep doing this while condition is true'\n• We need a counter variable to track how many times we've done something\n• We must change the counter inside the loop or it will go forever!\n• Much easier to understand than for loops\n\n🎨 New Drawing Function:\n• drawLine(x1, y1, x2, y2, color) - Draws a line from one point to another! The first two numbers (x1, y1) are where the line starts, and the next two (x2, y2) are where it ends.\n\n🌟 Your Challenge:\nTry changing the condition! What happens if you change 'i < 5' to 'i < 8'? Can you make the circles change color each time?",
         starterCode: `// Let's draw with a while loop!
 let i = 0;  // Start counting at 0
 
@@ -186,13 +205,14 @@ while (i < 5) {  // Keep going while i is less than 5
 drawText(50, 100, 'Drew ' + i + ' circles!', 'black');`,
         expectedOutput: "5 blue circles in a row with numbers inside",
         order: 4,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Advanced Repeating",
         description: "Learn for loops - a more powerful way to repeat",
-        content: "For loops are a more compact way to write loops! They put the counter, condition, and increment all in one line.\n\n🚀 For Loop Structure:\n• for (start; condition; increment) - all the loop parts in parentheses\n• let i = 0 (start counting at 0)\n• i < 5 (keep going while i is less than 5)\n• i++ (add 1 to i each time - same as i += 1)\n\n🔄 For vs While:\n• For loops are more compact when you know how many times to repeat\n• While loops are clearer when the condition is more complex\n• Both do the same thing, just written differently!\n\n🌟 Your Challenge:\nTry changing the for loop numbers! What happens if you change 'i < 5' to 'i < 8'? Can you make a diagonal pattern by changing the y position too?",
+        content:
+          "For loops are a more compact way to write loops! They put the counter, condition, and increment all in one line.\n\n🚀 For Loop Structure:\n• for (start; condition; increment) - all the loop parts in parentheses\n• let i = 0 (start counting at 0)\n• i < 5 (keep going while i is less than 5)\n• i++ (add 1 to i each time - same as i += 1)\n\n🔄 For vs While:\n• For loops are more compact when you know how many times to repeat\n• While loops are clearer when the condition is more complex\n• Both do the same thing, just written differently!\n\n🌟 Your Challenge:\nTry changing the for loop numbers! What happens if you change 'i < 5' to 'i < 8'? Can you make a diagonal pattern by changing the y position too?",
         starterCode: `// Let's draw a pattern with a for loop!
 for (let i = 0; i < 5; i++) {
     let x = i * 60;
@@ -210,15 +230,17 @@ for (let i = 0; i < 5; i++) {
 //     drawCircle(x + 20, y + 20, 15, 'yellow');
 //     i++;
 // }`,
-        expectedOutput: "A diagonal pattern of purple squares with yellow circles",
+        expectedOutput:
+          "A diagonal pattern of purple squares with yellow circles",
         order: 5,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Making Decisions",
         description: "Computer choices with if statements",
-        content: "Sometimes you want your program to make choices! 'If' statements let the computer decide what to do.\n\n🎨 New Drawing Function:\n• drawPixel(x, y, color) - Draws a single tiny dot at a specific position! Perfect for making detailed patterns or stars in the sky.\n\n🌟 Your Challenge:\nTry changing the numbers to see different results! Can you make it so circles appear in different colors based on different conditions?",
+        content:
+          "Sometimes you want your program to make choices! 'If' statements let the computer decide what to do.\n\n🎨 New Drawing Function:\n• drawPixel(x, y, color) - Draws a single tiny dot at a specific position! Perfect for making detailed patterns or stars in the sky.\n\n🌟 Your Challenge:\nTry changing the numbers to see different results! Can you make it so circles appear in different colors based on different conditions?",
         starterCode: `// Let's make the computer choose colors!
 for (let i = 0; i < 10; i++) {
     let x = i * 40;
@@ -234,13 +256,14 @@ for (let i = 0; i < 10; i++) {
 }`,
         expectedOutput: "Alternating blue circles and red squares",
         order: 6,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Listening to Keys",
         description: "Make your program respond to keyboard input",
-        content: "Learn to make your programs interactive! You can make things happen when keys are pressed.\n\n🎮 New Functions:\n• onKeyPress(callback) - Runs your code when ANY key is pressed\n• onArrowKeys(callback) - Runs your code when arrow keys are pressed\n• onSpaceBar(callback) - Runs your code when spacebar is pressed\n• isKeyPressed(key) - Checks if a specific key is currently being held down\n\n🌟 Your Challenge:\nTry adding your own key controls! Can you make different shapes appear when different keys are pressed?",
+        content:
+          "Learn to make your programs interactive! You can make things happen when keys are pressed.\n\n🎮 New Functions:\n• onKeyPress(callback) - Runs your code when ANY key is pressed\n• onArrowKeys(callback) - Runs your code when arrow keys are pressed\n• onSpaceBar(callback) - Runs your code when spacebar is pressed\n• isKeyPressed(key) - Checks if a specific key is currently being held down\n\n🌟 Your Challenge:\nTry adding your own key controls! Can you make different shapes appear when different keys are pressed?",
         starterCode: `// Let's make an interactive drawing!
 let x = 200;
 let y = 200;
@@ -269,15 +292,17 @@ onSpaceBar(() => {
     clearCanvas();
     drawCircle(x, y, 10, 'red');
 });`,
-        expectedOutput: "A blue circle that moves with arrow keys and turns red with spacebar",
+        expectedOutput:
+          "A blue circle that moves with arrow keys and turns red with spacebar",
         order: 8,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Colors and Shapes",
         description: "Learn about different colors and drawing shapes",
-        content: "Let's explore different colors and learn to draw more shapes! Colors make our drawings come alive.\n\n🎨 Color Tips:\n• You can use color names like 'red', 'blue', 'green', 'purple', 'orange', 'yellow'\n• You can also use hex codes like '#FF0000' for red, '#00FF00' for green\n• Try mixing different colors to make your art colorful!\n\n🌟 Your Challenge:\nDraw a simple house using rectangles for the walls, lines for the roof, and a circle for the sun. Use at least 3 different colors!",
+        content:
+          "Let's explore different colors and learn to draw more shapes! Colors make our drawings come alive.\n\n🎨 Color Tips:\n• You can use color names like 'red', 'blue', 'green', 'purple', 'orange', 'yellow'\n• You can also use hex codes like '#FF0000' for red, '#00FF00' for green\n• Try mixing different colors to make your art colorful!\n\n🌟 Your Challenge:\nDraw a simple house using rectangles for the walls, lines for the roof, and a circle for the sun. Use at least 3 different colors!",
         starterCode: `// Let's draw with different colors!
 drawRect(150, 200, 100, 80, 'brown');  // House walls
 drawRect(175, 240, 20, 40, 'darkbrown'); // Door
@@ -289,13 +314,14 @@ drawCircle(50, 50, 30, 'yellow');      // Sun
 // Maybe windows? A chimney? Flowers?`,
         expectedOutput: "A colorful house with sun",
         order: 9,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Making Patterns",
         description: "Use loops to create repeating patterns",
-        content: "Loops help us repeat code without writing it over and over! It's like telling the computer 'do this 10 times'.\n\n🔄 About Loops:\n• A 'for loop' repeats code a certain number of times\n• We use 'i' as a counter that changes each time\n• The loop runs while i is less than the number we set\n\n✨ Loop Magic:\n• i starts at 0, then becomes 1, 2, 3, and so on\n• We can use i in our drawing to make patterns\n• i * 50 means: 0, 50, 100, 150... (perfect for spacing!)\n\n🌟 Your Challenge:\nCreate your own pattern! Try changing the numbers, colors, or shapes. What happens if you use i for the color or size?",
+        content:
+          "Loops help us repeat code without writing it over and over! It's like telling the computer 'do this 10 times'.\n\n🔄 About Loops:\n• A 'for loop' repeats code a certain number of times\n• We use 'i' as a counter that changes each time\n• The loop runs while i is less than the number we set\n\n✨ Loop Magic:\n• i starts at 0, then becomes 1, 2, 3, and so on\n• We can use i in our drawing to make patterns\n• i * 50 means: 0, 50, 100, 150... (perfect for spacing!)\n\n🌟 Your Challenge:\nCreate your own pattern! Try changing the numbers, colors, or shapes. What happens if you use i for the color or size?",
         starterCode: `// Let's make a pattern with a loop!
 for (let i = 0; i < 5; i++) {
   drawCircle(50 + i * 60, 200, 20, 'purple');
@@ -307,13 +333,14 @@ for (let i = 0; i < 3; i++) {
 }`,
         expectedOutput: "A pattern of purple circles and orange squares",
         order: 10,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Random Fun",
         description: "Add randomness to make things unpredictable",
-        content: "Random numbers make our programs exciting and different every time! It's like rolling dice in your code.\n\n🎲 Random Magic:\n• Math.random() gives us a number between 0 and 1\n• Math.random() * 400 gives us a number between 0 and 400\n• Math.floor() removes the decimal part (1.7 becomes 1)\n• This helps us get random positions on our canvas!\n\n🌈 Random Ideas:\n• Random positions for stars in the sky\n• Random colors for a rainbow\n• Random sizes for bubbles\n\n🌟 Your Challenge:\nRun your code multiple times and watch it change! Try adding more random elements - maybe random colors or sizes!",
+        content:
+          "Random numbers make our programs exciting and different every time! It's like rolling dice in your code.\n\n🎲 Random Magic:\n• Math.random() gives us a number between 0 and 1\n• Math.random() * 400 gives us a number between 0 and 400\n• Math.floor() removes the decimal part (1.7 becomes 1)\n• This helps us get random positions on our canvas!\n\n🌈 Random Ideas:\n• Random positions for stars in the sky\n• Random colors for a rainbow\n• Random sizes for bubbles\n\n🌟 Your Challenge:\nRun your code multiple times and watch it change! Try adding more random elements - maybe random colors or sizes!",
         starterCode: `// Let's add some randomness!
 clearCanvas();
 
@@ -329,13 +356,14 @@ for (let i = 0; i < 10; i++) {
 // Try adding random rectangles too!`,
         expectedOutput: "Random colored circles scattered around",
         order: 11,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Moving Things",
         description: "Learn to animate objects",
-        content: "Animation makes things move on screen! We use setInterval to run code over and over, creating motion.\n\n⏰ About setInterval:\n• setInterval(function, milliseconds) runs code repeatedly\n• 100 milliseconds = 0.1 seconds (pretty fast!)\n• We change positions each time to create movement\n• clearCanvas() erases the old drawing before drawing the new one\n\n🏃‍♀️ Movement Tips:\n• Increase x to move right, decrease to move left\n• Increase y to move down, decrease to move up\n• Check boundaries to keep things on screen\n\n🌟 Your Challenge:\nTry changing the speed (100 to 50 for faster, 200 for slower) or direction. Can you make the ball bounce off the edges?",
+        content:
+          "Animation makes things move on screen! We use setInterval to run code over and over, creating motion.\n\n⏰ About setInterval:\n• setInterval(function, milliseconds) runs code repeatedly\n• 100 milliseconds = 0.1 seconds (pretty fast!)\n• We change positions each time to create movement\n• clearCanvas() erases the old drawing before drawing the new one\n\n🏃‍♀️ Movement Tips:\n• Increase x to move right, decrease to move left\n• Increase y to move down, decrease to move up\n• Check boundaries to keep things on screen\n\n🌟 Your Challenge:\nTry changing the speed (100 to 50 for faster, 200 for slower) or direction. Can you make the ball bounce off the edges?",
         starterCode: `// Let's make a moving ball!
 let ballX = 50;
 let ballY = 200;
@@ -353,13 +381,14 @@ setInterval(() => {
 }, 100);`,
         expectedOutput: "A red ball bouncing back and forth",
         order: 12,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Spacebar Magic",
         description: "Add special actions with the spacebar",
-        content: "The spacebar is perfect for special actions! In games, it's often used for jumping, shooting, or resetting things.\n\n🚀 Spacebar Power:\n• onSpaceBar() listens specifically for the spacebar\n• Great for 'action' buttons in games\n• Can trigger special effects or reset your game\n• Works great with other keyboard controls\n\n✨ Action Ideas:\n• Jump or change color\n• Create new objects\n• Reset positions\n• Trigger animations\n\n🌟 Your Challenge:\nTry combining arrow keys AND spacebar! Maybe the spacebar changes the player's color, or creates a trail behind them?",
+        content:
+          "The spacebar is perfect for special actions! In games, it's often used for jumping, shooting, or resetting things.\n\n🚀 Spacebar Power:\n• onSpaceBar() listens specifically for the spacebar\n• Great for 'action' buttons in games\n• Can trigger special effects or reset your game\n• Works great with other keyboard controls\n\n✨ Action Ideas:\n• Jump or change color\n• Create new objects\n• Reset positions\n• Trigger animations\n\n🌟 Your Challenge:\nTry combining arrow keys AND spacebar! Maybe the spacebar changes the player's color, or creates a trail behind them?",
         starterCode: `// Spacebar creates colorful circles!
 let playerX = 200;
 let playerY = 200;
@@ -399,15 +428,17 @@ function redrawEverything() {
 
 // Initial draw
 redrawEverything();`,
-        expectedOutput: "Move with arrows, press spacebar to create colorful circles",
+        expectedOutput:
+          "Move with arrows, press spacebar to create colorful circles",
         order: 13,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Snake Game",
         description: "Build the classic Snake game",
-        content: "Let's build the famous Snake game! This combines everything we've learned: drawing, movement, keyboard controls, and game logic.\n\n🐍 Snake Game Rules:\n• Snake moves continuously in one direction\n• Arrow keys change the direction\n• Snake grows when it eats food\n• Game ends if snake hits the walls or itself\n• Score increases with each food eaten\n\n🎮 Game Programming Concepts:\n• Game loop (setInterval) keeps everything moving\n• Arrays store the snake's body segments\n• Collision detection checks for hits\n• Game state manages score and game over\n\n🌟 Your Challenge:\nTry making the game your own! Change colors, speed, or add new features. What about power-ups or obstacles?",
+        content:
+          "Let's build the famous Snake game! This combines everything we've learned: drawing, movement, keyboard controls, and game logic.\n\n🐍 Snake Game Rules:\n• Snake moves continuously in one direction\n• Arrow keys change the direction\n• Snake grows when it eats food\n• Game ends if snake hits the walls or itself\n• Score increases with each food eaten\n\n🎮 Game Programming Concepts:\n• Game loop (setInterval) keeps everything moving\n• Arrays store the snake's body segments\n• Collision detection checks for hits\n• Game state manages score and game over\n\n🌟 Your Challenge:\nTry making the game your own! Change colors, speed, or add new features. What about power-ups or obstacles?",
         starterCode: `// Snake Game!
 let snake = [{x: 200, y: 200}];
 let direction = 'right';
@@ -487,13 +518,14 @@ onSpaceBar(() => {
 });`,
         expectedOutput: "A playable Snake game with arrow key controls",
         order: 14,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 1,
         title: "Your Own Game!",
         description: "Create your own game using everything you've learned",
-        content: "Congratulations! You've learned all the basics of programming and game development. Now it's time to create something totally your own!\n\n🎯 What You Can Build:\n• A different type of game (Pong, Pac-Man style, platformer)\n• An interactive art program\n• A physics simulation\n• A drawing tool with special effects\n• Your own twist on Snake\n\n🛠️ Tools You've Mastered:\n• Drawing shapes and colors\n• Variables and math\n• Loops and patterns\n• Random numbers\n• Animation with setInterval\n• Keyboard controls\n• Game logic and collision detection\n\n🌟 Your Challenge:\nStart with a blank canvas and create something amazing! Don't be afraid to experiment, break things, and try new ideas. Programming is all about creativity and problem-solving!",
+        content:
+          "Congratulations! You've learned all the basics of programming and game development. Now it's time to create something totally your own!\n\n🎯 What You Can Build:\n• A different type of game (Pong, Pac-Man style, platformer)\n• An interactive art program\n• A physics simulation\n• A drawing tool with special effects\n• Your own twist on Snake\n\n🛠️ Tools You've Mastered:\n• Drawing shapes and colors\n• Variables and math\n• Loops and patterns\n• Random numbers\n• Animation with setInterval\n• Keyboard controls\n• Game logic and collision detection\n\n🌟 Your Challenge:\nStart with a blank canvas and create something amazing! Don't be afraid to experiment, break things, and try new ideas. Programming is all about creativity and problem-solving!",
         starterCode: `// Your blank canvas - create anything you want!
 // Here are some ideas to get you started:
 
@@ -518,7 +550,7 @@ clearCanvas();
 drawText(150, 200, 'Your turn to create!', 'purple');`,
         expectedOutput: "Your own creative project",
         order: 15,
-        isLocked: true
+        isLocked: true,
       },
 
       // Array Methods Course (courseId: 2)
@@ -526,7 +558,8 @@ drawText(150, 200, 'Your turn to create!', 'purple');`,
         courseId: 2,
         title: "Introduction to Arrays",
         description: "Learn what arrays are and how to use them",
-        content: "Arrays are like lists that can hold multiple items. Instead of having separate variables for each item, you can store them all in one place!\n\n🔍 What You'll Learn:\n• How to create arrays\n• How to access items in arrays\n• Why arrays are useful for organizing data\n\n🌟 Your Challenge:\nTry creating your own array with different items. Use printData() to see what's inside!",
+        content:
+          "Arrays are like lists that can hold multiple items. Instead of having separate variables for each item, you can store them all in one place!\n\n🔍 What You'll Learn:\n• How to create arrays\n• How to access items in arrays\n• Why arrays are useful for organizing data\n\n🌟 Your Challenge:\nTry creating your own array with different items. Use printData() to see what's inside!",
         starterCode: `// Let's create our first array!
 let fruits = ['apple', 'banana', 'orange', 'grape'];
 
@@ -541,13 +574,14 @@ printData(fruits[2]); // Third item
 printData(fruits.length);`,
         expectedOutput: "Array contents and individual items displayed",
         order: 1,
-        isLocked: false
+        isLocked: false,
       },
       {
         courseId: 2,
         title: "forEach - Do Something with Each Item",
         description: "Loop through arrays the easy way",
-        content: "forEach is like a magic loop that goes through each item in your array automatically!\n\n🔍 What You'll Learn:\n• How forEach works\n• How to access each item and its position\n• Why forEach is better than regular for loops for arrays\n\n🌟 Your Challenge:\nTry using forEach with your own array. Maybe an array of your favorite colors or numbers!",
+        content:
+          "forEach is like a magic loop that goes through each item in your array automatically!\n\n🔍 What You'll Learn:\n• How forEach works\n• How to access each item and its position\n• Why forEach is better than regular for loops for arrays\n\n🌟 Your Challenge:\nTry using forEach with your own array. Maybe an array of your favorite colors or numbers!",
         starterCode: `// Let's use forEach to go through an array!
 let numbers = [2, 4, 6, 8, 10];
 
@@ -568,13 +602,14 @@ names.forEach((name) => {
 });`,
         expectedOutput: "Each array item processed and displayed",
         order: 2,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 2,
         title: "map - Transform Each Item",
         description: "Create a new array by changing each item",
-        content: "map is like a factory that takes each item in your array, transforms it, and creates a new array with the results!\n\n🔍 What You'll Learn:\n• How map transforms arrays\n• The difference between map and forEach\n• How to create new arrays from existing ones\n\n🌟 Your Challenge:\nTry mapping numbers to their squares, or words to their lengths!",
+        content:
+          "map is like a factory that takes each item in your array, transforms it, and creates a new array with the results!\n\n🔍 What You'll Learn:\n• How map transforms arrays\n• The difference between map and forEach\n• How to create new arrays from existing ones\n\n🌟 Your Challenge:\nTry mapping numbers to their squares, or words to their lengths!",
         starterCode: `// Let's transform an array with map!
 let numbers = [1, 2, 3, 4, 5];
 
@@ -602,13 +637,14 @@ printData('Uppercase words:');
 printData(uppercase);`,
         expectedOutput: "Original and transformed arrays displayed",
         order: 3,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 2,
         title: "filter - Keep Only Some Items",
         description: "Create a new array with only the items you want",
-        content: "filter is like a gatekeeper that only lets certain items through to create a new array!\n\n🔍 What You'll Learn:\n• How filter selects items\n• How to write conditions for filtering\n• Creating subsets of your data\n\n🌟 Your Challenge:\nTry filtering for your favorite items, or numbers that meet certain conditions!",
+        content:
+          "filter is like a gatekeeper that only lets certain items through to create a new array!\n\n🔍 What You'll Learn:\n• How filter selects items\n• How to write conditions for filtering\n• Creating subsets of your data\n\n🌟 Your Challenge:\nTry filtering for your favorite items, or numbers that meet certain conditions!",
         starterCode: `// Let's filter an array!
 let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -636,13 +672,14 @@ printData('Animals with long names:');
 printData(longNames);`,
         expectedOutput: "Original array and filtered results displayed",
         order: 4,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 2,
         title: "reduce - Combine All Items",
         description: "Combine all array items into a single value",
-        content: "reduce is like a blender that combines all your array items into one result!\n\n🔍 What You'll Learn:\n• How reduce combines items\n• How to use an accumulator\n• Common reduce patterns\n\n🌟 Your Challenge:\nTry using reduce to find the longest word, or to count how many times each item appears!",
+        content:
+          "reduce is like a blender that combines all your array items into one result!\n\n🔍 What You'll Learn:\n• How reduce combines items\n• How to use an accumulator\n• Common reduce patterns\n\n🌟 Your Challenge:\nTry using reduce to find the longest word, or to count how many times each item appears!",
         starterCode: `// Let's use reduce to combine things!
 let numbers = [1, 2, 3, 4, 5];
 
@@ -672,7 +709,7 @@ printData('Combined sentence:');
 printData(sentence);`,
         expectedOutput: "Various combinations and calculations displayed",
         order: 5,
-        isLocked: true
+        isLocked: true,
       },
 
       // DOM Manipulation Course (courseId: 3)
@@ -680,7 +717,8 @@ printData(sentence);`,
         courseId: 3,
         title: "Finding Elements",
         description: "Learn to find and select HTML elements",
-        content: "The DOM (Document Object Model) is like a map of your webpage. You can find any element and change it!\n\n🔍 What You'll Learn:\n• How to find elements by ID, class, and tag\n• The difference between querySelector and querySelectorAll\n• How to check if elements exist\n\n🌟 Your Challenge:\nTry finding different elements and changing their text!",
+        content:
+          "The DOM (Document Object Model) is like a map of your webpage. You can find any element and change it!\n\n🔍 What You'll Learn:\n• How to find elements by ID, class, and tag\n• The difference between querySelector and querySelectorAll\n• How to check if elements exist\n\n🌟 Your Challenge:\nTry finding different elements and changing their text!",
         starterCode: `<!DOCTYPE html>
 <html>
 <head>
@@ -718,13 +756,14 @@ printData(sentence);`,
 </html>`,
         expectedOutput: "A webpage with modified elements",
         order: 1,
-        isLocked: false
+        isLocked: false,
       },
       {
         courseId: 3,
         title: "Changing Styles",
         description: "Make your webpage look different with JavaScript",
-        content: "You can change how elements look using JavaScript! Change colors, sizes, positions, and more.\n\n🔍 What You'll Learn:\n• How to change CSS properties with JavaScript\n• How to add and remove CSS classes\n• How to create visual effects\n\n🌟 Your Challenge:\nTry changing different style properties and see what happens!",
+        content:
+          "You can change how elements look using JavaScript! Change colors, sizes, positions, and more.\n\n🔍 What You'll Learn:\n• How to change CSS properties with JavaScript\n• How to add and remove CSS classes\n• How to create visual effects\n\n🌟 Your Challenge:\nTry changing different style properties and see what happens!",
         starterCode: `<!DOCTYPE html>
 <html>
 <head>
@@ -779,13 +818,14 @@ printData(sentence);`,
 </html>`,
         expectedOutput: "A webpage with changing colors, sizes, and animations",
         order: 2,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 3,
         title: "Creating New Elements",
         description: "Add new HTML elements with JavaScript",
-        content: "You can create brand new HTML elements and add them to your page!\n\n🔍 What You'll Learn:\n• How to create new elements\n• How to add them to the page\n• How to remove elements\n\n🌟 Your Challenge:\nTry creating different types of elements and adding them in different places!",
+        content:
+          "You can create brand new HTML elements and add them to your page!\n\n🔍 What You'll Learn:\n• How to create new elements\n• How to add them to the page\n• How to remove elements\n\n🌟 Your Challenge:\nTry creating different types of elements and adding them in different places!",
         starterCode: `<!DOCTYPE html>
 <html>
 <head>
@@ -845,13 +885,14 @@ printData(sentence);`,
 </html>`,
         expectedOutput: "A webpage where you can create and remove elements",
         order: 3,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 3,
         title: "Working with Forms",
         description: "Get input from users with forms",
-        content: "Forms let users type information and interact with your webpage!\n\n🔍 What You'll Learn:\n• How to get values from input fields\n• How to respond to form submissions\n• How to validate user input\n\n🌟 Your Challenge:\nTry adding more form fields and creating a more complex form!",
+        content:
+          "Forms let users type information and interact with your webpage!\n\n🔍 What You'll Learn:\n• How to get values from input fields\n• How to respond to form submissions\n• How to validate user input\n\n🌟 Your Challenge:\nTry adding more form fields and creating a more complex form!",
         starterCode: `<!DOCTYPE html>
 <html>
 <head>
@@ -934,9 +975,10 @@ printData(sentence);`,
     </script>
 </body>
 </html>`,
-        expectedOutput: "A working form that collects and displays user information",
+        expectedOutput:
+          "A working form that collects and displays user information",
         order: 4,
-        isLocked: true
+        isLocked: true,
       },
 
       // Algorithms Course (courseId: 4)
@@ -944,7 +986,8 @@ printData(sentence);`,
         courseId: 4,
         title: "What Are Algorithms?",
         description: "Learn what algorithms are and why they're important",
-        content: "An algorithm is like a recipe - it's a set of steps to solve a problem!\n\n🔍 What You'll Learn:\n• What algorithms are\n• How to break down problems into steps\n• Why algorithms are everywhere\n\n🌟 Your Challenge:\nTry creating your own algorithm to solve a simple problem!",
+        content:
+          "An algorithm is like a recipe - it's a set of steps to solve a problem!\n\n🔍 What You'll Learn:\n• What algorithms are\n• How to break down problems into steps\n• Why algorithms are everywhere\n\n🌟 Your Challenge:\nTry creating your own algorithm to solve a simple problem!",
         starterCode: `// Let's create a simple algorithm!
 
 // Algorithm: Find the largest number in an array
@@ -982,15 +1025,17 @@ testWords.forEach(word => {
     let result = isPalindrome(word);
     printData(\`"\${word}" is \${result ? 'a palindrome' : 'not a palindrome'}\`);
 });`,
-        expectedOutput: "Algorithm results for finding largest number and checking palindromes",
+        expectedOutput:
+          "Algorithm results for finding largest number and checking palindromes",
         order: 1,
-        isLocked: false
+        isLocked: false,
       },
       {
         courseId: 4,
         title: "Searching Algorithms",
         description: "Learn different ways to find things in lists",
-        content: "There are many ways to search for items in a list. Let's explore the most common ones!\n\n🔍 What You'll Learn:\n• Linear search (checking each item one by one)\n• Binary search (for sorted lists)\n• When to use each method\n\n🌟 Your Challenge:\nTry searching for different items and see how many steps each algorithm takes!",
+        content:
+          "There are many ways to search for items in a list. Let's explore the most common ones!\n\n🔍 What You'll Learn:\n• Linear search (checking each item one by one)\n• Binary search (for sorted lists)\n• When to use each method\n\n🌟 Your Challenge:\nTry searching for different items and see how many steps each algorithm takes!",
         starterCode: `// Linear Search - Check each item one by one
 function linearSearch(array, target) {
     let steps = 0;
@@ -1043,13 +1088,14 @@ printData(binaryResult);
 printData(\`Binary search was \${linearResult.steps - binaryResult.steps} steps faster!\`);`,
         expectedOutput: "Comparison of linear and binary search algorithms",
         order: 2,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 4,
         title: "Sorting Algorithms",
         description: "Learn how to put things in order",
-        content: "Sorting is putting things in order - like organizing your toys by size or alphabetically!\n\n🔍 What You'll Learn:\n• Bubble sort (compare neighbors)\n• Selection sort (find the smallest)\n• How different sorting methods work\n\n🌟 Your Challenge:\nTry sorting different types of data - numbers, words, or even custom objects!",
+        content:
+          "Sorting is putting things in order - like organizing your toys by size or alphabetically!\n\n🔍 What You'll Learn:\n• Bubble sort (compare neighbors)\n• Selection sort (find the smallest)\n• How different sorting methods work\n\n🌟 Your Challenge:\nTry sorting different types of data - numbers, words, or even custom objects!",
         starterCode: `// Bubble Sort - Compare neighbors and swap if needed
 function bubbleSort(array) {
     let arr = [...array]; // Make a copy
@@ -1115,15 +1161,17 @@ printData('Sorting words:');
 printData(words);
 printData('Sorted words:');
 printData(bubbleSort(words).sorted);`,
-        expectedOutput: "Comparison of bubble sort and selection sort algorithms",
+        expectedOutput:
+          "Comparison of bubble sort and selection sort algorithms",
         order: 3,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 4,
         title: "Introduction to Recursion",
         description: "Learn how functions can call themselves",
-        content: "Recursion is when a function calls itself! It's like looking in a mirror that reflects another mirror.\n\n🔍 What You'll Learn:\n• What recursion is\n• How to write recursive functions\n• When recursion is useful\n\n🌟 Your Challenge:\nTry writing your own recursive function to solve a problem!",
+        content:
+          "Recursion is when a function calls itself! It's like looking in a mirror that reflects another mirror.\n\n🔍 What You'll Learn:\n• What recursion is\n• How to write recursive functions\n• When recursion is useful\n\n🌟 Your Challenge:\nTry writing your own recursive function to solve a problem!",
         starterCode: `// Recursive function to calculate factorial
 // 5! = 5 × 4 × 3 × 2 × 1 = 120
 function factorial(n) {
@@ -1178,15 +1226,17 @@ printData('First 10 Fibonacci numbers:');
 for (let i = 0; i < 10; i++) {
     printData(\`F(\${i}) = \${fibonacci(i)}\`);
 }`,
-        expectedOutput: "Step-by-step recursive calculations for factorial, sum, and Fibonacci",
+        expectedOutput:
+          "Step-by-step recursive calculations for factorial, sum, and Fibonacci",
         order: 4,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 4,
         title: "Problem Solving Strategies",
         description: "Learn how to approach complex problems",
-        content: "Breaking down big problems into smaller ones is the key to solving anything!\n\n🔍 What You'll Learn:\n• Divide and conquer approach\n• How to identify patterns\n• Step-by-step problem solving\n\n🌟 Your Challenge:\nTry solving a complex problem by breaking it down into smaller parts!",
+        content:
+          "Breaking down big problems into smaller ones is the key to solving anything!\n\n🔍 What You'll Learn:\n• Divide and conquer approach\n• How to identify patterns\n• Step-by-step problem solving\n\n🌟 Your Challenge:\nTry solving a complex problem by breaking it down into smaller parts!",
         starterCode: `// Problem: Find all anagrams of a word
 // An anagram is a word made by rearranging letters of another word
 
@@ -1289,7 +1339,7 @@ printData('Shortest path from [0,0] to [3,3]:');
 printData(path);`,
         expectedOutput: "Solutions to complex problems broken down into steps",
         order: 5,
-        isLocked: true
+        isLocked: true,
       },
 
       // Remote Data Course (courseId: 5)
@@ -1297,7 +1347,8 @@ printData(path);`,
         courseId: 5,
         title: "What is Remote Data?",
         description: "Learn about APIs and fetching data from servers",
-        content: "Remote data means getting information from other computers on the internet!\n\n🔍 What You'll Learn:\n• What APIs are\n• How data travels over the internet\n• Why we need remote data\n\n🌟 Your Challenge:\nTry making your first API request and see what data you get back!",
+        content:
+          "Remote data means getting information from other computers on the internet!\n\n🔍 What You'll Learn:\n• What APIs are\n• How data travels over the internet\n• Why we need remote data\n\n🌟 Your Challenge:\nTry making your first API request and see what data you get back!",
         starterCode: `// Let's fetch some data from a server!
 // We'll use a test API that returns fake data
 
@@ -1353,13 +1404,14 @@ printData('---');
 printData('Requests sent! Waiting for responses...');`,
         expectedOutput: "Data fetched from remote APIs displayed",
         order: 1,
-        isLocked: false
+        isLocked: false,
       },
       {
         courseId: 5,
         title: "GET Requests",
         description: "Learn to retrieve data from servers",
-        content: "GET requests are how we ask servers for information, like asking a librarian for a book!\n\n🔍 What You'll Learn:\n• How to make GET requests\n• How to handle different response formats\n• Error handling for network requests\n\n🌟 Your Challenge:\nTry fetching different types of data and see how the format changes!",
+        content:
+          "GET requests are how we ask servers for information, like asking a librarian for a book!\n\n🔍 What You'll Learn:\n• How to make GET requests\n• How to handle different response formats\n• Error handling for network requests\n\n🌟 Your Challenge:\nTry fetching different types of data and see how the format changes!",
         starterCode: `// Different types of GET requests
 
 // 1. Get a single item by ID
@@ -1439,15 +1491,17 @@ searchPosts('javascript');
 getProtectedData();
 
 printData('All GET requests sent!');`,
-        expectedOutput: "Various GET requests with different responses and error handling",
+        expectedOutput:
+          "Various GET requests with different responses and error handling",
         order: 2,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 5,
         title: "POST Requests",
         description: "Learn to send data to servers",
-        content: "POST requests let us send information to servers, like filling out a form!\n\n🔍 What You'll Learn:\n• How to send data with POST requests\n• Different data formats (JSON, form data)\n• Handling server responses\n\n🌟 Your Challenge:\nTry creating different types of data and sending them to the server!",
+        content:
+          "POST requests let us send information to servers, like filling out a form!\n\n🔍 What You'll Learn:\n• How to send data with POST requests\n• Different data formats (JSON, form data)\n• Handling server responses\n\n🌟 Your Challenge:\nTry creating different types of data and sending them to the server!",
         starterCode: `// Different types of POST requests
 
 // 1. Create a new user
@@ -1550,13 +1604,14 @@ uploadData({
 printData('All POST requests sent!');`,
         expectedOutput: "Various POST requests sending data to the server",
         order: 3,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 5,
         title: "Error Handling",
         description: "Learn to handle different types of errors",
-        content: "Sometimes things go wrong when talking to servers. Let's learn how to handle errors gracefully!\n\n🔍 What You'll Learn:\n• Different types of errors (network, server, client)\n• HTTP status codes\n• How to retry failed requests\n\n🌟 Your Challenge:\nTry making requests that will fail and see how to handle them!",
+        content:
+          "Sometimes things go wrong when talking to servers. Let's learn how to handle errors gracefully!\n\n🔍 What You'll Learn:\n• Different types of errors (network, server, client)\n• HTTP status codes\n• How to retry failed requests\n\n🌟 Your Challenge:\nTry making requests that will fail and see how to handle them!",
         starterCode: `// Error handling for different scenarios
 
 // 1. Network timeout
@@ -1673,13 +1728,14 @@ fetchWithRetry('/api/test-data/unreliable');
 handleDifferentErrors();`,
         expectedOutput: "Different error scenarios and how to handle them",
         order: 4,
-        isLocked: true
+        isLocked: true,
       },
       {
         courseId: 5,
         title: "Real-World API Integration",
         description: "Put it all together with a complete example",
-        content: "Let's build a complete application that uses everything we've learned!\n\n🔍 What You'll Learn:\n• Combining GET and POST requests\n• Managing application state\n• Creating a real user interface\n\n🌟 Your Challenge:\nTry extending this example with more features!",
+        content:
+          "Let's build a complete application that uses everything we've learned!\n\n🔍 What You'll Learn:\n• Combining GET and POST requests\n• Managing application state\n• Creating a real user interface\n\n🌟 Your Challenge:\nTry extending this example with more features!",
         starterCode: `// A complete todo list application using remote data
 
 class TodoApp {
@@ -1828,13 +1884,14 @@ setTimeout(() => {
     printData('=== Final Stats ===');
     printData(app.getStats());
 }, 5000);`,
-        expectedOutput: "A complete todo application with remote data integration",
+        expectedOutput:
+          "A complete todo application with remote data integration",
         order: 5,
-        isLocked: true
+        isLocked: true,
       },
     ];
 
-    tutorialData.forEach(tutorial => {
+    tutorialData.forEach((tutorial) => {
       const id = this.currentTutorialId++;
       this.tutorials.set(id, { ...tutorial, id });
     });
@@ -1858,7 +1915,7 @@ setTimeout(() => {
     const id = this.currentUserId++;
     const user: User = { ...insertUser, id };
     this.users.set(id, user);
-    
+
     // Create initial progress
     const progress: UserProgress = {
       id: this.currentProgressId++,
@@ -1870,7 +1927,7 @@ setTimeout(() => {
       stars: 0,
     };
     this.userProgress.set(id, progress);
-    
+
     return user;
   }
 
@@ -1879,12 +1936,15 @@ setTimeout(() => {
     return this.userProgress.get(userId);
   }
 
-  async updateUserProgress(userId: number, progress: Partial<InsertUserProgress>): Promise<UserProgress> {
+  async updateUserProgress(
+    userId: number,
+    progress: Partial<InsertUserProgress>
+  ): Promise<UserProgress> {
     const existing = this.userProgress.get(userId);
     if (!existing) {
       throw new Error(`User progress not found for user ${userId}`);
     }
-    
+
     const updated: UserProgress = { ...existing, ...progress };
     this.userProgress.set(userId, updated);
     return updated;
@@ -1908,12 +1968,14 @@ setTimeout(() => {
 
   // Tutorial methods
   async getAllTutorials(): Promise<Tutorial[]> {
-    return Array.from(this.tutorials.values()).sort((a, b) => a.order - b.order);
+    return Array.from(this.tutorials.values()).sort(
+      (a, b) => a.order - b.order
+    );
   }
 
   async getTutorialsByCourse(courseId: number): Promise<Tutorial[]> {
     return Array.from(this.tutorials.values())
-      .filter(t => t.courseId === courseId)
+      .filter((t) => t.courseId === courseId)
       .sort((a, b) => a.order - b.order);
   }
 

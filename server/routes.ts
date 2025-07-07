@@ -1,7 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage.js";
-import { insertUserSchema, insertUserProgressSchema } from "../shared/schema.js";
+import {
+  insertUserSchema,
+  insertUserProgressSchema,
+} from "../shared/schema.js";
 import OpenAI from "openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -42,6 +45,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/tutorials", async (req, res) => {
     try {
       const tutorials = await storage.getAllTutorials();
+
+      console.log(
+        "Fetched tutorials:",
+        tutorials.length,
+        "tutorials",
+        tutorials.map((t) => t.order).join(", ")
+      );
+
       res.json(tutorials);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch tutorials" });
@@ -68,14 +79,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For demo purposes, use a default user ID of 1
       // In a real app, this would come from authentication
       const userId = 1;
-      
+
       let progress = await storage.getUserProgress(userId);
       if (!progress) {
         // Create default user and progress if they don't exist
-        const user = await storage.createUser({ username: "demo", password: "demo" });
+        const user = await storage.createUser({
+          username: "demo",
+          password: "demo",
+        });
         progress = await storage.getUserProgress(user.id);
       }
-      
+
       res.json(progress);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch progress" });
@@ -87,8 +101,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = 1; // Demo user
       const progressData = insertUserProgressSchema.parse(req.body);
-      
-      const updatedProgress = await storage.updateUserProgress(userId, progressData);
+
+      const updatedProgress = await storage.updateUserProgress(
+        userId,
+        progressData
+      );
       res.json(updatedProgress);
     } catch (error) {
       res.status(400).json({ error: "Invalid progress data" });
@@ -99,13 +116,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/execute", async (req, res) => {
     try {
       const { code } = req.body;
-      
+
       // For demo purposes, just return success
       // In a real implementation, you'd want to safely execute the code
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         output: "Code executed successfully! 🎨",
-        logs: ["Great job! Your code is working perfectly."]
+        logs: ["Great job! Your code is working perfectly."],
       });
     } catch (error) {
       res.status(500).json({ error: "Failed to execute code" });
@@ -123,7 +140,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Test the API key with a simple request
       const testOpenai = new OpenAI({ apiKey });
-      
+
       await testOpenai.chat.completions.create({
         model: "gpt-4o",
         messages: [{ role: "user", content: "Hello" }],
@@ -176,7 +193,7 @@ Available drawing functions they can use:
 - clearCanvas()
 
 Canvas size is 400x400 pixels, with (0,0) at top-left corner.`;
-      
+
       if (isFirstMessage && tutorialId) {
         // Get tutorial context for first message
         const tutorial = await storage.getTutorial(tutorialId);
@@ -189,7 +206,7 @@ Tutorial Content: ${tutorial.content}`;
         }
       }
 
-      const chatMessages = systemMessage 
+      const chatMessages = systemMessage
         ? [{ role: "system", content: systemMessage }, ...messages]
         : messages;
 
@@ -201,10 +218,10 @@ Tutorial Content: ${tutorial.content}`;
       });
 
       const assistantMessage = response.choices[0].message.content;
-      
+
       res.json({
         message: assistantMessage,
-        usage: response.usage
+        usage: response.usage,
       });
     } catch (error) {
       console.error("AI chat error:", error);
@@ -219,7 +236,7 @@ Tutorial Content: ${tutorial.content}`;
       name: "Alice Johnson",
       email: "alice@example.com",
       age: 25,
-      city: "New York"
+      city: "New York",
     });
   });
 
@@ -236,32 +253,59 @@ Tutorial Content: ${tutorial.content}`;
 
   app.get("/api/test-data/posts", (req, res) => {
     res.json([
-      { id: 1, title: "Learning JavaScript", content: "JavaScript is awesome!", author: "Alice" },
-      { id: 2, title: "Web Development Tips", content: "Here are some tips...", author: "Bob" },
-      { id: 3, title: "API Design", content: "Good API design is important", author: "Charlie" }
+      {
+        id: 1,
+        title: "Learning JavaScript",
+        content: "JavaScript is awesome!",
+        author: "Alice",
+      },
+      {
+        id: 2,
+        title: "Web Development Tips",
+        content: "Here are some tips...",
+        author: "Bob",
+      },
+      {
+        id: 3,
+        title: "API Design",
+        content: "Good API design is important",
+        author: "Charlie",
+      },
     ]);
   });
 
   app.get("/api/test-data/posts/search", (req, res) => {
     const query = req.query.q as string;
     const allPosts = [
-      { id: 1, title: "Learning JavaScript", content: "JavaScript is awesome!" },
-      { id: 2, title: "Web Development Tips", content: "Here are some tips..." },
-      { id: 3, title: "API Design", content: "Good API design is important" }
+      {
+        id: 1,
+        title: "Learning JavaScript",
+        content: "JavaScript is awesome!",
+      },
+      {
+        id: 2,
+        title: "Web Development Tips",
+        content: "Here are some tips...",
+      },
+      { id: 3, title: "API Design", content: "Good API design is important" },
     ];
-    
-    const results = allPosts.filter(post => 
-      post.title.toLowerCase().includes(query.toLowerCase()) ||
-      post.content.toLowerCase().includes(query.toLowerCase())
+
+    const results = allPosts.filter(
+      (post) =>
+        post.title.toLowerCase().includes(query.toLowerCase()) ||
+        post.content.toLowerCase().includes(query.toLowerCase())
     );
-    
+
     res.json(results);
   });
 
   app.get("/api/test-data/protected", (req, res) => {
     const auth = req.headers.authorization;
     if (auth === "Bearer demo-token") {
-      res.json({ secret: "This is protected data!", timestamp: new Date().toISOString() });
+      res.json({
+        secret: "This is protected data!",
+        timestamp: new Date().toISOString(),
+      });
     } else {
       res.status(401).json({ error: "Unauthorized" });
     }
@@ -272,7 +316,7 @@ Tutorial Content: ${tutorial.content}`;
     res.status(201).json({
       id: Math.floor(Math.random() * 1000),
       ...userData,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
   });
 
@@ -282,7 +326,7 @@ Tutorial Content: ${tutorial.content}`;
       message: "Thank you for your message!",
       id: Math.floor(Math.random() * 1000),
       submittedAt: new Date().toISOString(),
-      data: formData
+      data: formData,
     });
   });
 
@@ -292,7 +336,7 @@ Tutorial Content: ${tutorial.content}`;
       message: "Data uploaded successfully",
       uploadId: Math.floor(Math.random() * 1000),
       size: JSON.stringify(data).length,
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
     });
   });
 
@@ -328,7 +372,7 @@ Tutorial Content: ${tutorial.content}`;
     res.json([
       { id: 1, text: "Learn JavaScript", completed: true },
       { id: 2, text: "Build a todo app", completed: false },
-      { id: 3, text: "Deploy to production", completed: false }
+      { id: 3, text: "Deploy to production", completed: false },
     ]);
   });
 
@@ -337,7 +381,7 @@ Tutorial Content: ${tutorial.content}`;
     res.status(201).json({
       id: Math.floor(Math.random() * 1000),
       ...todoData,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     });
   });
 
@@ -347,7 +391,7 @@ Tutorial Content: ${tutorial.content}`;
     res.json({
       id,
       ...updateData,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
   });
 

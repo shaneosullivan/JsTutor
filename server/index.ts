@@ -65,10 +65,10 @@ if (process.env.NODE_ENV === "development") {
   (async () => {
     const app = await createServer();
     
-    // ALWAYS serve the app on port 5000
+    // ALWAYS serve the app on port 5005
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
-    const port = 5000;
+    const port = 5005;
     app.listen(port, "0.0.0.0", () => {
       console.log(`serving on port ${port}`);
     });
