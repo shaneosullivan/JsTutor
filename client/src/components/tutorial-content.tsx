@@ -258,7 +258,10 @@ export default function TutorialContent({
             courseType === 'printData' ? "w-2/3" : "w-1/2"
           )}>
             <div className="h-full p-4">
-              <div className="h-full border border-slate-200 rounded-lg bg-white flex items-center justify-center overflow-hidden">
+              <div className={cn(
+                "h-full border border-slate-200 rounded-lg bg-white overflow-hidden",
+                courseType === 'printData' ? "flex" : "flex items-center justify-center"
+              )}>
                 {showAiChat ? (
                   <AiChat
                     tutorialId={tutorial.id}
@@ -277,11 +280,13 @@ export default function TutorialContent({
                       />
                     )}
                     {courseType === 'printData' && (
-                      <PrintDataDisplay 
-                        code={userCode} 
-                        onOutput={setOutput}
-                        onError={handleCanvasError}
-                      />
+                      <div className="w-full h-full">
+                        <PrintDataDisplay 
+                          code={userCode} 
+                          onOutput={setOutput}
+                          onError={handleCanvasError}
+                        />
+                      </div>
                     )}
                     {courseType === 'iframe' && (
                       <IframeDisplay 
