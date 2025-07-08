@@ -1,3 +1,5 @@
+import React from "react";
+
 function isDevServer(): boolean {
   const isDev =
     typeof window !== "undefined"
@@ -12,19 +14,25 @@ export default function Analytics() {
   if (isDevServer()) {
     return null;
   }
+
+  React.useEffect(() => {
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = "https://scripts.simpleanalyticscdn.com/latest.js";
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, []);
+
   return (
-    <>
-      <script
-        async
-        src="https://scripts.simpleanalyticscdn.com/latest.js"
-      ></script>
-      <noscript>
-        <img
-          src="https://queue.simpleanalyticscdn.com/noscript.gif"
-          alt=""
-          referrerPolicy="no-referrer-when-downgrade"
-        />
-      </noscript>
-    </>
+    <noscript>
+      <img
+        src="https://queue.simpleanalyticscdn.com/noscript.gif"
+        alt=""
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+    </noscript>
   );
 }
