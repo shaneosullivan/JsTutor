@@ -1,9 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Lock, Play, BookOpen, Code, Globe, Layers, Database } from "lucide-react";
+import {
+  CheckCircle,
+  Lock,
+  Play,
+  BookOpen,
+  Code,
+  Globe,
+  Layers,
+  Database,
+} from "lucide-react";
+import Analytics from "@/components/Analytics";
 
 interface Course {
   id: number;
@@ -21,7 +37,7 @@ export default function CourseSelection() {
 
   // Get completion status from localStorage
   const getCompletedCourses = (): number[] => {
-    const saved = localStorage.getItem('completedCourses');
+    const saved = localStorage.getItem("completedCourses");
     return saved ? JSON.parse(saved) : [];
   };
 
@@ -38,11 +54,11 @@ export default function CourseSelection() {
 
   const getCourseIcon = (type: string) => {
     switch (type) {
-      case 'canvas':
+      case "canvas":
         return <BookOpen className="h-8 w-8" />;
-      case 'printData':
+      case "printData":
         return <Code className="h-8 w-8" />;
-      case 'iframe':
+      case "iframe":
         return <Globe className="h-8 w-8" />;
       default:
         return <Layers className="h-8 w-8" />;
@@ -51,14 +67,14 @@ export default function CourseSelection() {
 
   const getCourseTypeDescription = (type: string) => {
     switch (type) {
-      case 'canvas':
-        return 'Visual programming with drawing canvas';
-      case 'printData':
-        return 'Data manipulation and console output';
-      case 'iframe':
-        return 'Web development with HTML preview';
+      case "canvas":
+        return "Visual programming with drawing canvas";
+      case "printData":
+        return "Data manipulation and console output";
+      case "iframe":
+        return "Web development with HTML preview";
       default:
-        return 'Interactive coding exercises';
+        return "Interactive coding exercises";
     }
   };
 
@@ -83,8 +99,8 @@ export default function CourseSelection() {
             JavaScript Adventure Courses
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Choose your learning path! Start with the Basics course, then explore specialized topics
-            in any order you prefer.
+            Choose your learning path! Start with the Basics course, then
+            explore specialized topics in any order you prefer.
           </p>
         </div>
 
@@ -99,19 +115,19 @@ export default function CourseSelection() {
                 key={course.id}
                 className={`transition-all duration-200 ${
                   isUnlocked
-                    ? 'hover:shadow-lg hover:scale-105 cursor-pointer'
-                    : 'opacity-60 cursor-not-allowed'
-                } ${isCompleted ? 'ring-2 ring-green-500' : ''}`}
+                    ? "hover:shadow-lg hover:scale-105 cursor-pointer"
+                    : "opacity-60 cursor-not-allowed"
+                } ${isCompleted ? "ring-2 ring-green-500" : ""}`}
               >
                 <CardHeader className="text-center">
                   <div className="flex justify-center mb-3">
                     <div
                       className={`p-3 rounded-full ${
                         isCompleted
-                          ? 'bg-green-100 text-green-600'
+                          ? "bg-green-100 text-green-600"
                           : isUnlocked
-                          ? 'bg-blue-100 text-blue-600'
-                          : 'bg-gray-100 text-gray-400'
+                          ? "bg-blue-100 text-blue-600"
+                          : "bg-gray-100 text-gray-400"
                       }`}
                     >
                       {isCompleted ? (
@@ -139,7 +155,7 @@ export default function CourseSelection() {
                   <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                     {course.description}
                   </p>
-                  
+
                   <div className="space-y-3">
                     {isCompleted && (
                       <div className="flex items-center text-green-600 text-sm">
@@ -147,23 +163,34 @@ export default function CourseSelection() {
                         Course Completed!
                       </div>
                     )}
-                    
+
                     {!isUnlocked && !isBasics && (
                       <div className="flex items-center text-gray-500 text-sm">
                         <Lock className="h-4 w-4 mr-2" />
                         Complete Basics course first
                       </div>
                     )}
-                    
+
                     {isUnlocked ? (
-                      <Link href={course.id === 1 ? "/" : `/course/${course.id}`}>
-                        <Button 
-                          className="w-full" 
+                      <Link
+                        href={course.id === 1 ? "/" : `/course/${course.id}`}
+                      >
+                        <Button
+                          className="w-full"
                           variant={isCompleted ? "outline" : "default"}
-                          onClick={() => localStorage.setItem('lastCourseId', course.id.toString())}
+                          onClick={() =>
+                            localStorage.setItem(
+                              "lastCourseId",
+                              course.id.toString()
+                            )
+                          }
                         >
                           <Play className="h-4 w-4 mr-2" />
-                          {isCompleted ? 'Review Course' : isBasics ? 'Start Learning' : 'Start Course'}
+                          {isCompleted
+                            ? "Review Course"
+                            : isBasics
+                            ? "Start Learning"
+                            : "Start Course"}
                         </Button>
                       </Link>
                     ) : (
@@ -186,12 +213,14 @@ export default function CourseSelection() {
               Your Progress is Saved Locally
             </h3>
             <p className="text-gray-600 text-sm">
-              All your progress is automatically saved in your browser. You can come back anytime
-              and continue where you left off!
+              All your progress is automatically saved in your browser. You can
+              come back anytime and continue where you left off!
             </p>
           </div>
         </div>
       </div>
+
+      <Analytics />
     </div>
   );
 }

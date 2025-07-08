@@ -7,6 +7,7 @@ import { ArrowLeft, Book, CheckCircle, Lock } from "lucide-react";
 import TutorialContent from "@/components/tutorial-content";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import { useTutorial } from "@/hooks/use-course-tutorial";
+import Analytics from "@/components/Analytics";
 
 interface Course {
   id: number;
@@ -44,8 +45,11 @@ export default function CoursePage() {
     return saved ? parseInt(saved) : 1;
   };
 
-  const [completedTutorials, setCompletedTutorials] = useState<number[]>(getCompletedTutorials);
-  const [currentTutorialOrder, setCurrentTutorialOrder] = useState<number>(getCurrentTutorial);
+  const [completedTutorials, setCompletedTutorials] = useState<number[]>(
+    getCompletedTutorials
+  );
+  const [currentTutorialOrder, setCurrentTutorialOrder] =
+    useState<number>(getCurrentTutorial);
 
   // Fetch course and tutorials
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
@@ -53,57 +57,67 @@ export default function CoursePage() {
     enabled: !!courseId,
   });
 
-  const { data: tutorials = [], isLoading: tutorialsLoading } = useQuery<Tutorial[]>({
+  const { data: tutorials = [], isLoading: tutorialsLoading } = useQuery<
+    Tutorial[]
+  >({
     queryKey: [`/api/courses/${courseId}/tutorials`],
     enabled: !!courseId,
   });
 
-  const {
-    userCode,
-    setUserCode,
-    sidebarCollapsed,
-    setSidebarCollapsed,
-  } = useTutorial();
+  const { userCode, setUserCode, sidebarCollapsed, setSidebarCollapsed } =
+    useTutorial();
 
   // Save last visited course to localStorage
   useEffect(() => {
     if (courseId) {
-      localStorage.setItem('lastCourseId', courseId.toString());
+      localStorage.setItem("lastCourseId", courseId.toString());
     }
   }, [courseId]);
 
   // Save progress to localStorage
   useEffect(() => {
-    localStorage.setItem(`completedTutorials_course_${courseId}`, JSON.stringify(completedTutorials));
+    localStorage.setItem(
+      `completedTutorials_course_${courseId}`,
+      JSON.stringify(completedTutorials)
+    );
   }, [completedTutorials, courseId]);
 
   useEffect(() => {
-    localStorage.setItem(`currentTutorial_course_${courseId}`, currentTutorialOrder.toString());
+    localStorage.setItem(
+      `currentTutorial_course_${courseId}`,
+      currentTutorialOrder.toString()
+    );
   }, [currentTutorialOrder, courseId]);
 
   // Tutorial completion logic
   const markTutorialComplete = (tutorialOrder: number) => {
-    const tutorial = tutorials.find(t => t.order === tutorialOrder);
+    const tutorial = tutorials.find((t) => t.order === tutorialOrder);
     if (!tutorial) return;
 
     if (!completedTutorials.includes(tutorial.id)) {
-      setCompletedTutorials(prev => [...prev, tutorial.id]);
+      setCompletedTutorials((prev) => [...prev, tutorial.id]);
     }
 
     // Check if this is the last tutorial in the course
-    const isLastTutorial = tutorialOrder === Math.max(...tutorials.map(t => t.order));
+    const isLastTutorial =
+      tutorialOrder === Math.max(...tutorials.map((t) => t.order));
     if (isLastTutorial) {
       // Mark course as completed
-      const completedCourses = JSON.parse(localStorage.getItem('completedCourses') || '[]');
+      const completedCourses = JSON.parse(
+        localStorage.getItem("completedCourses") || "[]"
+      );
       if (!completedCourses.includes(courseId)) {
-        localStorage.setItem('completedCourses', JSON.stringify([...completedCourses, courseId]));
+        localStorage.setItem(
+          "completedCourses",
+          JSON.stringify([...completedCourses, courseId])
+        );
       }
     }
   };
 
   const goToNextTutorial = () => {
     const nextOrder = currentTutorialOrder + 1;
-    const nextTutorial = tutorials.find(t => t.order === nextOrder);
+    const nextTutorial = tutorials.find((t) => t.order === nextOrder);
     if (nextTutorial) {
       setCurrentTutorialOrder(nextOrder);
     }
@@ -116,19 +130,26 @@ export default function CoursePage() {
   // Check if tutorial is unlocked
   const isTutorialUnlocked = (tutorial: Tutorial): boolean => {
     if (tutorial.order === 1) return true;
-    const prevTutorial = tutorials.find(t => t.order === tutorial.order - 1);
+    const prevTutorial = tutorials.find((t) => t.order === tutorial.order - 1);
     return prevTutorial ? completedTutorials.includes(prevTutorial.id) : false;
   };
 
-  const currentTutorialData = tutorials.find(t => t.order === currentTutorialOrder);
-  const isCurrentCompleted = currentTutorialData ? completedTutorials.includes(currentTutorialData.id) : false;
-  const hasNext = currentTutorialOrder < Math.max(...tutorials.map(t => t.order));
+  const currentTutorialData = tutorials.find(
+    (t) => t.order === currentTutorialOrder
+  );
+  const isCurrentCompleted = currentTutorialData
+    ? completedTutorials.includes(currentTutorialData.id)
+    : false;
+  const hasNext =
+    currentTutorialOrder < Math.max(...tutorials.map((t) => t.order));
 
   // Load starter code when tutorial changes
   useEffect(() => {
     if (currentTutorialData && currentTutorialData.starterCode) {
       // Check if we have saved user code for this tutorial
-      const savedCode = localStorage.getItem(`userCode_tutorial_${currentTutorialData.id}`);
+      const savedCode = localStorage.getItem(
+        `userCode_tutorial_${currentTutorialData.id}`
+      );
       if (savedCode) {
         setUserCode(savedCode);
       } else {
@@ -141,7 +162,10 @@ export default function CoursePage() {
   // Save user code when it changes
   useEffect(() => {
     if (currentTutorialData && userCode) {
-      localStorage.setItem(`userCode_tutorial_${currentTutorialData.id}`, userCode);
+      localStorage.setItem(
+        `userCode_tutorial_${currentTutorialData.id}`,
+        userCode
+      );
     }
   }, [currentTutorialData, userCode]);
 
@@ -184,7 +208,7 @@ export default function CoursePage() {
   return (
     <div className="h-screen flex">
       <TutorialSidebar
-        tutorials={sortedTutorials.map(t => ({
+        tutorials={sortedTutorials.map((t) => ({
           id: t.id,
           courseId: t.courseId,
           title: t.title,
@@ -193,19 +217,23 @@ export default function CoursePage() {
           starterCode: t.starterCode,
           expectedOutput: t.expectedOutput || "",
           order: t.order,
-          isLocked: !isTutorialUnlocked(t)
+          isLocked: !isTutorialUnlocked(t),
         }))}
-        currentTutorial={currentTutorialData ? {
-          id: currentTutorialData.id,
-          courseId: currentTutorialData.courseId,
-          title: currentTutorialData.title,
-          description: currentTutorialData.description,
-          content: currentTutorialData.content,
-          starterCode: currentTutorialData.starterCode,
-          expectedOutput: currentTutorialData.expectedOutput || "",
-          order: currentTutorialData.order,
-          isLocked: false
-        } : null}
+        currentTutorial={
+          currentTutorialData
+            ? {
+                id: currentTutorialData.id,
+                courseId: currentTutorialData.courseId,
+                title: currentTutorialData.title,
+                description: currentTutorialData.description,
+                content: currentTutorialData.content,
+                starterCode: currentTutorialData.starterCode,
+                expectedOutput: currentTutorialData.expectedOutput || "",
+                order: currentTutorialData.order,
+                isLocked: false,
+              }
+            : null
+        }
         completedTutorials={completedTutorials}
         onTutorialSelect={selectTutorial}
         collapsed={sidebarCollapsed}
@@ -248,7 +276,7 @@ export default function CoursePage() {
               starterCode: currentTutorialData.starterCode,
               expectedOutput: currentTutorialData.expectedOutput || "",
               order: currentTutorialData.order,
-              isLocked: false
+              isLocked: false,
             }}
             onComplete={() => markTutorialComplete(currentTutorialOrder)}
             isCompleted={isCurrentCompleted}
@@ -260,6 +288,8 @@ export default function CoursePage() {
           />
         </div>
       </div>
+
+      <Analytics />
     </div>
   );
 }

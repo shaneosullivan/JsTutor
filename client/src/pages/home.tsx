@@ -9,6 +9,7 @@ import { Code, Star, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Analytics from "@/components/Analytics";
 
 interface Course {
   id: number;
@@ -350,6 +351,7 @@ export default function Home() {
           </Tabs>
         </main>
       </div>
+      <Analytics />
     </div>
   );
 }
