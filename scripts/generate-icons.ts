@@ -57,7 +57,7 @@ const iconSizes: IconSize[] = [
 
 async function generateIcons() {
   const inputSvg = path.join(process.cwd(), 'client/public/logo.svg');
-  const outputDir = path.join(process.cwd(), 'client/public');
+  const outputDir = path.join(process.cwd(), 'client/public/icons');
   
   // Check if input SVG exists
   try {
@@ -154,53 +154,53 @@ async function generateManifest() {
     orientation: "portrait-primary",
     icons: [
       {
-        src: "/android-chrome-36x36.png",
+        src: "/icons/android-chrome-36x36.png",
         sizes: "36x36",
         type: "image/png",
         density: "0.75"
       },
       {
-        src: "/android-chrome-48x48.png",
+        src: "/icons/android-chrome-48x48.png",
         sizes: "48x48",
         type: "image/png",
         density: "1.0"
       },
       {
-        src: "/android-chrome-72x72.png",
+        src: "/icons/android-chrome-72x72.png",
         sizes: "72x72",
         type: "image/png",
         density: "1.5"
       },
       {
-        src: "/android-chrome-96x96.png",
+        src: "/icons/android-chrome-96x96.png",
         sizes: "96x96",
         type: "image/png",
         density: "2.0"
       },
       {
-        src: "/android-chrome-144x144.png",
+        src: "/icons/android-chrome-144x144.png",
         sizes: "144x144",
         type: "image/png",
         density: "3.0"
       },
       {
-        src: "/android-chrome-192x192.png",
+        src: "/icons/android-chrome-192x192.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "maskable any"
       },
       {
-        src: "/android-chrome-256x256.png",
+        src: "/icons/android-chrome-256x256.png",
         sizes: "256x256",
         type: "image/png"
       },
       {
-        src: "/android-chrome-384x384.png",
+        src: "/icons/android-chrome-384x384.png",
         sizes: "384x384",
         type: "image/png"
       },
       {
-        src: "/android-chrome-512x512.png",
+        src: "/icons/android-chrome-512x512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable any"
@@ -220,10 +220,10 @@ async function generateBrowserconfig() {
 <browserconfig>
     <msapplication>
         <tile>
-            <square70x70logo src="/mstile-70x70.png"/>
-            <square150x150logo src="/mstile-150x150.png"/>
-            <wide310x150logo src="/mstile-310x150.png"/>
-            <square310x310logo src="/mstile-310x310.png"/>
+            <square70x70logo src="/icons/mstile-70x70.png"/>
+            <square150x150logo src="/icons/mstile-150x150.png"/>
+            <wide310x150logo src="/icons/mstile-310x150.png"/>
+            <square310x310logo src="/icons/mstile-310x310.png"/>
             <TileColor>#6366f1</TileColor>
         </tile>
     </msapplication>
@@ -246,28 +246,28 @@ async function main() {
     console.log('🔗 Add these meta tags to your HTML <head>:');
     console.log('');
     console.log(`<!-- Standard favicons -->
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="shortcut icon" href="/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+<link rel="shortcut icon" href="/icons/favicon.ico">
 
 <!-- Apple Touch Icons -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
 
 <!-- Android Chrome Icons -->
-<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
-<link rel="icon" type="image/png" sizes="96x96" href="/android-chrome-96x96.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/icons/android-chrome-96x96.png">
 
 <!-- Microsoft Tiles -->
 <meta name="msapplication-TileColor" content="#6366f1">
-<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+<meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
 <meta name="msapplication-config" content="/browserconfig.xml">
 
 <!-- PWA Manifest -->
