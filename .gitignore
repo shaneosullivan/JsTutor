@@ -5,3 +5,10 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .last_modified_timestamp
+
+# Generated icons (can be regenerated with npm run generate-icons)
+client/public/*.png
+client/public/manifest.json
+client/public/browserconfig.xml
+# Keep the source SVG
+!client/public/logo.svg

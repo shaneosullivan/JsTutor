@@ -1,4 +1,4 @@
-import { Book, Code, Palette, Mouse, Zap, Info } from "lucide-react";
+import { Book, Code, Palette, Mouse, Zap, Info, Gamepad2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -83,6 +83,76 @@ drawText(200, 200, 'I love coding!', 'blue');`,
     example: `clearCanvas();
 // Canvas is now completely white`,
     category: "utility"
+  },
+  {
+    name: "onKeyPress",
+    syntax: "onKeyPress(callback)",
+    description: "Listen for any key press and execute a callback function",
+    parameters: [
+      { name: "callback", type: "function", description: "Function to call when a key is pressed, receives (key, preventDefault)" }
+    ],
+    example: `onKeyPress((key, preventDefault) => {
+  if (key === 'w') {
+    drawCircle(200, 200, 10, 'red');
+    preventDefault(); // Prevents default browser behavior
+  }
+});`,
+    category: "events"
+  },
+  {
+    name: "onArrowKeys",
+    syntax: "onArrowKeys(callback)",
+    description: "Listen specifically for arrow key presses (up, down, left, right)",
+    parameters: [
+      { name: "callback", type: "function", description: "Function to call when arrow keys are pressed, receives (direction, preventDefault)" }
+    ],
+    example: `let x = 200, y = 200;
+onArrowKeys((direction, preventDefault) => {
+  clearCanvas();
+  if (direction === 'up') y -= 10;
+  if (direction === 'down') y += 10;
+  if (direction === 'left') x -= 10;
+  if (direction === 'right') x += 10;
+  drawCircle(x, y, 15, 'blue');
+  preventDefault();
+});`,
+    category: "events"
+  },
+  {
+    name: "onSpaceBar",
+    syntax: "onSpaceBar(callback)",
+    description: "Listen for spacebar presses and execute a callback function",
+    parameters: [
+      { name: "callback", type: "function", description: "Function to call when spacebar is pressed" }
+    ],
+    example: `onSpaceBar(() => {
+  // Draw a random circle when spacebar is pressed
+  let x = Math.random() * 400;
+  let y = Math.random() * 400;
+  drawCircle(x, y, 20, 'purple');
+});`,
+    category: "events"
+  },
+  {
+    name: "isKeyPressed",
+    syntax: "isKeyPressed(key)",
+    description: "Check if a specific key is currently being held down",
+    parameters: [
+      { name: "key", type: "string", description: "The key to check (e.g., 'w', 'a', 's', 'd', 'arrowup')" }
+    ],
+    example: `// Continuous movement while keys are held
+function gameLoop() {
+  let x = 200, y = 200;
+  if (isKeyPressed('w')) y -= 2;
+  if (isKeyPressed('s')) y += 2;
+  if (isKeyPressed('a')) x -= 2;
+  if (isKeyPressed('d')) x += 2;
+  
+  clearCanvas();
+  drawCircle(x, y, 10, 'green');
+}
+setInterval(gameLoop, 50);`,
+    category: "events"
   }
 ];
 
@@ -120,6 +190,67 @@ drawCircle(230, 200, 20, 'pink');    // Right petal
 drawCircle(200, 170, 20, 'pink');    // Top petal
 drawCircle(200, 230, 20, 'pink');    // Bottom petal
 drawLine(200, 230, 200, 350, 'green'); // Stem`
+  },
+  {
+    title: "Interactive Drawing",
+    code: `// Draw with keyboard controls
+let x = 200, y = 200;
+
+// Use arrow keys to move
+onArrowKeys((direction, preventDefault) => {
+  if (direction === 'up') y -= 10;
+  if (direction === 'down') y += 10;
+  if (direction === 'left') x -= 10;
+  if (direction === 'right') x += 10;
+  
+  drawCircle(x, y, 5, 'red');
+  preventDefault();
+});
+
+// Press spacebar to clear
+onSpaceBar(() => {
+  clearCanvas();
+});`
+  },
+  {
+    title: "Keyboard Paint",
+    code: `// Paint with different keys
+onKeyPress((key, preventDefault) => {
+  let x = Math.random() * 400;
+  let y = Math.random() * 400;
+  
+  if (key === 'r') drawCircle(x, y, 10, 'red');
+  if (key === 'b') drawCircle(x, y, 10, 'blue');
+  if (key === 'g') drawCircle(x, y, 10, 'green');
+  if (key === 'c') clearCanvas();
+  
+  preventDefault();
+});`
+  },
+  {
+    title: "Smooth Movement",
+    code: `// Smooth character movement
+let playerX = 200, playerY = 200;
+
+function gameLoop() {
+  // Check which keys are held down
+  if (isKeyPressed('w')) playerY -= 3;
+  if (isKeyPressed('s')) playerY += 3;
+  if (isKeyPressed('a')) playerX -= 3;
+  if (isKeyPressed('d')) playerX += 3;
+  
+  // Keep player on screen
+  playerX = Math.max(10, Math.min(390, playerX));
+  playerY = Math.max(10, Math.min(390, playerY));
+  
+  // Draw the game
+  clearCanvas();
+  drawCircle(playerX, playerY, 10, 'blue');
+  drawText(10, 30, 'Use WASD to move!', 'black');
+}
+
+// Run the game loop 60 times per second
+setInterval(gameLoop, 16);`
   }
 ];
 
@@ -130,6 +261,7 @@ export default function ApiDocumentation() {
       case "shapes": return <Palette className="w-4 h-4" />;
       case "text": return <Book className="w-4 h-4" />;
       case "utility": return <Mouse className="w-4 h-4" />;
+      case "events": return <Gamepad2 className="w-4 h-4" />;
       default: return <Code className="w-4 h-4" />;
     }
   };
@@ -140,6 +272,7 @@ export default function ApiDocumentation() {
       case "shapes": return "bg-blue-100 text-blue-800";
       case "text": return "bg-green-100 text-green-800";
       case "utility": return "bg-purple-100 text-purple-800";
+      case "events": return "bg-orange-100 text-orange-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };
@@ -152,7 +285,7 @@ export default function ApiDocumentation() {
             Drawing Functions Reference
           </h1>
           <p className="text-slate-600">
-            All the functions you can use to create amazing drawings!
+            All the functions you can use to create amazing drawings and interactive experiences!
           </p>
         </div>
 

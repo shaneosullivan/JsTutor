@@ -1,0 +1,64 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle with Gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="jsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f7df1e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f0d000;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="codeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f1f5f9;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Main Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGradient)" filter="url(#glow)"/>
+  
+  <!-- JavaScript Symbol Background -->
+  <rect x="180" y="180" width="152" height="152" rx="24" fill="url(#jsGradient)"/>
+  
+  <!-- JS Text -->
+  <text x="256" y="290" font-family="Inter, system-ui, sans-serif" font-size="80" font-weight="800" text-anchor="middle" fill="#000000">JS</text>
+  
+  <!-- Code Brackets -->
+  <g stroke="url(#codeGradient)" stroke-width="8" fill="none">
+    <!-- Left bracket -->
+    <path d="M120 200 L80 256 L120 312" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Right bracket -->
+    <path d="M392 200 L432 256 L392 312" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- Adventure Elements - Compass/Navigation -->
+  <g transform="translate(380, 140)" fill="url(#codeGradient)">
+    <!-- Compass star -->
+    <path d="M0 -20 L5 -5 L20 0 L5 5 L0 20 L-5 5 L-20 0 L-5 -5 Z" opacity="0.9"/>
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="3" fill="#ffffff"/>
+  </g>
+  
+  <!-- Code dots/syntax highlighting -->
+  <g opacity="0.8">
+    <circle cx="150" cy="150" r="6" fill="#34d399"/>
+    <circle cx="370" cy="160" r="4" fill="#60a5fa"/>
+    <circle cx="140" cy="370" r="5" fill="#f472b6"/>
+    <circle cx="380" cy="350" r="4" fill="#fbbf24"/>
+  </g>
+  
+  <!-- Subtle geometric pattern -->
+  <g opacity="0.1" stroke="#ffffff" stroke-width="1" fill="none">
+    <polygon points="256,100 300,150 256,200 212,150"/>
+    <polygon points="256,312 300,362 256,412 212,362"/>
+  </g>
+</svg>

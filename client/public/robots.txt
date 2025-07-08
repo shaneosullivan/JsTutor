@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://jsadventure.dev/sitemap.xml
+
+# Crawl-delay for courtesy
+Crawl-delay: 1

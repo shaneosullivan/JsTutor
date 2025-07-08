@@ -200,9 +200,11 @@ export default function Home() {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
-                  <Code className="text-white" size={16} />
-                </div>
+                <img
+                  src="/logo.svg"
+                  alt="JavaScript Adventure Logo"
+                  className="w-8 h-8 rounded-lg"
+                />
                 <h1 className="text-xl font-bold text-slate-800">
                   JavaScript Adventure
                 </h1>
