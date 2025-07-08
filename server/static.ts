@@ -55,18 +55,44 @@ export function serveStatic(app: Express) {
     express.static(distPath, {
       index: false, // Don't automatically serve index.html for directories
       setHeaders: (res, filePath) => {
+        const relativePath = path.relative(distPath, filePath);
+
         if (filePath.endsWith(".js")) {
           res.setHeader(
             "Content-Type",
             "application/javascript; charset=utf-8"
           );
+          // Cache hashed assets for 1 year, but bust cache for HTML
+          if (relativePath.includes("assets/")) {
+            res.setHeader(
+              "Cache-Control",
+              "public, max-age=31536000, immutable"
+            );
+          }
         } else if (filePath.endsWith(".mjs")) {
           res.setHeader(
             "Content-Type",
             "application/javascript; charset=utf-8"
           );
+          if (relativePath.includes("assets/")) {
+            res.setHeader(
+              "Cache-Control",
+              "public, max-age=31536000, immutable"
+            );
+          }
         } else if (filePath.endsWith(".css")) {
           res.setHeader("Content-Type", "text/css; charset=utf-8");
+          if (relativePath.includes("assets/")) {
+            res.setHeader(
+              "Cache-Control",
+              "public, max-age=31536000, immutable"
+            );
+          }
+        } else if (filePath.endsWith(".html")) {
+          // Don't cache HTML files to ensure cache invalidation works
+          res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+          res.setHeader("Pragma", "no-cache");
+          res.setHeader("Expires", "0");
         }
       },
     })
@@ -78,6 +104,11 @@ export function serveStatic(app: Express) {
     if (path.extname(req.path)) {
       return res.status(404).json({ error: "File not found" });
     }
+
+    // Set cache headers for HTML to prevent caching issues
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
 
     // Serve index.html for all other routes (SPA routing)
     res.sendFile(path.resolve(distPath, "index.html"));
