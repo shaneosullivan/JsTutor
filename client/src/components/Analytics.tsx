@@ -16,7 +16,6 @@ export default function Analytics() {
     <>
       <script
         async
-        defer
         src="https://scripts.simpleanalyticscdn.com/latest.js"
       ></script>
       <noscript>
