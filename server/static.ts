@@ -48,29 +48,38 @@ export function serveStatic(app: Express) {
     );
   }
 
-  // Serve static files with proper MIME types
+  console.log(`[Static] Serving static files from: ${distPath}`);
+
+  // Serve static files with proper configuration for ES modules
   app.use(
     express.static(distPath, {
-      setHeaders: (res, path) => {
-        if (path.endsWith(".js")) {
-          res.setHeader("Content-Type", "application/javascript");
-        } else if (path.endsWith(".css")) {
-          res.setHeader("Content-Type", "text/css");
+      index: false, // Don't automatically serve index.html for directories
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".js")) {
+          res.setHeader(
+            "Content-Type",
+            "application/javascript; charset=utf-8"
+          );
+        } else if (filePath.endsWith(".mjs")) {
+          res.setHeader(
+            "Content-Type",
+            "application/javascript; charset=utf-8"
+          );
+        } else if (filePath.endsWith(".css")) {
+          res.setHeader("Content-Type", "text/css; charset=utf-8");
         }
       },
     })
   );
 
-  // Only serve index.html for non-file requests (routes without extensions)
-  app.use("*", (req, res) => {
-    const requestPath = req.path;
-
-    // If the request is for a file (has an extension), return 404
-    if (path.extname(requestPath)) {
-      return res.status(404).send("File not found");
+  // Handle SPA routing - only serve index.html for routes (no file extension)
+  app.get("*", (req, res) => {
+    // Don't serve index.html for requests that look like files
+    if (path.extname(req.path)) {
+      return res.status(404).json({ error: "File not found" });
     }
 
-    // Otherwise, serve index.html for SPA routing
+    // Serve index.html for all other routes (SPA routing)
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
