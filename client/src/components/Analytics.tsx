@@ -1,7 +1,7 @@
 function isDevServer(): boolean {
   const isDev =
     typeof window !== "undefined"
-      ? window.location.host.indexOf("localhost:3003") > -1 ||
+      ? window.location.host.indexOf("localhost:") > -1 ||
         window.location.host.indexOf("192.168.") > -1
       : process.env.NODE_ENV === "development";
 
