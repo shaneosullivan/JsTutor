@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { RotateCcw, ArrowRight, Eraser, Lightbulb, ChevronLeft, Bot } from "lucide-react";
+import { RotateCcw, ArrowRight, Eraser, Lightbulb, ChevronLeft, Bot, HelpCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import DrawingCanvas from "@/components/drawing-canvas";
 import PrintDataDisplay from "@/components/print-data-display";
 import IframeDisplay from "@/components/iframe-display";
 import AiChat from "@/components/ai-chat";
+import HelpModal from "@/components/help-modal";
 import type { Tutorial } from "@shared/schema";
 
 interface TutorialContentProps {
@@ -36,6 +37,7 @@ export default function TutorialContent({
   const [isRunning, setIsRunning] = useState(false);
   const [isExplanationOpen, setIsExplanationOpen] = useState(true);
   const [showAiChat, setShowAiChat] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const [canvasError, setCanvasError] = useState<{message: string; line?: number} | null>(null);
 
   // Auto-expand "What You'll Learn" when tutorial changes
@@ -126,20 +128,47 @@ export default function TutorialContent({
         )}>
           {/* Collapse Toggle */}
           <div className="p-3 border-b border-slate-200">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleExplanationToggle}
-              className="w-full justify-center p-1 h-8"
-            >
-              {isExplanationOpen ? (
-                <ChevronLeft className="h-4 w-4" />
-              ) : (
-                <div className="flex flex-col items-center">
+            {isExplanationOpen ? (
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExplanationToggle}
+                  className="p-1 h-8"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowHelp(true)}
+                  className="p-1 h-8 gradient-primary text-white hover:opacity-80"
+                  title="Get Help"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center space-y-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExplanationToggle}
+                  className="w-full justify-center p-1 h-8"
+                >
                   <Lightbulb className="h-4 w-4 text-yellow-500" />
-                </div>
-              )}
-            </Button>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowHelp(true)}
+                  className="w-full justify-center p-1 h-8 gradient-primary text-white hover:opacity-80"
+                  title="Get Help"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Collapsible Content */}
@@ -259,6 +288,7 @@ export default function TutorialContent({
                 {showAiChat ? (
                   <AiChat
                     tutorialId={tutorial.id}
+                    courseId={tutorial.courseId}
                     code={userCode}
                     onClose={() => setShowAiChat(false)}
                     isVisible={showAiChat}
@@ -296,6 +326,13 @@ export default function TutorialContent({
           </div>
         </div>
       </div>
+
+      {/* Help Modal */}
+      <HelpModal
+        isOpen={showHelp}
+        onClose={() => setShowHelp(false)}
+        currentTutorial={tutorial}
+      />
     </div>
   );
 }

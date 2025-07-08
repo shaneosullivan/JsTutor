@@ -183,6 +183,10 @@ IMPORTANT RULES:
 7. Always use the provided drawing functions - DON'T suggest rewriting them
 8. ALWAYS mention specific line numbers when discussing code (e.g., "On line 3, you wrote...")
 9. When explaining errors, reference the exact line number where the problem occurs
+10. ALWAYS format any JavaScript code using triple backticks like this:
+    \`\`\`javascript
+    // your code here
+    \`\`\`
 
 Available drawing functions they can use:
 - drawCircle(x, y, radius, color)

@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bot, User, Send, X, Loader2 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import ApiKeySetup from '@/components/api-key-setup';
+import MessageContent from '@/components/message-content';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -15,13 +16,14 @@ interface Message {
 
 interface AiChatProps {
   tutorialId: number;
+  courseId?: number;
   code: string;
   onClose: () => void;
   isVisible: boolean;
   canvasError?: {message: string; line?: number} | null;
 }
 
-export default function AiChat({ tutorialId, code, onClose, isVisible, canvasError }: AiChatProps) {
+export default function AiChat({ tutorialId, courseId, code, onClose, isVisible, canvasError }: AiChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -46,12 +48,12 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Reset chat when tutorial changes
+  // Reset chat when tutorial or course changes
   useEffect(() => {
     setMessages([]);
     setHasInitialized(false);
     setLastErrorSent(null);
-  }, [tutorialId]);
+  }, [tutorialId, courseId]);
 
   // Initialize chat with context when first shown (only if API key is available)
   useEffect(() => {
@@ -236,7 +238,7 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
                         : 'bg-gray-100 text-gray-800'
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <MessageContent content={message.content} />
                     <p className="text-xs mt-1 opacity-70">
                       {message.timestamp.toLocaleTimeString()}
                     </p>
@@ -272,7 +274,7 @@ export default function AiChat({ tutorialId, code, onClose, isVisible, canvasErr
           <Input
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             placeholder="Ask me about your code..."
             disabled={isLoading}
             className="flex-1"

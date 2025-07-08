@@ -4,9 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTutorial } from "@/hooks/use-course-tutorial";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import TutorialContent from "@/components/tutorial-content";
-import HelpModal from "@/components/help-modal";
 import ApiDocumentation from "@/components/api-documentation";
-import { Code, Star, HelpCircle, Book } from "lucide-react";
+import { Code, Star, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -177,8 +176,6 @@ export default function Home() {
     }
   }, [currentTutorial, userCode]);
 
-  const [showHelp, setShowHelp] = useState(false);
-
   const progressPercentage =
     tutorials.length > 0
       ? (completedTutorials.length / tutorials.length) * 100
@@ -279,8 +276,6 @@ export default function Home() {
             title: "JavaScript Basics",
             description: "Learn the fundamentals",
             type: "printData",
-            order: 1,
-            requiredCourse: null,
           }}
         />
 
@@ -355,22 +350,6 @@ export default function Home() {
           </Tabs>
         </main>
       </div>
-
-      {/* Floating Help Button */}
-      <Button
-        onClick={() => setShowHelp(true)}
-        className="fixed bottom-6 right-6 w-12 h-12 rounded-full gradient-primary shadow-lg hover:shadow-xl transition-all duration-200"
-        size="icon"
-      >
-        <HelpCircle size={20} />
-      </Button>
-
-      {/* Help Modal */}
-      <HelpModal
-        isOpen={showHelp}
-        onClose={() => setShowHelp(false)}
-        currentTutorial={currentTutorial}
-      />
     </div>
   );
 }
