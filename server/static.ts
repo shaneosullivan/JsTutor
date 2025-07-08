@@ -23,9 +23,9 @@ export function serveStatic(app: Express) {
     path.resolve(process.cwd(), "dist", "public"),
     path.resolve(process.cwd(), "public"),
     path.resolve(__dirname, "..", "public"),
-    path.resolve(__dirname, "..", "dist", "public")
+    path.resolve(__dirname, "..", "dist", "public"),
   ];
-  
+
   let distPath = "";
   for (const possiblePath of possiblePaths) {
     if (fs.existsSync(possiblePath)) {
@@ -33,23 +33,44 @@ export function serveStatic(app: Express) {
       break;
     }
   }
-  
+
   if (!distPath) {
     // Log available paths for debugging
     console.log("Available directories:");
     console.log("__dirname:", __dirname);
     console.log("process.cwd():", process.cwd());
     console.log("Checked paths:", possiblePaths);
-    
+
     throw new Error(
-      `Could not find the build directory in any of: ${possiblePaths.join(", ")}`
+      `Could not find the build directory in any of: ${possiblePaths.join(
+        ", "
+      )}`
     );
   }
 
-  app.use(express.static(distPath));
+  // Serve static files with proper MIME types
+  app.use(
+    express.static(distPath, {
+      setHeaders: (res, path) => {
+        if (path.endsWith(".js")) {
+          res.setHeader("Content-Type", "application/javascript");
+        } else if (path.endsWith(".css")) {
+          res.setHeader("Content-Type", "text/css");
+        }
+      },
+    })
+  );
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  // Only serve index.html for non-file requests (routes without extensions)
+  app.use("*", (req, res) => {
+    const requestPath = req.path;
+
+    // If the request is for a file (has an extension), return 404
+    if (path.extname(requestPath)) {
+      return res.status(404).send("File not found");
+    }
+
+    // Otherwise, serve index.html for SPA routing
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }
