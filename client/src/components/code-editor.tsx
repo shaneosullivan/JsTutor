@@ -4,6 +4,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorState, StateField, StateEffect } from "@codemirror/state";
 import { Decoration, DecorationSet } from "@codemirror/view";
+import { CodeEditorErrorBoundary } from "./code-editor-error-boundary";
 
 interface CodeEditorProps {
   value: string;
@@ -11,11 +12,12 @@ interface CodeEditorProps {
   language?: string;
   className?: string;
   errorLine?: number;
+  originalCode?: string;
 }
 
 // Error line decoration
 const errorLineMark = Decoration.line({
-  attributes: { class: "cm-error-line" }
+  attributes: { class: "cm-error-line" },
 });
 
 // State effect for setting error line
@@ -33,25 +35,37 @@ const errorLineField = StateField.define<DecorationSet>({
         if (effect.value === null) {
           decorations = Decoration.none;
         } else {
-          const line = tr.state.doc.line(effect.value);
-          decorations = Decoration.set([errorLineMark.range(line.from)]);
+          const lineNumber = effect.value;
+          if (lineNumber >= 1 && lineNumber <= tr.state.doc.lines) {
+            const line = tr.state.doc.line(lineNumber);
+            decorations = Decoration.set([errorLineMark.range(line.from)]);
+          } else {
+            decorations = Decoration.none;
+          }
         }
       }
     }
     return decorations;
   },
-  provide: f => EditorView.decorations.from(f)
+  provide: (f) => EditorView.decorations.from(f),
 });
 
-export default function CodeEditor({ 
-  value, 
-  onChange, 
+export default function CodeEditor({
+  value,
+  onChange,
   language = "javascript",
   className = "",
-  errorLine
+  errorLine,
+  originalCode,
 }: CodeEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
+
+  const handleReset = () => {
+    if (originalCode) {
+      onChange(originalCode);
+    }
+  };
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -120,10 +134,17 @@ export default function CodeEditor({
   useEffect(() => {
     if (viewRef.current) {
       viewRef.current.dispatch({
-        effects: [setErrorLineEffect.of(errorLine || null)]
+        effects: [setErrorLineEffect.of(errorLine || null)],
       });
     }
   }, [errorLine]);
 
-  return <div ref={editorRef} className={className} />;
+  return (
+    <CodeEditorErrorBoundary
+      originalCode={originalCode || value}
+      onReset={handleReset}
+    >
+      <div ref={editorRef} className={className} />
+    </CodeEditorErrorBoundary>
+  );
 }
