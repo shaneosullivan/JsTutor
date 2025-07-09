@@ -391,7 +391,7 @@ export default function Home() {
                   hasNext={hasNextTutorial}
                   userCode={userCode}
                   onCodeChange={setUserCode}
-                  courseType="printData"
+                  courseType="canvas"
                 />
               ) : (
                 <div className="h-full flex items-center justify-center">
