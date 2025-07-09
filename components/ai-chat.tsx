@@ -96,7 +96,7 @@ export default function AiChat({
       };
 
       setMessages([initialMessage]);
-      sendMessage(initialMessage, true);
+      sendMessage(initialMessage);
       setHasInitialized(true);
     }
   }, [
@@ -106,6 +106,7 @@ export default function AiChat({
     showSetup,
     canvasError,
     isVisible,
+    code,
   ]);
 
   // Send error message when Help Me button is clicked with an error present
@@ -124,12 +125,12 @@ export default function AiChat({
         : `"${canvasError.message}"`;
       const errorMessage: Message = {
         role: "user",
-        content: `I just got this error in my code: ${errorText}. Can you help me fix it?`,
+        content: `I just got this error in my code: ${errorText}. Can you help me understand what's wrong and how to fix it?`,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, errorMessage]);
-      sendMessage(errorMessage, false);
+      sendMessage(errorMessage);
       setLastErrorSent(canvasError);
     }
   }, [
@@ -140,9 +141,10 @@ export default function AiChat({
     showSetup,
     isLoading,
     lastErrorSent,
+    code,
   ]);
 
-  const sendMessage = async (message: Message, isFirstMessage = false) => {
+  const sendMessage = async (message: Message) => {
     setIsLoading(true);
 
     try {
@@ -159,21 +161,35 @@ export default function AiChat({
         content: msg.content,
       }));
 
-      // Add system message for context
+      const guidelines = ` Guidelines:
+- Be encouraging and supportive
+- Explain concepts in simple terms
+- Ask guiding questions rather than giving direct answers
+- Help them understand their mistakes
+- Don't write their code for them, but help them figure it out
+- Focus on learning and understanding over just getting the right answer
+- Use emojis occasionally to keep it fun and engaging
+- If they have an error, help them understand what went wrong and how to fix it`;
+
+      const codeMessage = code
+        ? `Here is their current code:\n\`\`\`javascript\n${code}\n\`\`\``
+        : "";
+
+      let content = "";
+
+      if (hasInitialized) {
+        content = codeMessage;
+      } else {
+        content = `You are a helpful coding tutor for kids learning JavaScript. The student is working on tutorial ${tutorialId}. 
+        ${codeMessage || ""}
+        
+        ${guidelines}`;
+      }
+
+      // Add system message for context (includes latest code)
       const systemMessage = {
         role: "system" as const,
-        content: `You are a helpful coding tutor for kids learning JavaScript. The student is working on tutorial ${tutorialId}. 
-        ${code ? `Here is their current code:\n\`\`\`javascript\n${code}\n\`\`\`` : ""}
-        
-        Guidelines:
-        - Be encouraging and supportive
-        - Explain concepts in simple terms
-        - Ask guiding questions rather than giving direct answers
-        - Help them understand their mistakes
-        - Don't write their code for them, but help them figure it out
-        - Focus on learning and understanding over just getting the right answer
-        - Use emojis occasionally to keep it fun and engaging
-        - If they have an error, help them understand what went wrong and how to fix it`,
+        content,
       };
 
       const response = await openai.chat.completions.create({
@@ -231,7 +247,7 @@ export default function AiChat({
 
     setMessages((prev) => [...prev, userMessage]);
     setInputMessage("");
-    sendMessage(userMessage, false);
+    sendMessage(userMessage);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
