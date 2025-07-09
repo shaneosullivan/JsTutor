@@ -49,6 +49,56 @@ export default function IframeDisplay({
         <script>
           (function() {
             const originalConsole = window.console;
+
+            // Function to safely serialize arguments for console output
+            function serializeArg(arg) {
+              if (arg === null) return 'null';
+              if (arg === undefined) return 'undefined';
+
+              const type = typeof arg;
+
+              if (type === 'string' || type === 'number' || type === 'boolean') {
+                return String(arg);
+              }
+
+              if (type === 'function') {
+                return \`<function: \${arg.name || 'anonymous'}>\`;
+              }
+
+              if (type === 'object') {
+                // Handle special DOM objects
+                if (arg === document) return '<document>';
+                if (arg === window) return '<window>';
+                if (arg instanceof HTMLElement) {
+                  return \`<\${arg.tagName.toLowerCase()}\${arg.id ? '#' + arg.id : ''}\${arg.className ? '.' + arg.className.split(' ').join('.') : ''}>\`;
+                }
+                if (arg instanceof NodeList) return \`<NodeList: \${arg.length} items>\`;
+                if (arg instanceof HTMLCollection) return \`<HTMLCollection: \${arg.length} items>\`;
+                if (arg instanceof Event) return \`<Event: \${arg.type}>\`;
+                if (arg instanceof Error) return \`<Error: \${arg.message}>\`;
+                if (Array.isArray(arg)) {
+                  try {
+                    return JSON.stringify(arg);
+                  } catch (e) {
+                    return \`<Array: \${arg.length} items>\`;
+                  }
+                }
+
+                // Try to serialize regular objects
+                try {
+                  return JSON.stringify(arg);
+                } catch (e) {
+                  // If serialization fails, provide a description
+                  if (arg.constructor && arg.constructor.name) {
+                    return \`<\${arg.constructor.name} object>\`;
+                  }
+                  return '<object>';
+                }
+              }
+
+              return String(arg);
+            }
+
             window.console = {
               ...originalConsole,
               log: function(...args) {
@@ -56,7 +106,7 @@ export default function IframeDisplay({
                 window.parent.postMessage({
                   type: 'console',
                   level: 'log',
-                  message: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ')
+                  message: args.map(serializeArg).join(' ')
                 }, '*');
               },
               warn: function(...args) {
@@ -64,7 +114,7 @@ export default function IframeDisplay({
                 window.parent.postMessage({
                   type: 'console',
                   level: 'warn',
-                  message: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ')
+                  message: args.map(serializeArg).join(' ')
                 }, '*');
               },
               error: function(...args) {
@@ -72,7 +122,7 @@ export default function IframeDisplay({
                 window.parent.postMessage({
                   type: 'console',
                   level: 'error',
-                  message: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ')
+                  message: args.map(serializeArg).join(' ')
                 }, '*');
               },
               debug: function(...args) {
@@ -80,7 +130,7 @@ export default function IframeDisplay({
                 window.parent.postMessage({
                   type: 'console',
                   level: 'debug',
-                  message: args.map(arg => typeof arg === 'object' ? JSON.stringify(arg) : String(arg)).join(' ')
+                  message: args.map(serializeArg).join(' ')
                 }, '*');
               }
             };

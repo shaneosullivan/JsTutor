@@ -675,6 +675,9 @@ printData(sentence);`,
         console.log('Found title element:', titleElement);
         
         function changeTitle() {
+            // Find the title element each time to make sure we have it
+            let titleElement = document.getElementById('main-title');
+
             // Change the text inside the title
             titleElement.textContent = 'I changed the title with JavaScript!';
             
