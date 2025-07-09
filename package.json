@@ -1,8 +1,12 @@
 {
-  "name": "rest-express",
+  "name": "js-tutor",
   "version": "1.0.0",
   "type": "module",
   "license": "MIT",
+  "author": {
+    "name": "Shane O'Sullivan",
+    "email": "shaneosullivan1@gmail.com"
+  },
   "scripts": {
     "dev": "lsof -ti:3020 | xargs kill -9 && PORT=3020 next dev",
     "build": "next build",
