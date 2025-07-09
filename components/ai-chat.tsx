@@ -81,7 +81,7 @@ export default function AiChat({
         const errorText = canvasError.line
           ? `"${canvasError.message}" on line ${canvasError.line}`
           : `"${canvasError.message}"`;
-        initialContent = `Hi! I'm having trouble with my code. I'm getting this error: ${errorText}. Can you help me understand what's wrong and how to fix it?`;
+        initialContent = `Hi! I'm having trouble with the code I sent you. I'm getting this error: ${errorText}. Can you help me understand what's wrong and how to fix it?`;
         // Mark this error as already sent to prevent duplicate messages
         setLastErrorSent(canvasError);
       } else {
