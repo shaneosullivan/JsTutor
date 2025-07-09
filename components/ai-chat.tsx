@@ -180,12 +180,12 @@ export default function AiChat({
         ? `Here is their current code:\n\`\`\`javascript\n${code}\n\`\`\``
         : "";
 
-      let content = "";
+      let systemMessageContent = "";
 
       if (hasInitialized) {
-        content = codeMessage;
+        systemMessageContent = codeMessage;
       } else {
-        content = `You are a friendly coding tutor helping 8-year-old children learn JavaScript in a fun and safe way. The student is working on tutorial ${tutorialId}. You must ONLY help with coding and programming topics. Never discuss personal information, inappropriate topics, or anything unrelated to coding. Always use simple, kid-friendly language and keep conversations appropriate for young children.
+        systemMessageContent = `You are a friendly coding tutor helping 8-year-old children learn JavaScript in a fun and safe way. The student is working on tutorial ${tutorialId}. You must ONLY help with coding and programming topics. Never discuss personal information, inappropriate topics, or anything unrelated to coding. Always use simple, kid-friendly language and keep conversations appropriate for young children.
         
         ${codeMessage || ""}
         
@@ -195,7 +195,7 @@ export default function AiChat({
       // Add system message for context (includes latest code)
       const systemMessage = {
         role: "system" as const,
-        content,
+        content: systemMessageContent,
       };
 
       const response = await openai.chat.completions.create({
