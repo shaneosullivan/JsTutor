@@ -74,7 +74,7 @@ export default function ApiKeySetup({
       onKeyValidated(apiKey);
     } else {
       setError(
-        "Hmm, that API key doesn't seem to work. Double-check that you copied it correctly, or ask your parent to help verify it's the right one!"
+        "Hmm, that API key doesn't seem to work. Double-check that you copied it correctly, or ask your parent to help verify it's the right one!",
       );
     }
 

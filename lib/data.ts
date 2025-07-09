@@ -56,6 +56,12 @@ export const tutorials = [
     content:
       "Variables are like boxes that hold information. You can put numbers, text, or other things in them and use them later!\n\n🎨 About the Drawing Functions:\n• drawCircle(x, y, radius, color) - The first number (x) is how many pixels from the LEFT edge to place the center. The second number (y) is how many pixels from the TOP edge. The radius is how big the circle is (like measuring from the center to the edge).\n• drawText(x, y, text, color) - Places text at a position. X is pixels from left, Y is pixels from top.\n\n📍 Think of the canvas like a grid: (0,0) is the top-left corner, (400,400) is the bottom-right!\n\n🌟 Your Challenge:\nAfter trying the example, clear the code and write your own! Try creating a variable with your favorite number, then draw a circle using that number. Can you draw your initials on the canvas too?",
     starterCode: `// Let's create our first variable!
+// To create a variable, we use the keyword 'let'
+// followed by the name we want to give it.
+// Then we put some information inside the
+// variable by using the equals sign (=), followed
+// by the value we want to store.
+
 let myName = "Your Name";
 let age = 9;
 

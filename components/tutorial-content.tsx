@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   Bot,
   CircleHelp,
+  Book,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,7 @@ interface TutorialContentProps {
   userCode: string;
   onCodeChange: (code: string) => void;
   courseType?: string;
+  onShowReference?: () => void;
 }
 
 export default function TutorialContent({
@@ -46,6 +48,7 @@ export default function TutorialContent({
   userCode,
   onCodeChange,
   courseType = "canvas",
+  onShowReference,
 }: TutorialContentProps) {
   const [output, setOutput] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
@@ -87,7 +90,7 @@ export default function TutorialContent({
   };
 
   const handleCanvasError = (
-    error: { message: string; line?: number } | null
+    error: { message: string; line?: number } | null,
   ) => {
     setCanvasError(error);
   };
@@ -116,6 +119,17 @@ export default function TutorialContent({
               <Bot className="h-4 w-4 mr-2" />
               🤖 Help Me!
             </Button>
+
+            {onShowReference && (
+              <Button
+                onClick={onShowReference}
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white transition-all duration-200 hover:scale-105 shadow-lg"
+                size="sm"
+              >
+                <Book className="h-4 w-4 mr-2" />
+                📚 Reference
+              </Button>
+            )}
 
             {isCompleted ? (
               <div className="flex items-center space-x-2">
@@ -160,7 +174,7 @@ export default function TutorialContent({
         <div
           className={cn(
             "border-r border-slate-200 bg-white flex flex-col transition-all duration-300",
-            isExplanationOpen ? "w-96" : "w-12"
+            isExplanationOpen ? "w-96" : "w-12",
           )}
         >
           {/* Collapse Toggle */}
@@ -349,14 +363,14 @@ export default function TutorialContent({
                     ? "flex flex-col"
                     : courseType === "iframe"
                       ? "flex flex-col"
-                      : "flex items-center justify-center overflow-hidden"
+                      : "flex items-center justify-center overflow-hidden",
                 )}
               >
                 {/* AI Chat - Always mounted but positioned absolutely */}
                 <div
                   className={cn(
                     "absolute inset-0 z-10",
-                    showAiChat ? "block" : "hidden"
+                    showAiChat ? "block" : "hidden",
                   )}
                   style={{ display: showAiChat ? "block" : "none" }}
                 >
@@ -374,7 +388,7 @@ export default function TutorialContent({
                 <div
                   className={cn(
                     courseType === "iframe" ? "h-full" : "",
-                    "relative z-0"
+                    "relative z-0",
                   )}
                 >
                   {courseType === "canvas" && (

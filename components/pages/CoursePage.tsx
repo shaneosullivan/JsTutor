@@ -7,7 +7,13 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ArrowLeft, Book, CheckCircle, Lock, Code, Star } from "lucide-react";
 import TutorialContent from "@/components/tutorial-content";
 import TutorialSidebar from "@/components/tutorial-sidebar";
@@ -71,6 +77,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
   const [highestTutorialReached, setHighestTutorialReached] =
     useState<number>(1);
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
+  const [showReferenceDialog, setShowReferenceDialog] = useState(false);
 
   // Query for course data
   const { data: course, isLoading: courseLoading } = useQuery<Course>({
@@ -365,64 +372,52 @@ export default function CoursePage({ courseId }: CoursePageProps) {
 
         {/* Main Content */}
         <main className="flex-1 overflow-hidden">
-          <Tabs defaultValue="tutorial" className="h-full flex flex-col">
-            <div className="border-b border-slate-200 bg-white px-6 py-3">
-              <TabsList className="grid w-full grid-cols-2 max-w-md bg-slate-100 border border-slate-200">
-                <TabsTrigger
-                  value="tutorial"
-                  className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm text-slate-600 hover:text-slate-900"
-                >
-                  <Code className="w-4 h-4" />
-                  Tutorial
-                </TabsTrigger>
-                <TabsTrigger
-                  value="reference"
-                  className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm text-slate-600 hover:text-slate-900"
-                >
-                  <Book className="w-4 h-4" />
-                  Reference
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <TabsContent
-              value="tutorial"
-              className="flex-1 overflow-hidden mt-0"
-            >
-              {currentTutorial ? (
-                <TutorialContent
-                  tutorial={currentTutorial}
-                  onComplete={() => markTutorialComplete(currentTutorialOrder)}
-                  isCompleted={isCurrentCompleted}
-                  onNext={hasNextTutorial ? goToNextTutorial : undefined}
-                  hasNext={hasNextTutorial}
-                  userCode={userCode}
-                  onCodeChange={setUserCode}
-                  courseType={course.type}
-                />
-              ) : (
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <Code className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-                    <h3 className="text-lg font-medium text-slate-800 mb-2">
-                      Select a tutorial to get started!
-                    </h3>
-                    <p className="text-slate-600">
-                      Choose a tutorial from the sidebar to begin this course.
-                    </p>
-                  </div>
+          <div className="h-full flex flex-col">
+            {currentTutorial ? (
+              <TutorialContent
+                tutorial={currentTutorial}
+                onComplete={() => markTutorialComplete(currentTutorialOrder)}
+                isCompleted={isCurrentCompleted}
+                onNext={hasNextTutorial ? goToNextTutorial : undefined}
+                hasNext={hasNextTutorial}
+                userCode={userCode}
+                onCodeChange={setUserCode}
+                courseType={course.type}
+                onShowReference={() => setShowReferenceDialog(true)}
+              />
+            ) : (
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                  <Code className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                  <h3 className="text-lg font-medium text-slate-800 mb-2">
+                    Select a tutorial to get started!
+                  </h3>
+                  <p className="text-slate-600">
+                    Choose a tutorial from the sidebar to begin this course.
+                  </p>
                 </div>
-              )}
-            </TabsContent>
-
-            <TabsContent
-              value="reference"
-              className="flex-1 overflow-hidden mt-0"
-            >
-              <ApiDocumentation courseType={course?.type || "canvas"} />
-            </TabsContent>
-          </Tabs>
+              </div>
+            )}
+          </div>
         </main>
+
+        {/* Reference Dialog */}
+        <Dialog
+          open={showReferenceDialog}
+          onOpenChange={setShowReferenceDialog}
+        >
+          <DialogContent className="max-w-6xl h-[90vh] bg-white flex flex-col">
+            <DialogHeader className="bg-white border-b pb-4 flex-shrink-0">
+              <DialogTitle className="flex items-center gap-2">
+                <Book className="w-5 h-5" />
+                Reference Documentation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 overflow-hidden bg-white">
+              <ApiDocumentation courseType={course?.type || "canvas"} />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
       <Analytics />
     </div>

@@ -344,7 +344,12 @@ const printDataFunctions = [
     syntax: "printData(data)",
     description: "Display data in the output console",
     parameters: [
-      { name: "data", type: "any", description: "The data to display - can be strings, numbers, objects, arrays, etc." },
+      {
+        name: "data",
+        type: "any",
+        description:
+          "The data to display - can be strings, numbers, objects, arrays, etc.",
+      },
     ],
     example: `printData("Hello World!");
 printData(42);
@@ -373,7 +378,11 @@ const domFunctions = [
     syntax: "document.getElementById(id)",
     description: "Find an HTML element by its ID attribute",
     parameters: [
-      { name: "id", type: "string", description: "The ID of the element to find" },
+      {
+        name: "id",
+        type: "string",
+        description: "The ID of the element to find",
+      },
     ],
     example: `let titleElement = document.getElementById('title');
 let button = document.getElementById('myButton');
@@ -385,7 +394,11 @@ titleElement.textContent = 'New Title';`,
     syntax: "document.querySelector(selector)",
     description: "Find the first element matching a CSS selector",
     parameters: [
-      { name: "selector", type: "string", description: "CSS selector (e.g., '.class', '#id', 'tag')" },
+      {
+        name: "selector",
+        type: "string",
+        description: "CSS selector (e.g., '.class', '#id', 'tag')",
+      },
     ],
     example: `let firstParagraph = document.querySelector('p');
 let redButton = document.querySelector('.red-button');
@@ -409,8 +422,16 @@ allParagraphs.forEach(p => p.style.color = 'blue');`,
     syntax: "element.addEventListener(event, function)",
     description: "Listen for events on an element",
     parameters: [
-      { name: "event", type: "string", description: "Event type (e.g., 'click', 'input')" },
-      { name: "function", type: "function", description: "Function to call when event occurs" },
+      {
+        name: "event",
+        type: "string",
+        description: "Event type (e.g., 'click', 'input')",
+      },
+      {
+        name: "function",
+        type: "function",
+        description: "Function to call when event occurs",
+      },
     ],
     example: `let button = document.getElementById('myButton');
 button.addEventListener('click', () => {
@@ -423,7 +444,11 @@ button.addEventListener('click', () => {
     syntax: "document.createElement(tagName)",
     description: "Create a new HTML element",
     parameters: [
-      { name: "tagName", type: "string", description: "HTML tag name (e.g., 'div', 'p', 'button')" },
+      {
+        name: "tagName",
+        type: "string",
+        description: "HTML tag name (e.g., 'div', 'p', 'button')",
+      },
     ],
     example: `let newParagraph = document.createElement('p');
 newParagraph.textContent = 'Hello!';
@@ -538,25 +563,39 @@ interface ApiDocumentationProps {
   courseType?: string;
 }
 
-export default function ApiDocumentation({ courseType = "canvas" }: ApiDocumentationProps) {
+export default function ApiDocumentation({
+  courseType = "canvas",
+}: ApiDocumentationProps) {
   const [copiedExample, setCopiedExample] = useState<number | null>(null);
-  
+
   // Select appropriate data based on course type
-  const functions = courseType === "canvas" ? drawingFunctions : 
-                   courseType === "iframe" ? domFunctions : 
-                   printDataFunctions;
-  
-  const examples = courseType === "canvas" ? codeExamples : 
-                  courseType === "iframe" ? domExamples : 
-                  printDataExamples;
-                  
-  const title = courseType === "canvas" ? "Drawing Functions Reference" : 
-               courseType === "iframe" ? "DOM Manipulation Reference" : 
-               "Data Functions Reference";
-               
-  const description = courseType === "canvas" ? "All the functions you can use to create amazing drawings and interactive experiences!" : 
-                     courseType === "iframe" ? "Functions to manipulate HTML elements and create interactive web pages!" : 
-                     "Functions to work with data and display output in your programs!";
+  const functions =
+    courseType === "canvas"
+      ? drawingFunctions
+      : courseType === "iframe"
+        ? domFunctions
+        : printDataFunctions;
+
+  const examples =
+    courseType === "canvas"
+      ? codeExamples
+      : courseType === "iframe"
+        ? domExamples
+        : printDataExamples;
+
+  const title =
+    courseType === "canvas"
+      ? "Drawing Functions Reference"
+      : courseType === "iframe"
+        ? "DOM Manipulation Reference"
+        : "Data Functions Reference";
+
+  const description =
+    courseType === "canvas"
+      ? "All the functions you can use to create amazing drawings and interactive experiences!"
+      : courseType === "iframe"
+        ? "Functions to manipulate HTML elements and create interactive web pages!"
+        : "Functions to work with data and display output in your programs!";
 
   const copyToClipboard = async (code: string, index: number) => {
     try {
@@ -615,43 +654,48 @@ export default function ApiDocumentation({ courseType = "canvas" }: ApiDocumenta
   };
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="p-6 space-y-6">
+    <div className="h-full flex flex-col">
+      <div className="flex-shrink-0 p-6 pb-4">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">
-            {title}
-          </h1>
-          <p className="text-slate-600">
-            {description}
-          </p>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">{title}</h1>
+          <p className="text-slate-600">{description}</p>
         </div>
+      </div>
 
-        <Tabs defaultValue="functions" className="w-full">
-          <TabsList className={`grid w-full ${courseType === "canvas" ? "grid-cols-3" : "grid-cols-2"} bg-slate-100 border border-slate-200 p-1 rounded-lg shadow-sm`}>
-            <TabsTrigger
-              value="functions"
-              className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Tabs defaultValue="functions" className="w-full flex flex-col h-full">
+          <div className="flex-shrink-0 px-6 pb-4">
+            <TabsList
+              className={`grid w-full ${courseType === "canvas" ? "grid-cols-3" : "grid-cols-2"} bg-slate-100 border border-slate-200 p-1 rounded-lg shadow-sm`}
             >
-              Functions
-            </TabsTrigger>
-            {courseType === "canvas" && (
               <TabsTrigger
-                value="colors"
+                value="functions"
                 className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
               >
-                Colors
+                Functions
               </TabsTrigger>
-            )}
-            <TabsTrigger
-              value="examples"
-              className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
-            >
-              Examples
-            </TabsTrigger>
-          </TabsList>
+              {courseType === "canvas" && (
+                <TabsTrigger
+                  value="colors"
+                  className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
+                >
+                  Colors
+                </TabsTrigger>
+              )}
+              <TabsTrigger
+                value="examples"
+                className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
+              >
+                Examples
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="functions" className="space-y-4">
-            <div className="grid gap-4">
+          <TabsContent
+            value="functions"
+            className="flex-1 overflow-y-auto px-6 mt-0"
+          >
+            <div className="space-y-4 pb-6">
               {functions.map((func, index) => (
                 <Card key={index} className="border-l-4 border-l-purple-400">
                   <CardHeader className="pb-3">
@@ -725,65 +769,186 @@ export default function ApiDocumentation({ courseType = "canvas" }: ApiDocumenta
           </TabsContent>
 
           {courseType === "canvas" && (
-            <TabsContent value="colors" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="w-5 h-5 text-pink-500" />
-                  Available Colors
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-800 mb-2">
-                    Color Formats
-                  </h4>
-                  <ul className="text-blue-700 text-sm space-y-1">
-                    <li>
-                      • <strong>Color names:</strong> 'red', 'blue', 'green',
-                      etc.
-                    </li>
-                    <li>
-                      • <strong>Hex colors:</strong> '#FF0000', '#00FF00',
-                      '#0000FF', etc.
-                    </li>
-                    <li>
-                      • <strong>RGB colors:</strong> 'rgb(255, 0, 0)', 'rgb(0,
-                      255, 0)', etc.
-                    </li>
-                  </ul>
-                </div>
-
-                {colorExamples.map((group, index) => (
-                  <div key={index}>
-                    <h4 className="font-medium text-slate-700 mb-3">
-                      {group.name}
+            <TabsContent value="colors" className="flex-1 overflow-y-auto px-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Palette className="w-5 h-5 text-pink-500" />
+                    Available Colors
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6 pb-6">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+                    <h4 className="font-medium text-blue-800 mb-3">
+                      Understanding Colors in Programming! 🎨
                     </h4>
-                    <div className="grid grid-cols-4 gap-3">
-                      {group.colors.map((color, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-2 p-2 bg-white border rounded-lg"
-                        >
-                          <div
-                            className="w-6 h-6 rounded border border-slate-300"
-                            style={{ backgroundColor: color }}
-                          />
-                          <code className="text-xs text-slate-700">
-                            {color}
+
+                    <div className="space-y-4">
+                      <div className="bg-white p-3 rounded border border-blue-100">
+                        <h5 className="font-semibold text-blue-800 mb-2">
+                          🏷️ Color Names
+                        </h5>
+                        <p className="text-blue-700 text-sm mb-2">
+                          The easiest way! Just use simple English words like '
+                          <strong>red</strong>', '<strong>blue</strong>', '
+                          <strong>green</strong>'. Perfect for beginners -
+                          computers understand these basic color names.
+                        </p>
+                        <code className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          drawCircle(100, 100, 50, 'red');
+                        </code>
+                      </div>
+
+                      <div className="bg-white p-3 rounded border border-blue-100">
+                        <h5 className="font-semibold text-blue-800 mb-2">
+                          🔢 Hex Colors
+                        </h5>
+                        <p className="text-blue-700 text-sm mb-2">
+                          <strong>Hex = Hexadecimal</strong> - a special number
+                          system that goes 0-9, A-F, giving you 16 numbers. Hex
+                          colors start with # and have 6 characters:{" "}
+                          <strong>#RRGGBB</strong>
+                        </p>
+                        <ul className="text-blue-700 text-xs space-y-1 mb-2">
+                          <li>
+                            • <strong>RR</strong> = Red amount (00-FF)
+                          </li>
+                          <li>
+                            • <strong>GG</strong> = Green amount (00-FF)
+                          </li>
+                          <li>
+                            • <strong>BB</strong> = Blue amount (00-FF)
+                          </li>
+                          <li>
+                            • <strong>00</strong> = no color,{" "}
+                            <strong>FF</strong> = maximum color
+                          </li>
+                        </ul>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-blue-700">Examples:</span>
+                          <code className="bg-red-100 text-red-800 px-1 rounded">
+                            #FF0000 = pure red
+                          </code>
+                          <code className="bg-green-100 text-green-800 px-1 rounded">
+                            #00FF00 = pure green
+                          </code>
+                          <code className="bg-blue-100 text-blue-800 px-1 rounded">
+                            #0000FF = pure blue
                           </code>
                         </div>
-                      ))}
+                      </div>
+
+                      <div className="bg-white p-3 rounded border border-blue-100">
+                        <h5 className="font-semibold text-blue-800 mb-2">
+                          🌈 RGB Colors
+                        </h5>
+                        <p className="text-blue-700 text-sm mb-2">
+                          <strong>RGB = Red, Green, Blue</strong> - the three
+                          primary colors of light! Mix different amounts (0-255)
+                          to create any color you want.
+                        </p>
+                        <ul className="text-blue-700 text-xs space-y-1 mb-2">
+                          <li>
+                            • <strong>0</strong> = no light (black)
+                          </li>
+                          <li>
+                            • <strong>255</strong> = maximum light (bright)
+                          </li>
+                          <li>• Mix red + green = yellow!</li>
+                          <li>• Mix all three = white!</li>
+                        </ul>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-blue-700">Examples:</span>
+                          <code className="bg-purple-100 text-purple-800 px-1 rounded">
+                            rgb(255, 0, 255) = purple
+                          </code>
+                          <code className="bg-yellow-100 text-yellow-800 px-1 rounded">
+                            rgb(255, 255, 0) = yellow
+                          </code>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-red-100 via-green-100 to-blue-100 p-3 rounded border border-blue-100">
+                        <h5 className="font-semibold text-gray-800 mb-2">
+                          🔬 Fun Science Fact!
+                        </h5>
+                        <p className="text-gray-700 text-sm">
+                          Your computer screen has tiny red, green, and blue
+                          lights! By mixing different amounts of these three
+                          colors, it can create millions of different colors.
+                          Just like mixing paint, but with light instead! 💡
+                        </p>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
+
+                  {colorExamples.map((group, index) => (
+                    <div key={index}>
+                      <h4 className="font-medium text-slate-700 mb-3">
+                        {group.name}
+                        {group.name === "Hex Colors" && (
+                          <span className="text-sm font-normal text-slate-500 ml-2">
+                            - See how the hex codes match the colors! 🔍
+                          </span>
+                        )}
+                      </h4>
+                      <div className="grid grid-cols-2 gap-3">
+                        {group.colors.map((color, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-3 p-3 bg-white border rounded-lg hover:shadow-md transition-shadow"
+                          >
+                            <div
+                              className="w-8 h-8 rounded border-2 border-slate-300 flex-shrink-0"
+                              style={{ backgroundColor: color }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <code className="text-sm text-slate-700 font-mono">
+                                {color}
+                              </code>
+                              {group.name === "Hex Colors" && (
+                                <div className="text-xs text-slate-500 mt-1">
+                                  {color === "#FF0000" &&
+                                    "Red: FF, Green: 00, Blue: 00"}
+                                  {color === "#00FF00" &&
+                                    "Red: 00, Green: FF, Blue: 00"}
+                                  {color === "#0000FF" &&
+                                    "Red: 00, Green: 00, Blue: FF"}
+                                  {color === "#FFFF00" &&
+                                    "Red: FF, Green: FF, Blue: 00 = Yellow!"}
+                                  {color === "#FF00FF" &&
+                                    "Red: FF, Green: 00, Blue: FF = Magenta!"}
+                                  {color === "#00FFFF" &&
+                                    "Red: 00, Green: FF, Blue: FF = Cyan!"}
+                                  {color === "#FFA500" &&
+                                    "Red: FF, Green: A5, Blue: 00 = Orange!"}
+                                  {color === "#800080" &&
+                                    "Red: 80, Green: 00, Blue: 80 = Purple!"}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {group.name === "Hex Colors" && (
+                        <div className="mt-3 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                          <p className="text-yellow-800 text-sm">
+                            💡 <strong>Pro tip:</strong> In hex codes, FF means
+                            "maximum" (255 in regular numbers) and 00 means
+                            "none" (0 in regular numbers). Try making your own
+                            hex colors!
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </TabsContent>
           )}
 
-          <TabsContent value="examples" className="space-y-4">
-            <div className="grid gap-4">
+          <TabsContent value="examples" className="flex-1 overflow-y-auto px-6">
+            <div className="grid gap-4 pb-6">
               {examples.map((example, index) => (
                 <Card key={index}>
                   <CardHeader>
