@@ -1,12 +1,16 @@
 {
-  "name": "JavaScript Adventure",
+  "name": "JavaScript Adventure - Learn Coding",
   "short_name": "JS Adventure",
-  "description": "Learn JavaScript through interactive tutorials and coding challenges",
+  "description": "Interactive JavaScript learning platform for young coders",
   "start_url": "/",
-  "display": "standalone",
-  "background_color": "#6366f1",
-  "theme_color": "#6366f1",
-  "orientation": "portrait-primary",
+  "display": "fullscreen",
+  "background_color": "#f8fafc",
+  "theme_color": "#8b5cf6",
+  "orientation": "landscape",
+  "categories": ["education", "productivity", "developer"],
+  "lang": "en",
+  "scope": "/",
+  "id": "js-adventure",
   "icons": [
     {
       "src": "/icons/android-chrome-36x36.png",

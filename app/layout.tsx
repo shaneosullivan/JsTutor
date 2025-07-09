@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ClientProvider from "@/components/ClientProvider";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -108,7 +109,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "JavaScript Adventure",
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     startupImage: [
       {
         url: "/icons/apple-touch-icon-180x180.png",
@@ -130,8 +131,8 @@ export const metadata: Metadata = {
   applicationName: "JavaScript Adventure",
   referrer: "origin-when-cross-origin",
   colorScheme: "light",
-  themeColor: "#6366f1",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  themeColor: "#8b5cf6",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
   openGraph: {
     title: "JsTutor - Interactive JavaScript Learning Platform",
     description:
@@ -243,6 +244,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
+        <ServiceWorkerRegistration />
         <ClientProvider>
           <TooltipProvider>
             <Toaster />
