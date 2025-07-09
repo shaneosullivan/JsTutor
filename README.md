@@ -5,7 +5,7 @@ An interactive JavaScript learning platform designed for children, featuring han
 ## Features
 
 - **Interactive Learning Environment**: Visual code editor with real-time execution and error highlighting
-- **5 Specialized Courses**: 
+- **5 Specialized Courses**:
   - **Basics** (Canvas): Visual programming with drawing functions
   - **Array Methods** (PrintData): Data manipulation and array operations
   - **DOM Manipulation** (iframe): Interactive web pages and HTML elements
@@ -40,17 +40,20 @@ That's it! No database setup required - the application uses in-memory data stor
 ## Installation & Setup
 
 1. **Clone the repository**:
+
    ```bash
    git clone https://github.com/shaneosullivan/JsTutor.git
    cd JsTutor
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
 
 3. **Start the development server**:
+
    ```bash
    npm run dev
    ```
@@ -106,18 +109,21 @@ npm run generate-icons # Generate app icons
 ## Course Structure
 
 ### 1. Basics Course (Canvas-based)
+
 - **What is HTML?**: Introduction to HTML structure and DOM basics
 - **Your First Variable**: Learn to store and use information
-- **Math is Fun!**: Mathematical operations and calculations
+- **Maths is Fun!**: Mathematical operations and calculations
 - **Interactive Drawing**: Canvas API with visual feedback
 - **Keyboard Events**: Handle user input and create interactive experiences
 
 ### 2. Array Methods Course (PrintData)
+
 - Array manipulation with forEach, map, filter, reduce
 - Data transformation and processing
 - Real-world data scenarios
 
 ### 3. DOM Manipulation Course (iframe)
+
 - **What is HTML?**: HTML structure, head/body, tags, attributes
 - **Finding Elements**: getElementById, querySelector, querySelectorAll
 - **Changing Styles**: CSS property manipulation and classes
@@ -125,11 +131,13 @@ npm run generate-icons # Generate app icons
 - **Working with Forms**: User input handling and validation
 
 ### 4. Algorithms Course (PrintData)
+
 - Logic and problem-solving
 - Recursion and algorithmic thinking
 - Performance optimization
 
 ### 5. Remote Data Course (PrintData)
+
 - API integration
 - Fetch operations
 - Data handling and error management
@@ -137,6 +145,7 @@ npm run generate-icons # Generate app icons
 ## Key Features Explained
 
 ### AI Integration
+
 - Users provide their own OpenAI API keys through the application interface
 - Context-aware assistance based on current code and errors
 - Child-friendly explanations with encouraging tone
@@ -144,33 +153,36 @@ npm run generate-icons # Generate app icons
 - Chat history maintained per tutorial session
 
 ### Canvas API Functions
+
 The platform provides a rich set of drawing functions for visual programming:
 
 ```javascript
 // Basic drawing
-drawPixel(x, y, color)
-drawCircle(x, y, radius, color)
-drawLine(x1, y1, x2, y2, color)
-drawRect(x, y, width, height, color)
-drawText(x, y, text, color)
+drawPixel(x, y, color);
+drawCircle(x, y, radius, color);
+drawLine(x1, y1, x2, y2, color);
+drawRect(x, y, width, height, color);
+drawText(x, y, text, color);
 
 // Canvas management
-clearCanvas()
+clearCanvas();
 
 // Event handling
-onKeyPress(callback)           // Any key press
-onArrowKeys(callback)          // Arrow key navigation
-onSpaceBar(callback)           // Spacebar events
-isKeyPressed(key)              // Check if key is held down
+onKeyPress(callback); // Any key press
+onArrowKeys(callback); // Arrow key navigation
+onSpaceBar(callback); // Spacebar events
+isKeyPressed(key); // Check if key is held down
 ```
 
 ### Console Output Enhancement
+
 - Smart object serialization for iframe console logging
 - Handles DOM objects like `document`, `window`, HTML elements
 - Non-serializable objects display as descriptive text (e.g., `<document>`, `<h1#main-title>`)
 - Real-time console output with proper formatting
 
 ### Progress Tracking
+
 - Tutorial completion stored in browser localStorage
 - Course unlocking based on prerequisites
 - Star-based reward system (10 stars per completed tutorial)
@@ -201,10 +213,11 @@ isKeyPressed(key)              // Check if key is held down
 ## Deployment
 
 ### Vercel (Recommended)
+
 The project is configured for easy deployment on Vercel:
 
 1. **Fork or clone the repository** to your GitHub account
-2. **Connect to Vercel**: 
+2. **Connect to Vercel**:
    - Go to [vercel.com](https://vercel.com)
    - Import your GitHub repository
    - Vercel will automatically detect Next.js configuration

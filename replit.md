@@ -7,6 +7,7 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 ## System Architecture
 
 ### Frontend Architecture
+
 - **Framework**: React 18 with TypeScript
 - **UI Library**: Radix UI components with shadcn/ui design system
 - **Styling**: Tailwind CSS with custom theming
@@ -15,6 +16,7 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 - **Routing**: Wouter for client-side navigation
 
 ### Backend Architecture
+
 - **Framework**: Express.js with TypeScript
 - **Storage**: In-memory storage for course/tutorial data
 - **Session Management**: Local storage for user progress
@@ -24,17 +26,20 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 ### Key Components
 
 #### Tutorial System
+
 - **Tutorial Content**: Rich text descriptions with starter code and expected outputs
 - **Progress Tracking**: User completion status and star-based reward system
 - **Unlocking Mechanism**: Sequential tutorial unlocking based on completion
 - **Code Execution**: Safe JavaScript execution with canvas drawing API
 
 #### Drawing Canvas
+
 - **Canvas API**: Custom drawing functions (drawCircle, drawLine, drawRect, etc.)
 - **Real-time Feedback**: Immediate visual output from code execution
 - **Error Handling**: User-friendly error messages and debugging tips
 
 #### User Interface
+
 - **Responsive Design**: Mobile-first approach with adaptive layouts
 - **Interactive Elements**: Code editor with syntax highlighting and autocomplete
 - **Help System**: Contextual help modal with tips and troubleshooting
@@ -51,7 +56,8 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 ## External Dependencies
 
 ### Frontend Dependencies
-- **@radix-ui/react-***: Accessible UI primitives
+
+- **@radix-ui/react-\***: Accessible UI primitives
 - **@codemirror/**: Code editor functionality
 - **@tanstack/react-query**: Server state management
 - **codemirror**: Core editor functionality
@@ -59,27 +65,32 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 - **wouter**: Lightweight routing
 
 ### Backend Dependencies
+
 - **express**: Web application framework
 - **tsx**: TypeScript execution runtime
 
 ### Development Dependencies
+
 - **vite**: Build tool and development server
-- **@replit/vite-plugin-***: Replit-specific development tools
+- **@replit/vite-plugin-\***: Replit-specific development tools
 - **esbuild**: JavaScript bundler for production builds
 
 ## Deployment Strategy
 
 ### Build Process
+
 1. **Frontend Build**: Vite compiles React application to static assets
 2. **Backend Build**: esbuild bundles Express server for production
 3. **Asset Optimization**: Vite optimizes CSS and JavaScript bundles
 
 ### Environment Configuration
+
 - **Development**: Local development with hot reloading
 - **Production**: Containerized deployment with environment variables
 - **Storage**: Client-side localStorage for user progress
 
 ### Performance Considerations
+
 - **Code Splitting**: Vite automatically splits bundles for optimal loading
 - **Caching**: TanStack Query provides intelligent caching for API responses
 - **Error Boundaries**: React error boundaries prevent full application crashes
@@ -87,6 +98,7 @@ JavaScript Adventure is an interactive educational platform designed to teach Ja
 ## Changelog
 
 Changelog:
+
 - July 07, 2025: Initial setup
 - July 07, 2025: Added comprehensive API documentation with tabbed interface
   - Created dedicated reference section with all drawing functions
@@ -169,7 +181,7 @@ Changelog:
   - Each tutorial builds on previous concepts while introducing new programming skills
   - "What You'll Learn" section now auto-expands when switching tutorials for immediate educational context
 - July 07, 2025: Added compound assignment operators tutorial and improved loop progression
-  - Created "Shortcuts with Math" tutorial after "Math is Fun!" covering +=, -=, *=, /=
+  - Created "Shortcuts with Math" tutorial after "Maths is Fun!" covering +=, -=, \*=, /=
   - Demonstrates practical usage with visual examples showing score tracking and size changes
   - Teaches programming efficiency and industry-standard coding practices
   - Restructured loop learning progression: while loops first (simpler), then for loops (advanced)

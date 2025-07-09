@@ -68,7 +68,7 @@ drawText(200, 300, myName, 'black');`,
   {
     id: 2,
     courseId: 1,
-    title: "Math is Fun!",
+    title: "Maths is Fun!",
     description: "Add, subtract, and more",
     content:
       "JavaScript can do math just like you! You can add (+), subtract (-), multiply (*), and divide (/) numbers.\n\n🎨 New Drawing Function:\n• drawRect(x, y, width, height, color) - Draws a rectangle! X and Y tell us where the TOP-LEFT corner goes. Width is how wide (left to right), height is how tall (top to bottom). Think of it like drawing a box!\n\n🌟 Your Challenge:\nClear the code and try this on your own! Create variables for your age and your favorite number, then do some math with them. Draw rectangles using the results - maybe make a building or a robot face!",
@@ -89,7 +89,7 @@ drawRect(x + 150, y, size / 2, size, 'blue');`,
     title: "Shortcuts with Math",
     description: "Learn faster ways to do math with variables",
     content:
-      "Sometimes you want to change a variable by adding or subtracting from it. There are shortcuts that make this easier!\n\n🚀 Math Shortcuts:\n• += means 'add to this variable' (like score += 10 means score = score + 10)\n• -= means 'subtract from this variable' (like lives -= 1 means lives = lives - 1)\n• *= means 'multiply this variable' (like size *= 2 means size = size * 2)\n• /= means 'divide this variable' (like speed /= 2 means speed = speed / 2)\n\n✨ Why Use Shortcuts?\n• They're faster to type\n• They're easier to read\n• They help prevent mistakes\n• Real programmers use them all the time!\n\n🌟 Your Challenge:\nTry changing the code to use different shortcuts. What happens if you use *= instead of +=? Can you make the squares get smaller instead of bigger?",
+      "Sometimes you want to change a variable by adding or subtracting from it. There are shortcuts that make this easier!\n\n🚀 Maths Shortcuts:\n• += means 'add to this variable' (like score += 10 means score = score + 10)\n• -= means 'subtract from this variable' (like lives -= 1 means lives = lives - 1)\n• *= means 'multiply this variable' (like size *= 2 means size = size * 2)\n• /= means 'divide this variable' (like speed /= 2 means speed = speed / 2)\n\n✨ Why Use Shortcuts?\n• They're faster to type\n• They're easier to read\n• They help prevent mistakes\n• Real programmers use them all the time!\n\n🌟 Your Challenge:\nTry changing the code to use different shortcuts. What happens if you use *= instead of +=? Can you make the squares get smaller instead of bigger?",
     starterCode: `// Let's practice math shortcuts!
 let score = 0;
 let lives = 5;
