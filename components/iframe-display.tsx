@@ -30,7 +30,6 @@ export default function IframeDisplay({
 
     setIsLoading(true);
     setLastError(null);
-    setConsoleMessages([]);
 
     try {
       // Validate that the code contains basic HTML structure
@@ -156,6 +155,7 @@ export default function IframeDisplay({
       const iframe = iframeRef.current;
       const handleLoad = () => {
         setIsLoading(false);
+        setConsoleMessages([]); // Clear console messages when iframe loads
         onOutput(["HTML page loaded successfully"]);
         onError?.(null);
       };
@@ -216,6 +216,8 @@ export default function IframeDisplay({
   useEffect(() => {
     if (consoleMessages.length > 0) {
       onOutput(["HTML page loaded successfully", ...consoleMessages]);
+    } else {
+      onOutput(["HTML page loaded successfully"]);
     }
   }, [consoleMessages, onOutput]);
 
@@ -317,11 +319,11 @@ export default function IframeDisplay({
       </Card>
 
       {/* Console Output */}
-      <Card className="flex flex-col mt-4">
-        <CardHeader className="pb-2">
+      <Card className="mt-4 h-48 flex flex-col">
+        <CardHeader className="pb-2 flex-shrink-0">
           <CardTitle className="text-sm">Console Output</CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 p-2">
+        <CardContent className="flex-1 p-2 overflow-hidden">
           <div className="h-full bg-slate-900 rounded text-green-400 font-mono text-xs overflow-y-auto p-2">
             {consoleMessages.length > 0 ? (
               consoleMessages.map((message, index) => (
