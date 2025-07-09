@@ -263,43 +263,45 @@ export default function TutorialContent({
                   </Card>
                 )}
 
-                {/* Output Console */}
-                <Card className="mb-4">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-medium text-slate-700">
-                        Output
-                      </CardTitle>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleClearCanvas}
-                        className="h-6 px-2 text-xs"
-                      >
-                        <Eraser className="h-3 w-3 mr-1" />
-                        Clear
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="bg-slate-900 rounded-md p-3 min-h-[100px] max-h-[200px] overflow-y-auto">
-                      {output.length > 0 ? (
-                        output.map((line, index) => (
-                          <div
-                            key={index}
-                            className="text-green-400 text-sm font-mono mb-1"
-                          >
-                            {line}
+                {/* Output Console - Hidden for iframe courses as it's built into IframeDisplay */}
+                {courseType !== "iframe" && (
+                  <Card className="mb-4">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium text-slate-700">
+                          Output
+                        </CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleClearCanvas}
+                          className="h-6 px-2 text-xs"
+                        >
+                          <Eraser className="h-3 w-3 mr-1" />
+                          Clear
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="bg-slate-900 rounded-md p-3 min-h-[100px] max-h-[200px] overflow-y-auto">
+                        {output.length > 0 ? (
+                          output.map((line, index) => (
+                            <div
+                              key={index}
+                              className="text-green-400 text-sm font-mono mb-1"
+                            >
+                              {line}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-slate-500 text-sm">
+                            Run your code to see output here...
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-slate-500 text-sm">
-                          Run your code to see output here...
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* Controls */}
@@ -345,43 +347,42 @@ export default function TutorialContent({
                   "h-full border border-slate-200 rounded-lg bg-white",
                   courseType === "printData"
                     ? "flex flex-col"
+                    : courseType === "iframe"
+                    ? "flex flex-col"
                     : "flex items-center justify-center overflow-hidden",
                 )}
               >
-                {showAiChat ? (
-                  <AiChat
-                    tutorialId={tutorial.id}
-                    courseId={tutorial.courseId}
-                    code={userCode}
-                    onClose={() => setShowAiChat(false)}
-                    isVisible={showAiChat}
-                    canvasError={canvasError}
-                  />
-                ) : (
-                  <>
-                    {courseType === "canvas" && (
-                      <DrawingCanvas
-                        code={userCode}
-                        onOutput={setOutput}
-                        onError={handleCanvasError}
-                      />
-                    )}
-                    {courseType === "printData" && (
-                      <PrintDataDisplay
-                        code={userCode}
-                        onOutput={setOutput}
-                        onError={handleCanvasError}
-                      />
-                    )}
-                    {courseType === "iframe" && (
-                      <IframeDisplay
-                        code={userCode}
-                        onOutput={setOutput}
-                        onError={handleCanvasError}
-                      />
-                    )}
-                  </>
-                )}
+                <AiChat
+                  tutorialId={tutorial.id}
+                  courseId={tutorial.courseId}
+                  code={userCode}
+                  onClose={() => setShowAiChat(false)}
+                  isVisible={showAiChat}
+                  canvasError={canvasError}
+                />
+                <div className={showAiChat ? "hidden" : ""}>
+                  {courseType === "canvas" && (
+                    <DrawingCanvas
+                      code={userCode}
+                      onOutput={setOutput}
+                      onError={handleCanvasError}
+                    />
+                  )}
+                  {courseType === "printData" && (
+                    <PrintDataDisplay
+                      code={userCode}
+                      onOutput={setOutput}
+                      onError={handleCanvasError}
+                    />
+                  )}
+                  {courseType === "iframe" && (
+                    <IframeDisplay
+                      code={userCode}
+                      onOutput={setOutput}
+                      onError={handleCanvasError}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </div>

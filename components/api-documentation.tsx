@@ -1,7 +1,9 @@
-import { Book, Code, Palette, Mouse, Zap, Info, Gamepad2 } from "lucide-react";
+import { Book, Code, Palette, Mouse, Zap, Info, Gamepad2, Copy, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 
 const drawingFunctions = [
   {
@@ -326,6 +328,18 @@ setInterval(gameLoop, 16);`,
 ];
 
 export default function ApiDocumentation() {
+  const [copiedExample, setCopiedExample] = useState<number | null>(null);
+
+  const copyToClipboard = async (code: string, index: number) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedExample(index);
+      setTimeout(() => setCopiedExample(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy to clipboard:', err);
+    }
+  };
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case "basic":
@@ -374,10 +388,25 @@ export default function ApiDocumentation() {
         </div>
 
         <Tabs defaultValue="functions" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="functions">Functions</TabsTrigger>
-            <TabsTrigger value="colors">Colors</TabsTrigger>
-            <TabsTrigger value="examples">Examples</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-slate-100 border border-slate-200 p-1 rounded-lg shadow-sm">
+            <TabsTrigger 
+              value="functions" 
+              className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
+            >
+              Functions
+            </TabsTrigger>
+            <TabsTrigger 
+              value="colors" 
+              className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
+            >
+              Colors
+            </TabsTrigger>
+            <TabsTrigger 
+              value="examples" 
+              className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
+            >
+              Examples
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="functions" className="space-y-4">
@@ -515,13 +544,33 @@ export default function ApiDocumentation() {
               {codeExamples.map((example, index) => (
                 <Card key={index}>
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Code className="w-5 h-5 text-green-500" />
-                      {example.title}
-                    </CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Code className="w-5 h-5 text-green-500" />
+                        {example.title}
+                      </CardTitle>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyToClipboard(example.code, index)}
+                        className="flex items-center gap-2 hover:bg-green-50 hover:border-green-300 transition-colors"
+                      >
+                        {copiedExample === index ? (
+                          <>
+                            <Check className="w-4 h-4 text-green-600" />
+                            <span className="text-green-600">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-4 h-4" />
+                            Copy Code
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="bg-slate-900 p-4 rounded-lg">
+                    <div className="bg-slate-900 p-4 rounded-lg relative">
                       <pre className="text-sm text-green-300 overflow-x-auto">
                         <code>{example.code}</code>
                       </pre>
