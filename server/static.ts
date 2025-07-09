@@ -43,8 +43,8 @@ export function serveStatic(app: Express) {
 
     throw new Error(
       `Could not find the build directory in any of: ${possiblePaths.join(
-        ", "
-      )}`
+        ", ",
+      )}`,
     );
   }
 
@@ -60,24 +60,24 @@ export function serveStatic(app: Express) {
         if (filePath.endsWith(".js")) {
           res.setHeader(
             "Content-Type",
-            "application/javascript; charset=utf-8"
+            "application/javascript; charset=utf-8",
           );
           // Cache hashed assets for 1 year, but bust cache for HTML
           if (relativePath.includes("assets/")) {
             res.setHeader(
               "Cache-Control",
-              "public, max-age=31536000, immutable"
+              "public, max-age=31536000, immutable",
             );
           }
         } else if (filePath.endsWith(".mjs")) {
           res.setHeader(
             "Content-Type",
-            "application/javascript; charset=utf-8"
+            "application/javascript; charset=utf-8",
           );
           if (relativePath.includes("assets/")) {
             res.setHeader(
               "Cache-Control",
-              "public, max-age=31536000, immutable"
+              "public, max-age=31536000, immutable",
             );
           }
         } else if (filePath.endsWith(".css")) {
@@ -85,7 +85,7 @@ export function serveStatic(app: Express) {
           if (relativePath.includes("assets/")) {
             res.setHeader(
               "Cache-Control",
-              "public, max-age=31536000, immutable"
+              "public, max-age=31536000, immutable",
             );
           }
         } else if (filePath.endsWith(".html")) {
@@ -95,7 +95,7 @@ export function serveStatic(app: Express) {
           res.setHeader("Expires", "0");
         }
       },
-    })
+    }),
   );
 
   // Handle SPA routing - only serve index.html for routes (no file extension)

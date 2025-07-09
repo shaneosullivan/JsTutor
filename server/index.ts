@@ -64,7 +64,7 @@ export async function createServer() {
 if (process.env.NODE_ENV === "development") {
   (async () => {
     const app = await createServer();
-    
+
     // ALWAYS serve the app on port 5005
     // this serves both the API and the client.
     // It is the only port that is not firewalled.

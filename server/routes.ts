@@ -50,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "Fetched tutorials:",
         tutorials.length,
         "tutorials",
-        tutorials.map((t) => t.order).join(", ")
+        tutorials.map((t) => t.order).join(", "),
       );
 
       res.json(tutorials);
@@ -104,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updatedProgress = await storage.updateUserProgress(
         userId,
-        progressData
+        progressData,
       );
       res.json(updatedProgress);
     } catch (error) {
@@ -297,7 +297,7 @@ Tutorial Content: ${tutorial.content}`;
     const results = allPosts.filter(
       (post) =>
         post.title.toLowerCase().includes(query.toLowerCase()) ||
-        post.content.toLowerCase().includes(query.toLowerCase())
+        post.content.toLowerCase().includes(query.toLowerCase()),
     );
 
     res.json(results);

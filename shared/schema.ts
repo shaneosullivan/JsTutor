@@ -66,7 +66,7 @@ export const insertTutorialSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   content: z.string().min(1),
-  starterCode: z.string().default(''),
+  starterCode: z.string().default(""),
   expectedOutput: z.string().optional(),
   order: z.number(),
   isLocked: z.boolean().default(false),

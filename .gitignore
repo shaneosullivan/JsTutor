@@ -6,3 +6,4 @@ vite.config.ts.*
 *.tar.gz
 .last_modified_timestamp
 tmp
+.next

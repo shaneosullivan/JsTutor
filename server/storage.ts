@@ -17,7 +17,7 @@ export interface IStorage {
   getUserProgress(userId: number): Promise<UserProgress | undefined>;
   updateUserProgress(
     userId: number,
-    progress: Partial<InsertUserProgress>
+    progress: Partial<InsertUserProgress>,
   ): Promise<UserProgress>;
 
   getAllCourses(): Promise<Course[]>;
@@ -1938,7 +1938,7 @@ setTimeout(() => {
 
   async updateUserProgress(
     userId: number,
-    progress: Partial<InsertUserProgress>
+    progress: Partial<InsertUserProgress>,
   ): Promise<UserProgress> {
     const existing = this.userProgress.get(userId);
     if (!existing) {
@@ -1969,7 +1969,7 @@ setTimeout(() => {
   // Tutorial methods
   async getAllTutorials(): Promise<Tutorial[]> {
     return Array.from(this.tutorials.values()).sort(
-      (a, b) => a.order - b.order
+      (a, b) => a.order - b.order,
     );
   }
 
