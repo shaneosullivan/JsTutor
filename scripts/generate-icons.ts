@@ -211,7 +211,7 @@ async function generateIcons() {
       }
 
       console.log(
-        `✅ Generated ${icon.filename} (${icon.size}x${icon.size}) - ${icon.description}`
+        `✅ Generated ${icon.filename} (${icon.size}x${icon.size}) - ${icon.description}`,
       );
       successCount++;
     } catch (error) {
@@ -230,7 +230,7 @@ async function generateIcons() {
 
     // Note: Sharp doesn't support ICO format directly, but we can use the 32x32 PNG
     console.log(
-      `✅ Generated favicon.ico equivalent (favicon.png) - Traditional favicon`
+      `✅ Generated favicon.ico equivalent (favicon.png) - Traditional favicon`,
     );
     successCount++;
   } catch (error) {
@@ -329,7 +329,7 @@ async function generateManifest() {
 async function generateBrowserconfig() {
   const browserconfigPath = path.join(
     process.cwd(),
-    "client/public/browserconfig.xml"
+    "client/public/browserconfig.xml",
   );
 
   const browserconfig = `<?xml version="1.0" encoding="utf-8"?>

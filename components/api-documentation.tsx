@@ -1,4 +1,14 @@
-import { Book, Code, Palette, Mouse, Zap, Info, Gamepad2, Copy, Check } from "lucide-react";
+import {
+  Book,
+  Code,
+  Palette,
+  Mouse,
+  Zap,
+  Info,
+  Gamepad2,
+  Copy,
+  Check,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -336,7 +346,7 @@ export default function ApiDocumentation() {
       setCopiedExample(index);
       setTimeout(() => setCopiedExample(null), 2000);
     } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
+      console.error("Failed to copy to clipboard:", err);
     }
   };
 
@@ -389,20 +399,20 @@ export default function ApiDocumentation() {
 
         <Tabs defaultValue="functions" className="w-full">
           <TabsList className="grid w-full grid-cols-3 bg-slate-100 border border-slate-200 p-1 rounded-lg shadow-sm">
-            <TabsTrigger 
-              value="functions" 
+            <TabsTrigger
+              value="functions"
               className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
             >
               Functions
             </TabsTrigger>
-            <TabsTrigger 
-              value="colors" 
+            <TabsTrigger
+              value="colors"
               className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
             >
               Colors
             </TabsTrigger>
-            <TabsTrigger 
-              value="examples" 
+            <TabsTrigger
+              value="examples"
               className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
             >
               Examples

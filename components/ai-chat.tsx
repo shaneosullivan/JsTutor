@@ -68,7 +68,13 @@ export default function AiChat({
 
   // Initialize chat with context when first shown (only if API key is available)
   useEffect(() => {
-    if (!hasInitialized && messages.length === 0 && apiKey && !showSetup && isVisible) {
+    if (
+      !hasInitialized &&
+      messages.length === 0 &&
+      apiKey &&
+      !showSetup &&
+      isVisible
+    ) {
       let initialContent;
 
       if (canvasError) {
@@ -93,7 +99,14 @@ export default function AiChat({
       sendMessage(initialMessage, true);
       setHasInitialized(true);
     }
-  }, [hasInitialized, messages.length, apiKey, showSetup, canvasError, isVisible]);
+  }, [
+    hasInitialized,
+    messages.length,
+    apiKey,
+    showSetup,
+    canvasError,
+    isVisible,
+  ]);
 
   // Send error message when Help Me button is clicked with an error present
   useEffect(() => {

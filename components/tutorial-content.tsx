@@ -348,8 +348,8 @@ export default function TutorialContent({
                   courseType === "printData"
                     ? "flex flex-col"
                     : courseType === "iframe"
-                    ? "flex flex-col"
-                    : "flex items-center justify-center overflow-hidden",
+                      ? "flex flex-col"
+                      : "flex items-center justify-center overflow-hidden",
                 )}
               >
                 <AiChat
@@ -360,7 +360,15 @@ export default function TutorialContent({
                   isVisible={showAiChat}
                   canvasError={canvasError}
                 />
-                <div className={showAiChat ? "hidden" : ""}>
+                <div
+                  className={
+                    showAiChat
+                      ? "hidden"
+                      : courseType === "iframe"
+                        ? "h-full"
+                        : ""
+                  }
+                >
                   {courseType === "canvas" && (
                     <DrawingCanvas
                       code={userCode}
