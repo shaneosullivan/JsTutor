@@ -63,7 +63,7 @@ export default function TutorialContent({
     setIsRunning(false);
     setCanvasError(null);
     setIsExplanationOpen(true); // Always expand when moving to a new tutorial
-    // Don't reset showAiChat here - let it persist but the AI chat will reset its own state
+    setShowAiChat(false); // Reset AI chat visibility when tutorial changes
   }, [tutorial.id]);
 
   // Handle explanation toggle
@@ -87,7 +87,7 @@ export default function TutorialContent({
   };
 
   const handleCanvasError = (
-    error: { message: string; line?: number } | null,
+    error: { message: string; line?: number } | null
   ) => {
     setCanvasError(error);
   };
@@ -160,7 +160,7 @@ export default function TutorialContent({
         <div
           className={cn(
             "border-r border-slate-200 bg-white flex flex-col transition-all duration-300",
-            isExplanationOpen ? "w-96" : "w-12",
+            isExplanationOpen ? "w-96" : "w-12"
           )}
         >
           {/* Collapse Toggle */}
@@ -344,30 +344,38 @@ export default function TutorialContent({
             <div className="h-full p-4">
               <div
                 className={cn(
-                  "h-full border border-slate-200 rounded-lg bg-white",
+                  "h-full border border-slate-200 rounded-lg bg-white relative",
                   courseType === "printData"
                     ? "flex flex-col"
                     : courseType === "iframe"
                       ? "flex flex-col"
-                      : "flex items-center justify-center overflow-hidden",
+                      : "flex items-center justify-center overflow-hidden"
                 )}
               >
-                <AiChat
-                  tutorialId={tutorial.id}
-                  courseId={tutorial.courseId}
-                  code={userCode}
-                  onClose={() => setShowAiChat(false)}
-                  isVisible={showAiChat}
-                  canvasError={canvasError}
-                />
+                {/* AI Chat - Always mounted but positioned absolutely */}
                 <div
-                  className={
-                    showAiChat
-                      ? "hidden"
-                      : courseType === "iframe"
-                        ? "h-full"
-                        : ""
-                  }
+                  className={cn(
+                    "absolute inset-0 z-10",
+                    showAiChat ? "block" : "hidden"
+                  )}
+                  style={{ display: showAiChat ? "block" : "none" }}
+                >
+                  <AiChat
+                    tutorialId={tutorial.id}
+                    courseId={tutorial.courseId}
+                    code={userCode}
+                    onClose={() => setShowAiChat(false)}
+                    isVisible={showAiChat}
+                    canvasError={canvasError}
+                  />
+                </div>
+
+                {/* Canvas/Tutorial Content - Always visible unless AI chat is shown */}
+                <div
+                  className={cn(
+                    courseType === "iframe" ? "h-full" : "",
+                    "relative z-0"
+                  )}
                 >
                   {courseType === "canvas" && (
                     <DrawingCanvas
