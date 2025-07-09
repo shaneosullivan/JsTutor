@@ -636,6 +636,64 @@ printData(sentence);`,
   {
     id: 20,
     courseId: 3,
+    title: "What is HTML?",
+    description: "Learn the basics of HTML structure and the DOM",
+    content:
+      "HTML is the language that creates web pages! Think of it like building blocks that tell the browser how to display content.\n\n🏗️ HTML Structure:\n• HTML pages have a <head> (invisible info) and <body> (visible content)\n• Tags are like containers: <h1>Title</h1> wraps text to make it a heading\n• Attributes give extra info to tags: <h1 id=\"title\">Hello</h1>\n• The browser creates a 'document' object you can control with JavaScript\n\n🌟 Your Challenge:\nTry changing the text, adding your own paragraph, or modifying the styles!",
+    starterCode: `<!DOCTYPE html>
+<html>
+<head>
+    <title>My First Webpage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .highlight {
+            background-color: yellow;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="main-title">Welcome to HTML!</h1>
+    <p class="intro">This is a paragraph inside the body.</p>
+    <p>HTML uses <strong>tags</strong> to structure content.</p>
+    <button onclick="changeTitle()">Click me!</button>
+    <div id="output"></div>
+
+    <script>
+        // The 'document' object represents the entire HTML page
+        console.log('The document object:', document);
+        
+        // The 'window' object represents the browser window
+        console.log('The window object:', window);
+        
+        // You can find elements by their id attribute
+        let titleElement = document.getElementById('main-title');
+        console.log('Found title element:', titleElement);
+        
+        function changeTitle() {
+            // Change the text inside the title
+            titleElement.textContent = 'I changed the title with JavaScript!';
+            
+            // Add some content to the output div
+            let output = document.getElementById('output');
+            output.innerHTML = '<p class="highlight">JavaScript can change HTML!</p>';
+            
+            console.log('Title changed!');
+        }
+    </script>
+</body>
+</html>`,
+    expectedOutput:
+      "A webpage explaining HTML basics with interactive elements",
+    order: 1,
+  },
+  {
+    id: 21,
+    courseId: 3,
     title: "Finding Elements",
     description: "Learn to find and select HTML elements",
     content:
@@ -676,10 +734,10 @@ printData(sentence);`,
 </body>
 </html>`,
     expectedOutput: "A webpage with modified elements",
-    order: 1,
+    order: 2,
   },
   {
-    id: 21,
+    id: 22,
     courseId: 3,
     title: "Changing Styles",
     description: "Make your webpage look different with JavaScript",
@@ -738,10 +796,10 @@ printData(sentence);`,
 </body>
 </html>`,
     expectedOutput: "A webpage with changing colors, sizes, and animations",
-    order: 2,
+    order: 3,
   },
   {
-    id: 22,
+    id: 23,
     courseId: 3,
     title: "Creating New Elements",
     description: "Add new HTML elements with JavaScript",
@@ -805,10 +863,10 @@ printData(sentence);`,
 </body>
 </html>`,
     expectedOutput: "A webpage where you can create and remove elements",
-    order: 3,
+    order: 4,
   },
   {
-    id: 23,
+    id: 24,
     courseId: 3,
     title: "Working with Forms",
     description: "Get input from users with forms",
@@ -898,7 +956,7 @@ printData(sentence);`,
 </html>`,
     expectedOutput:
       "A working form that collects and displays user information",
-    order: 4,
+    order: 5,
   },
 
   // Algorithms Course (courseId: 4)
