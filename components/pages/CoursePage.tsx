@@ -419,7 +419,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
               value="reference"
               className="flex-1 overflow-hidden mt-0"
             >
-              <ApiDocumentation />
+              <ApiDocumentation courseType={course?.type || "canvas"} />
             </TabsContent>
           </Tabs>
         </main>

@@ -337,8 +337,226 @@ setInterval(gameLoop, 16);`,
   },
 ];
 
-export default function ApiDocumentation() {
+// PrintData course functions
+const printDataFunctions = [
+  {
+    name: "printData",
+    syntax: "printData(data)",
+    description: "Display data in the output console",
+    parameters: [
+      { name: "data", type: "any", description: "The data to display - can be strings, numbers, objects, arrays, etc." },
+    ],
+    example: `printData("Hello World!");
+printData(42);
+printData([1, 2, 3]);
+printData({ name: "Alice", age: 25 });`,
+    category: "output",
+  },
+  {
+    name: "console.log",
+    syntax: "console.log(...args)",
+    description: "Log messages to the browser console",
+    parameters: [
+      { name: "args", type: "any", description: "Multiple arguments to log" },
+    ],
+    example: `console.log("Debug message");
+console.log("Value:", 42);
+console.log("User:", { name: "Bob", age: 30 });`,
+    category: "debug",
+  },
+];
+
+// DOM/iframe course functions
+const domFunctions = [
+  {
+    name: "document.getElementById",
+    syntax: "document.getElementById(id)",
+    description: "Find an HTML element by its ID attribute",
+    parameters: [
+      { name: "id", type: "string", description: "The ID of the element to find" },
+    ],
+    example: `let titleElement = document.getElementById('title');
+let button = document.getElementById('myButton');
+titleElement.textContent = 'New Title';`,
+    category: "dom",
+  },
+  {
+    name: "document.querySelector",
+    syntax: "document.querySelector(selector)",
+    description: "Find the first element matching a CSS selector",
+    parameters: [
+      { name: "selector", type: "string", description: "CSS selector (e.g., '.class', '#id', 'tag')" },
+    ],
+    example: `let firstParagraph = document.querySelector('p');
+let redButton = document.querySelector('.red-button');
+let titleById = document.querySelector('#title');`,
+    category: "dom",
+  },
+  {
+    name: "document.querySelectorAll",
+    syntax: "document.querySelectorAll(selector)",
+    description: "Find all elements matching a CSS selector",
+    parameters: [
+      { name: "selector", type: "string", description: "CSS selector" },
+    ],
+    example: `let allParagraphs = document.querySelectorAll('p');
+let allButtons = document.querySelectorAll('button');
+allParagraphs.forEach(p => p.style.color = 'blue');`,
+    category: "dom",
+  },
+  {
+    name: "element.addEventListener",
+    syntax: "element.addEventListener(event, function)",
+    description: "Listen for events on an element",
+    parameters: [
+      { name: "event", type: "string", description: "Event type (e.g., 'click', 'input')" },
+      { name: "function", type: "function", description: "Function to call when event occurs" },
+    ],
+    example: `let button = document.getElementById('myButton');
+button.addEventListener('click', () => {
+  alert('Button clicked!');
+});`,
+    category: "events",
+  },
+  {
+    name: "document.createElement",
+    syntax: "document.createElement(tagName)",
+    description: "Create a new HTML element",
+    parameters: [
+      { name: "tagName", type: "string", description: "HTML tag name (e.g., 'div', 'p', 'button')" },
+    ],
+    example: `let newParagraph = document.createElement('p');
+newParagraph.textContent = 'Hello!';
+document.body.appendChild(newParagraph);`,
+    category: "dom",
+  },
+];
+
+// Examples for different course types
+const printDataExamples = [
+  {
+    title: "Working with Arrays",
+    code: `let fruits = ['apple', 'banana', 'orange'];
+printData('My favorite fruits:');
+printData(fruits);
+
+// Using array methods
+let uppercaseFruits = fruits.map(fruit => fruit.toUpperCase());
+printData('Uppercase fruits:');
+printData(uppercaseFruits);`,
+  },
+  {
+    title: "Object Manipulation",
+    code: `let person = {
+  name: 'Alice',
+  age: 25,
+  city: 'New York'
+};
+
+printData('Person info:');
+printData(person);
+
+// Adding properties
+person.job = 'Developer';
+printData('Updated person:');
+printData(person);`,
+  },
+  {
+    title: "Loop Through Data",
+    code: `let numbers = [1, 2, 3, 4, 5];
+
+printData('Original numbers:');
+printData(numbers);
+
+// Square each number
+let squared = numbers.map(num => num * num);
+printData('Squared numbers:');
+printData(squared);
+
+// Filter even numbers
+let evenNumbers = numbers.filter(num => num % 2 === 0);
+printData('Even numbers:');
+printData(evenNumbers);`,
+  },
+];
+
+const domExamples = [
+  {
+    title: "Change Text Content",
+    code: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Example</title>
+</head>
+<body>
+    <h1 id="title">Original Title</h1>
+    <p class="text">Original paragraph</p>
+    <button onclick="changeText()">Change Text</button>
+    
+    <script>
+        function changeText() {
+            let title = document.getElementById('title');
+            title.textContent = 'New Title!';
+            
+            let paragraph = document.querySelector('.text');
+            paragraph.textContent = 'Text changed!';
+        }
+    </script>
+</body>
+</html>`,
+  },
+  {
+    title: "Interactive Button",
+    code: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Button Example</title>
+</head>
+<body>
+    <button id="colorButton">Click me!</button>
+    <div id="output"></div>
+    
+    <script>
+        let button = document.getElementById('colorButton');
+        let output = document.getElementById('output');
+        let clickCount = 0;
+        
+        button.addEventListener('click', () => {
+            clickCount++;
+            output.innerHTML = '<p>Clicked ' + clickCount + ' times!</p>';
+            
+            // Change button color
+            button.style.backgroundColor = 'lightblue';
+        });
+    </script>
+</body>
+</html>`,
+  },
+];
+
+interface ApiDocumentationProps {
+  courseType?: string;
+}
+
+export default function ApiDocumentation({ courseType = "canvas" }: ApiDocumentationProps) {
   const [copiedExample, setCopiedExample] = useState<number | null>(null);
+  
+  // Select appropriate data based on course type
+  const functions = courseType === "canvas" ? drawingFunctions : 
+                   courseType === "iframe" ? domFunctions : 
+                   printDataFunctions;
+  
+  const examples = courseType === "canvas" ? codeExamples : 
+                  courseType === "iframe" ? domExamples : 
+                  printDataExamples;
+                  
+  const title = courseType === "canvas" ? "Drawing Functions Reference" : 
+               courseType === "iframe" ? "DOM Manipulation Reference" : 
+               "Data Functions Reference";
+               
+  const description = courseType === "canvas" ? "All the functions you can use to create amazing drawings and interactive experiences!" : 
+                     courseType === "iframe" ? "Functions to manipulate HTML elements and create interactive web pages!" : 
+                     "Functions to work with data and display output in your programs!";
 
   const copyToClipboard = async (code: string, index: number) => {
     try {
@@ -362,6 +580,12 @@ export default function ApiDocumentation() {
         return <Mouse className="w-4 h-4" />;
       case "events":
         return <Gamepad2 className="w-4 h-4" />;
+      case "output":
+        return <Code className="w-4 h-4" />;
+      case "debug":
+        return <Info className="w-4 h-4" />;
+      case "dom":
+        return <Palette className="w-4 h-4" />;
       default:
         return <Code className="w-4 h-4" />;
     }
@@ -379,6 +603,12 @@ export default function ApiDocumentation() {
         return "bg-purple-100 text-purple-800";
       case "events":
         return "bg-orange-100 text-orange-800";
+      case "output":
+        return "bg-indigo-100 text-indigo-800";
+      case "debug":
+        return "bg-red-100 text-red-800";
+      case "dom":
+        return "bg-teal-100 text-teal-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -389,28 +619,29 @@ export default function ApiDocumentation() {
       <div className="p-6 space-y-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
-            Drawing Functions Reference
+            {title}
           </h1>
           <p className="text-slate-600">
-            All the functions you can use to create amazing drawings and
-            interactive experiences!
+            {description}
           </p>
         </div>
 
         <Tabs defaultValue="functions" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-100 border border-slate-200 p-1 rounded-lg shadow-sm">
+          <TabsList className={`grid w-full ${courseType === "canvas" ? "grid-cols-3" : "grid-cols-2"} bg-slate-100 border border-slate-200 p-1 rounded-lg shadow-sm`}>
             <TabsTrigger
               value="functions"
               className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
             >
               Functions
             </TabsTrigger>
-            <TabsTrigger
-              value="colors"
-              className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
-            >
-              Colors
-            </TabsTrigger>
+            {courseType === "canvas" && (
+              <TabsTrigger
+                value="colors"
+                className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
+              >
+                Colors
+              </TabsTrigger>
+            )}
             <TabsTrigger
               value="examples"
               className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-slate-200 text-slate-600 hover:text-slate-900 transition-all duration-200 font-medium"
@@ -421,7 +652,7 @@ export default function ApiDocumentation() {
 
           <TabsContent value="functions" className="space-y-4">
             <div className="grid gap-4">
-              {drawingFunctions.map((func, index) => (
+              {functions.map((func, index) => (
                 <Card key={index} className="border-l-4 border-l-purple-400">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -493,7 +724,8 @@ export default function ApiDocumentation() {
             </div>
           </TabsContent>
 
-          <TabsContent value="colors" className="space-y-4">
+          {courseType === "canvas" && (
+            <TabsContent value="colors" className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -548,10 +780,11 @@ export default function ApiDocumentation() {
               </CardContent>
             </Card>
           </TabsContent>
+          )}
 
           <TabsContent value="examples" className="space-y-4">
             <div className="grid gap-4">
-              {codeExamples.map((example, index) => (
+              {examples.map((example, index) => (
                 <Card key={index}>
                   <CardHeader>
                     <div className="flex items-center justify-between">

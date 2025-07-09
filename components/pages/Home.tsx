@@ -424,7 +424,7 @@ export default function Home() {
               value="reference"
               className="flex-1 overflow-hidden mt-0"
             >
-              <ApiDocumentation />
+              <ApiDocumentation courseType="canvas" />
             </TabsContent>
           </Tabs>
         </main>
