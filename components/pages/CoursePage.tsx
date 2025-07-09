@@ -12,6 +12,7 @@ import { ArrowLeft, Book, CheckCircle, Lock, Code, Star } from "lucide-react";
 import TutorialContent from "@/components/tutorial-content";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import ApiDocumentation from "@/components/api-documentation";
+import GithubIcon from "@/components/GithubIcon";
 import { useTutorial } from "@/hooks/use-course-tutorial";
 import Analytics from "@/components/Analytics";
 
@@ -330,6 +331,16 @@ export default function CoursePage({ courseId }: CoursePageProps) {
                   {completedTutorials.length * 10}
                 </span>
               </div>
+
+              <a
+                href="https://github.com/shaneosullivan/JsTutor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-8 h-8 text-slate-600 hover:text-slate-800 transition-colors"
+                title="View on GitHub"
+              >
+                <GithubIcon size={20} />
+              </a>
             </div>
           </div>
         </div>

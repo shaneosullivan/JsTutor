@@ -7,6 +7,7 @@ import { useTutorial } from "@/hooks/use-course-tutorial";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import TutorialContent from "@/components/tutorial-content";
 import ApiDocumentation from "@/components/api-documentation";
+import GithubIcon from "@/components/GithubIcon";
 import { Code, Star, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -298,6 +299,16 @@ export default function Home() {
                   {completedTutorials.length * 10}
                 </span>
               </div>
+
+              <a
+                href="https://github.com/shaneosullivan/JsTutor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-8 h-8 text-slate-600 hover:text-slate-800 transition-colors"
+                title="View on GitHub"
+              >
+                <GithubIcon size={20} />
+              </a>
             </div>
           </div>
         </div>

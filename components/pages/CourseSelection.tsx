@@ -22,6 +22,7 @@ import {
   Layers,
   Database,
 } from "lucide-react";
+import GithubIcon from "@/components/GithubIcon";
 import Analytics from "@/components/Analytics";
 
 interface Course {
@@ -103,6 +104,17 @@ export default function CourseSelection() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto">
+        <div className="flex justify-end mb-4">
+          <a
+            href="https://github.com/shaneosullivan/JsTutor"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-8 h-8 text-slate-600 hover:text-slate-800 transition-colors"
+            title="View on GitHub"
+          >
+            <GithubIcon size={20} />
+          </a>
+        </div>
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">
             JavaScript Adventure Courses
