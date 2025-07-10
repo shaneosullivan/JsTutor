@@ -102,37 +102,65 @@ export default function CourseSelection() {
   const sortedCourses = courses.sort((a, b) => a.order - b.order);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-end mb-4">
-          <a
-            href="https://github.com/shaneosullivan/JsTutor"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-8 h-8 text-slate-600 hover:text-slate-800 transition-colors"
-            title="View on GitHub"
-          >
-            <GithubIcon size={20} />
-          </a>
-        </div>
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            JavaScript Adventure Courses
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Choose your learning path! Start with the Basics course, then
-            explore specialized topics in any order you prefer.
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-end mb-4">
+            <a
+              href="https://github.com/shaneosullivan/JsTutor"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center w-8 h-8 text-slate-600 hover:text-slate-800 transition-colors hover:scale-110"
+              title="View on GitHub"
+            >
+              <GithubIcon size={20} />
+            </a>
+          </div>
+          
+          {/* Hero Section */}
+          <div className="text-center mb-12">
+            <div className="relative">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent mb-6">
+                JavaScript Adventure Courses
+              </h1>
+              <div className="flex justify-center mb-4">
+                <div className="bg-white rounded-full px-6 py-2 shadow-lg border-2 border-purple-200">
+                  <span className="ml-2 font-semibold text-gray-700">Choose Your Learning Path</span>
+                </div>
+              </div>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                Start with the <strong className="text-purple-600">Basics course</strong>, then 
+                explore specialized topics in any order you prefer!
+              </p>
+            </div>
+          </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {sortedCourses.map((course) => {
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {sortedCourses.map((course, index) => {
             const isUnlocked = isCourseUnlocked(course);
             const isCompleted = isCourseCompleted(course.id);
             const isBasics = course.requiredCourse === null;
 
+            const cardGradients = {
+              canvas: "from-pink-100 to-purple-100",
+              printData: "from-blue-100 to-cyan-100",
+              iframe: "from-green-100 to-emerald-100", 
+              default: "from-yellow-100 to-orange-100"
+            };
+
+            const cardBorders = {
+              canvas: "border-pink-200",
+              printData: "border-blue-200", 
+              iframe: "border-green-200",
+              default: "border-yellow-200"
+            };
+
             return (
-              <div key={course.id}>
+              <div 
+                key={course.id}
+                className="animate-fade-in-up"
+                style={{ animationDelay: `${index * 150}ms` }}
+              >
                 {isUnlocked ? (
                   <Link
                     href={course.id === 1 ? "/" : `/course/${course.id}`}
@@ -146,65 +174,82 @@ export default function CourseSelection() {
                     }}
                   >
                     <Card
-                      className={`transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer ${
-                        isCompleted ? "ring-2 ring-green-500" : ""
-                      }`}
+                      className={`relative transition-all duration-300 hover:shadow-2xl hover:scale-105 cursor-pointer border-2 bg-gradient-to-br ${cardGradients[course.type as keyof typeof cardGradients] || cardGradients.default} ${cardBorders[course.type as keyof typeof cardBorders] || cardBorders.default} ${
+                        isCompleted ? "ring-4 ring-green-400 ring-opacity-50" : ""
+                      } hover:rotate-1 transform-gpu`}
                     >
+                      {/* Completion indicator */}
+                      {isCompleted && (
+                        <div className="absolute -top-2 -right-2 bg-green-500 text-white rounded-full p-2 shadow-lg">
+                          <CheckCircle className="h-4 w-4" />
+                        </div>
+                      )}
+
                       <CardHeader className="text-center">
-                        <div className="flex justify-center mb-3">
+                        <div className="flex justify-center mb-4">
                           <div
-                            className={`p-3 rounded-full ${
+                            className={`p-4 rounded-full shadow-lg transform transition-transform hover:scale-110 ${
                               isCompleted
-                                ? "bg-green-100 text-green-600"
+                                ? "bg-gradient-to-br from-green-100 to-green-200 text-green-600"
                                 : isUnlocked
-                                  ? "bg-blue-100 text-blue-600"
-                                  : "bg-gray-100 text-gray-400"
+                                  ? "bg-gradient-to-br from-blue-100 to-blue-200 text-blue-600"
+                                  : "bg-gradient-to-br from-gray-100 to-gray-200 text-gray-400"
                             }`}
                           >
                             {isCompleted ? (
-                              <CheckCircle className="h-8 w-8" />
+                              <CheckCircle className="h-10 w-10" />
                             ) : isUnlocked ? (
                               getCourseIcon(course.type)
                             ) : (
-                              <Lock className="h-8 w-8" />
+                              <Lock className="h-10 w-10" />
                             )}
                           </div>
                         </div>
-                        <CardTitle className="text-xl mb-2">
-                          {course.title}
+                        <CardTitle className="text-xl mb-3 font-bold">
+                          <span className="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                            {course.title}
+                          </span>
                           {isBasics && (
-                            <Badge className="ml-2 bg-purple-100 text-purple-700">
-                              Required First
+                            <Badge className="ml-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg">
+                              Start Here
                             </Badge>
                           )}
                         </CardTitle>
-                        <CardDescription className="text-sm text-gray-500">
+                        <CardDescription className="text-sm font-medium bg-white/50 rounded-full px-3 py-1 mx-auto inline-block">
                           {getCourseTypeDescription(course.type)}
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                          {course.description}
-                        </p>
+                        <div className="bg-white/70 rounded-lg p-3 mb-4 border border-white/50">
+                          <p className="text-gray-700 text-sm leading-relaxed font-medium">
+                            {course.description}
+                          </p>
+                        </div>
 
                         <div className="space-y-3">
                           {isCompleted && (
-                            <div className="flex items-center text-green-600 text-sm">
+                            <div className="flex items-center justify-center bg-green-50 text-green-700 text-sm font-semibold rounded-full py-2 px-4 border-2 border-green-200">
                               <CheckCircle className="h-4 w-4 mr-2" />
                               Course Completed!
                             </div>
                           )}
 
                           {!isUnlocked && !isBasics && (
-                            <div className="flex items-center text-gray-500 text-sm">
+                            <div className="flex items-center justify-center bg-gray-50 text-gray-600 text-sm font-medium rounded-full py-2 px-4 border-2 border-gray-200">
                               <Lock className="h-4 w-4 mr-2" />
                               Complete Basics course first
                             </div>
                           )}
 
                           <Button
-                            className="w-full"
-                            variant={isCompleted ? "outline" : "default"}
+                            className={`w-full font-bold text-sm py-3 transition-all duration-300 transform hover:scale-105 shadow-lg ${
+                              isCompleted 
+                                ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0"
+                                : isUnlocked
+                                  ? "bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0"
+                                  : ""
+                            }`}
+                            variant={isCompleted ? "default" : isUnlocked ? "default" : "outline"}
                             disabled={!isUnlocked}
                           >
                             {isUnlocked ? (
@@ -229,9 +274,7 @@ export default function CourseSelection() {
                   </Link>
                 ) : (
                   <Card
-                    className={`transition-all duration-200 opacity-60 cursor-not-allowed ${
-                      isCompleted ? "ring-2 ring-green-500" : ""
-                    }`}
+                    className={`relative transition-all duration-300 opacity-70 cursor-not-allowed border-2 bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300 transform hover:scale-102`}
                   >
                     <CardHeader className="text-center">
                       <div className="flex justify-center mb-3">
@@ -313,23 +356,45 @@ export default function CourseSelection() {
               </div>
             );
           })}
-        </div>
+          </div>
 
-        <div className="mt-12 text-center">
-          <div className="bg-blue-50 rounded-lg p-6 max-w-2xl mx-auto">
-            <Database className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Your Progress is Saved Locally
-            </h3>
-            <p className="text-gray-600 text-sm">
-              All your progress is automatically saved in your browser. You can
-              come back anytime and continue where you left off!
-            </p>
+          {/* Progress Info Section */}
+          <div className="mt-16 text-center">
+            <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8 max-w-3xl mx-auto border-2 border-blue-200 shadow-xl relative overflow-hidden">
+              <div className="relative z-10">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-3 rounded-full shadow-lg">
+                    <Database className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+                  Your Progress is Automatically Saved
+                </h3>
+                <div className="bg-white/80 rounded-xl p-4 backdrop-blur-sm border border-blue-200">
+                  <p className="text-gray-700 font-medium leading-relaxed">
+                    All your progress is <strong className="text-purple-600">automatically saved</strong> in your browser. 
+                    <br/>
+                    Come back anytime and continue your learning journey right where you left off!
+                  </p>
+                </div>
+                
+                {/* Progress stats if completed courses exist */}
+                {completedCourses.length > 0 && (
+                  <div className="mt-4 flex justify-center">
+                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-full px-6 py-2 border-2 border-green-300">
+                      <span className="text-green-700 font-bold">
+                        {completedCourses.length} Course{completedCourses.length !== 1 ? 's' : ''} Completed
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <Analytics />
+        <Analytics />
+      </div>
     </div>
   );
 }

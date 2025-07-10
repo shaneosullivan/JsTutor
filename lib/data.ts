@@ -278,11 +278,14 @@ drawCircle(50, 50, 30, 'yellow');      // Sun
       "Loops help us repeat code without writing it over and over! It's like telling the computer 'do this 10 times'.\n\n🔄 About Loops:\n• A 'for loop' repeats code a certain number of times\n• We use 'i' as a counter that changes each time\n• The loop runs while i is less than the number we set\n\n✨ Loop Magic:\n• i starts at 0, then becomes 1, 2, 3, and so on\n• We can use i in our drawing to make patterns\n• i * 50 means: 0, 50, 100, 150... (perfect for spacing!)\n\n🌟 Your Challenge:\nCreate your own pattern! Try changing the numbers, colors, or shapes. What happens if you use i for the color or size?",
     starterCode: `// Let's make a pattern with a loop!
 for (let i = 0; i < 5; i++) {
+  // Can you see why the circles are spaced out?
   drawCircle(50 + i * 60, 200, 20, 'purple');
 }
 
 // Try making a different pattern!
 for (let i = 0; i < 3; i++) {
+  // Can you see why the squares start further right
+  // than the circles?
   drawRect(100 + i * 80, 300, 40, 40, 'orange');
 }`,
     expectedOutput: "A pattern of purple circles and orange squares",

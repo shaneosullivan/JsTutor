@@ -113,14 +113,24 @@ export default function HelpModal({
         <div className="space-y-6 p-1">
           {/* Current Tutorial Help */}
           {currentTutorial && (
-            <Card>
+            <Card className="border-yellow-200 bg-yellow-50">
               <CardHeader>
-                <CardTitle className="text-lg">
+                <CardTitle className="text-lg flex items-center">
+                  <span className="mr-2">💡</span>
                   Help for: {currentTutorial.title}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-slate-700 mb-4">{currentTutorial.content}</p>
+                <div className="prose prose-sm max-w-none mb-4">
+                  {currentTutorial.content.split("\n").map((paragraph, index) => (
+                    <p
+                      key={index}
+                      className="mb-3 last:mb-0 text-slate-700 leading-relaxed"
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
                 {currentTutorial.expectedOutput && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <h4 className="font-medium text-blue-800 mb-2">
