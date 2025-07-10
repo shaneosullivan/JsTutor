@@ -8,6 +8,7 @@ import TutorialSidebar from "@/components/tutorial-sidebar";
 import TutorialContent from "@/components/tutorial-content";
 import ApiDocumentation from "@/components/api-documentation";
 import GithubIcon from "@/components/GithubIcon";
+import { useKeyboard } from "@/components/KeyboardProvider";
 import { Code, Star, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -30,6 +31,7 @@ interface Course {
 
 export default function Home() {
   const router = useRouter();
+  const keyboard = useKeyboard();
   const { data: courses = [] } = useQuery<Course[]>({
     queryKey: ["/api/courses"],
   });
@@ -261,9 +263,14 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen bg-slate-50 flex flex-col">
+    <div
+      className="bg-slate-50 flex flex-col keyboard-stable"
+      style={{ height: keyboard.visibleHeight }}
+    >
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200 flex-shrink-0">
+      <header
+        className={`bg-white shadow-sm border-b border-slate-200 flex-shrink-0 keyboard-responsive-header ${keyboard.isVisible ? "keyboard-hidden" : ""}`}
+      >
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">

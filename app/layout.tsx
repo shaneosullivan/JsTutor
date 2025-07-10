@@ -132,7 +132,8 @@ export const metadata: Metadata = {
   referrer: "origin-when-cross-origin",
   colorScheme: "light",
   themeColor: "#8b5cf6",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+  viewport:
+    "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content",
   openGraph: {
     title: "JsTutor - Interactive JavaScript Learning Platform",
     description:

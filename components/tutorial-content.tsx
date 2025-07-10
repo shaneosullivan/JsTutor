@@ -25,6 +25,7 @@ import PrintDataDisplay from "@/components/print-data-display";
 import IframeDisplay from "@/components/iframe-display";
 import AiChat from "@/components/ai-chat";
 import HelpModal from "@/components/help-modal";
+import { useKeyboard } from "@/components/KeyboardProvider";
 import type { Tutorial } from "@shared/schema";
 
 interface TutorialContentProps {
@@ -50,6 +51,7 @@ export default function TutorialContent({
   courseType = "canvas",
   onShowReference,
 }: TutorialContentProps) {
+  const keyboard = useKeyboard();
   const [output, setOutput] = useState<string[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [isExplanationOpen, setIsExplanationOpen] = useState(true);
@@ -102,7 +104,9 @@ export default function TutorialContent({
   return (
     <div className="h-full flex flex-col">
       {/* Tutorial Header */}
-      <div className="border-b border-slate-200 bg-white px-6 py-4">
+      <div
+        className={`border-b border-slate-200 bg-white px-6 py-4 keyboard-responsive-header ${keyboard.isVisible ? "keyboard-hidden" : ""}`}
+      >
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">

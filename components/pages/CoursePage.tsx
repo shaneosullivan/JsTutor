@@ -19,6 +19,7 @@ import TutorialContent from "@/components/tutorial-content";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import ApiDocumentation from "@/components/api-documentation";
 import GithubIcon from "@/components/GithubIcon";
+import { useKeyboard } from "@/components/KeyboardProvider";
 import { useTutorial } from "@/hooks/use-course-tutorial";
 import Analytics from "@/components/Analytics";
 
@@ -50,6 +51,7 @@ interface CoursePageProps {
 export default function CoursePage({ courseId }: CoursePageProps) {
   const courseIdNum = parseInt(courseId);
   const router = useRouter();
+  const keyboard = useKeyboard();
 
   // Local storage hooks for course-specific progress
   const getCompletedTutorials = (): number[] => {
@@ -294,9 +296,14 @@ export default function CoursePage({ courseId }: CoursePageProps) {
   }
 
   return (
-    <div className="h-screen bg-slate-50 flex flex-col">
+    <div
+      className="bg-slate-50 flex flex-col keyboard-stable"
+      style={{ height: keyboard.visibleHeight }}
+    >
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200 flex-shrink-0">
+      <header
+        className={`bg-white shadow-sm border-b border-slate-200 flex-shrink-0 keyboard-responsive-header ${keyboard.isVisible ? "keyboard-hidden" : ""}`}
+      >
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
