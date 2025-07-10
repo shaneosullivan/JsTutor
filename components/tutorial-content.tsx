@@ -85,7 +85,7 @@ export default function TutorialContent({
   };
 
   const handleCanvasError = (
-    error: { message: string; line?: number } | null
+    error: { message: string; line?: number } | null,
   ) => {
     setCanvasError(error);
   };
@@ -100,10 +100,10 @@ export default function TutorialContent({
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col content-area">
       {/* Tutorial Header */}
       <div
-        className={`border-b border-slate-200 bg-white px-6 py-4 keyboard-responsive-header ${keyboard.isVisible ? "keyboard-hidden" : ""}`}
+        className={`border-b border-slate-200 bg-white px-6 py-4 keyboard-responsive-header keyboard-transition ${keyboard.isVisible ? "keyboard-hidden" : ""}`}
       >
         <div className="flex items-center justify-between">
           <div>
@@ -176,7 +176,7 @@ export default function TutorialContent({
         <div
           className={cn(
             "border-r border-slate-200 bg-white flex flex-col transition-all duration-300",
-            isExplanationOpen ? "w-96" : "w-12"
+            isExplanationOpen ? "w-96" : "w-12",
           )}
         >
           {/* Collapse Toggle */}
@@ -341,9 +341,14 @@ export default function TutorialContent({
         {/* Right Panel - Code Editor and Canvas (Side by Side) */}
         <div className="flex-1 flex overflow-hidden">
           {/* Code Editor */}
-          <div className="w-1/2 border-r border-slate-200 bg-white">
-            <div className={"h-full " + (keyboard.isVisible ? "" : " p-4")}>
-              <div className="h-full border border-slate-200 rounded-lg overflow-hidden">
+          <div className="w-1/2 border-r border-slate-200 bg-white editor-container">
+            <div
+              className={
+                "h-full keyboard-transition " +
+                (keyboard.isVisible ? "" : " p-4")
+              }
+            >
+              <div className="h-full border border-slate-200 rounded-lg overflow-hidden keyboard-stable">
                 <CodeEditor
                   value={userCode}
                   onChange={onCodeChange}
@@ -356,23 +361,28 @@ export default function TutorialContent({
           </div>
 
           {/* Canvas/Output Area */}
-          <div className="w-1/2 bg-slate-50 relative">
-            <div className={"h-full " + (keyboard.isVisible ? "" : " p-4")}>
+          <div className="w-1/2 bg-slate-50 relative editor-container">
+            <div
+              className={
+                "h-full keyboard-transition " +
+                (keyboard.isVisible ? "" : " p-4")
+              }
+            >
               <div
                 className={cn(
-                  "h-full border border-slate-200 rounded-lg bg-white relative",
+                  "h-full border border-slate-200 rounded-lg bg-white relative keyboard-stable",
                   courseType === "printData"
                     ? "flex flex-col"
                     : courseType === "iframe"
                       ? "flex flex-col"
-                      : "flex items-center justify-center overflow-hidden"
+                      : "flex items-center justify-center overflow-hidden",
                 )}
               >
                 {/* AI Chat - Always mounted but positioned absolutely */}
                 <div
                   className={cn(
                     "absolute inset-0 z-10",
-                    showAiChat ? "block" : "hidden"
+                    showAiChat ? "block" : "hidden",
                   )}
                   style={{ display: showAiChat ? "block" : "none" }}
                 >
@@ -390,7 +400,7 @@ export default function TutorialContent({
                 <div
                   className={cn(
                     courseType === "iframe" ? "h-full" : "",
-                    "relative z-0"
+                    "relative z-0",
                   )}
                 >
                   {courseType === "canvas" && (

@@ -302,7 +302,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     >
       {/* Header */}
       <header
-        className={`bg-white shadow-sm border-b border-slate-200 flex-shrink-0 keyboard-responsive-header ${keyboard.isVisible ? "keyboard-hidden" : ""}`}
+        className={`bg-white shadow-sm border-b border-slate-200 flex-shrink-0 keyboard-responsive-header keyboard-transition ${keyboard.isVisible ? "keyboard-hidden" : ""}`}
       >
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">

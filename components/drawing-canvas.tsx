@@ -110,13 +110,13 @@ export default function DrawingCanvas({
           "wrappedSetInterval",
           "wrappedSetTimeout",
           "providedPrintData",
-          safeCode
+          safeCode,
         );
         executeCode(
           canvasAPI,
           wrappedSetInterval,
           wrappedSetTimeout,
-          printData
+          printData,
         );
 
         setError(null);
@@ -127,7 +127,7 @@ export default function DrawingCanvas({
         if (allOutput.length === 0) {
           allOutput.push(
             "✨ Code executed successfully!",
-            "🎨 Your drawing is looking great!"
+            "🎨 Your drawing is looking great!",
           );
         }
         onOutput(allOutput);
@@ -183,10 +183,10 @@ export default function DrawingCanvas({
   maxHeight = maxHeight || 400; // Default to 400 if not provided
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 h-full">
+    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 h-full keyboard-transition">
       <canvas
         ref={canvasRef}
-        className={`tutorial-canvas w-full h-full mx-auto rounded shadow-lg`}
+        className={`tutorial-canvas w-full h-full mx-auto rounded shadow-lg keyboard-stable`}
         style={{
           imageRendering: "pixelated",
           maxHeight: `${maxHeight}px`,

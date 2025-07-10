@@ -177,7 +177,9 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
     document.addEventListener("gesturechange", preventGestureScroll, {
       passive: false,
     });
-    document.addEventListener("gestureend", preventGestureScroll, { passive: false });
+    document.addEventListener("gestureend", preventGestureScroll, {
+      passive: false,
+    });
 
     return () => {
       document.removeEventListener("touchstart", handleTouchStart);
@@ -292,7 +294,9 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
   return (
     <KeyboardContext.Provider value={keyboardState}>
       <div
-        className={`keyboard-responsive-container ${keyboardState.isVisible ? "ios-keyboard-adjust" : ""}`}
+        className={`keyboard-responsive-container keyboard-transition ${
+          keyboardState.isVisible ? "ios-keyboard-adjust" : ""
+        }`}
         style={{
           height: effectiveHeight || undefined,
           minHeight: effectiveMinHeight || undefined,
