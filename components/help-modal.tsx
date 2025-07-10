@@ -141,20 +141,13 @@ export default function HelpModal({
                         code: ({ className, children, ...props }: any) => {
                           const isInline = !className?.includes("language-");
 
-                          // Clean up backticks that might appear in inline code
-                          let cleanChildren = children;
-                          if (typeof children === "string" && isInline) {
-                            cleanChildren = children.replace(/^`+|`+$/g, "");
-                          }
-                          console.log("Rendering code block:", cleanChildren);
-
                           if (isInline) {
                             return (
                               <code
                                 className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded text-sm font-mono"
                                 {...props}
                               >
-                                {cleanChildren}
+                                {children}
                               </code>
                             );
                           } else {
