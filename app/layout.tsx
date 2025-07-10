@@ -1,6 +1,6 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ClientProvider from "@/components/ClientProvider";
@@ -8,6 +8,17 @@ import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import VersionChecker from "@/components/VersionChecker";
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+  colorScheme: "light",
+  themeColor: "#8b5cf6",
+};
 
 export const metadata: Metadata = {
   title: "JsTutor - Interactive JavaScript Learning Platform",
@@ -131,10 +142,6 @@ export const metadata: Metadata = {
   },
   applicationName: "JavaScript Adventure",
   referrer: "origin-when-cross-origin",
-  colorScheme: "light",
-  themeColor: "#8b5cf6",
-  viewport:
-    "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content",
   openGraph: {
     title: "JsTutor - Interactive JavaScript Learning Platform",
     description:
