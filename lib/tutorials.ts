@@ -15,7 +15,7 @@ export const TUTORIAL_DESCRIPTIONS = {
   },
   2: {
     tips: [
-      "JavaScript can do math just like a calculator",
+      "JavaScript can do maths just like a calculator",
       "Use + for addition, - for subtraction",
       "Use * for multiplication, / for division",
     ],
@@ -88,7 +88,7 @@ export const TUTORIAL_DESCRIPTIONS = {
   8: {
     tips: [
       "Combine loops and arrays to create patterns",
-      "Use math to calculate positions and sizes",
+      "Use maths to calculate positions and sizes",
       "Experiment with different colors and shapes",
     ],
     examples: [

@@ -56,6 +56,11 @@ export const tutorials = [
     content:
       "Variables are like boxes that hold information. You can put numbers, text, or other things in them and use them later!\n\n🎨 About the Drawing Functions:\n• drawCircle(x, y, radius, color) - The first number (x) is how many pixels from the LEFT edge to place the center. The second number (y) is how many pixels from the TOP edge. The radius is how big the circle is (like measuring from the center to the edge).\n• drawText(x, y, text, color) - Places text at a position. X is pixels from left, Y is pixels from top.\n\n📍 Think of the canvas like a grid: (0,0) is the top-left corner, (400,400) is the bottom-right!\n\n🌟 Your Challenge:\nAfter trying the example, clear the code and write your own! Try creating a variable with your favorite number, then draw a circle using that number. Can you draw your initials on the canvas too?",
     starterCode: `// Let's create our first variable!
+// This grey text is called a 'comment'. It doesn't
+// affect the code, it's just for us to read.
+// You make one by putting two slashes (//) at 
+// the start of a line.
+
 // To create a variable, we use the keyword 'let'
 // followed by the name we want to give it.
 // Then we put some information inside the
@@ -77,8 +82,8 @@ drawText(200, 300, myName, 'black');`,
     title: "Maths is Fun!",
     description: "Add, subtract, and more",
     content:
-      "JavaScript can do math just like you! You can add (+), subtract (-), multiply (*), and divide (/) numbers.\n\n🎨 New Drawing Function:\n• drawRect(x, y, width, height, color) - Draws a rectangle! X and Y tell us where the TOP-LEFT corner goes. Width is how wide (left to right), height is how tall (top to bottom). Think of it like drawing a box!\n\n🌟 Your Challenge:\nClear the code and try this on your own! Create variables for your age and your favorite number, then do some math with them. Draw rectangles using the results - maybe make a building or a robot face!",
-    starterCode: `// Let's do some math and draw with it!
+      "JavaScript can do maths just like you! You can add (+), subtract (-), multiply (*), and divide (/) numbers.\n\n🎨 New Drawing Function:\n• drawRect(x, y, width, height, color) - Draws a rectangle! X and Y tell us where the TOP-LEFT corner goes. Width is how wide (left to right), height is how tall (top to bottom). Think of it like drawing a box!\n\n🌟 Your Challenge:\nClear the code and try this on your own! Create variables for your age and your favorite number, then do some maths with them. Draw rectangles using the results - maybe make a building or a robot face!",
+    starterCode: `// Let's do some maths and draw with it!
 let x = 100;
 let y = 150;
 let size = 10 + 20; // This equals 30!
@@ -93,10 +98,10 @@ drawRect(x + 150, y, size / 2, size, 'blue');`,
     id: 3,
     courseId: 1,
     title: "Shortcuts with Math",
-    description: "Learn faster ways to do math with variables",
+    description: "Learn faster ways to do maths with variables",
     content:
       "Sometimes you want to change a variable by adding or subtracting from it. There are shortcuts that make this easier!\n\n🚀 Maths Shortcuts:\n• += means 'add to this variable' (like score += 10 means score = score + 10)\n• -= means 'subtract from this variable' (like lives -= 1 means lives = lives - 1)\n• *= means 'multiply this variable' (like size *= 2 means size = size * 2)\n• /= means 'divide this variable' (like speed /= 2 means speed = speed / 2)\n\n✨ Why Use Shortcuts?\n• They're faster to type\n• They're easier to read\n• They help prevent mistakes\n• Real programmers use them all the time!\n\n🌟 Your Challenge:\nTry changing the code to use different shortcuts. What happens if you use *= instead of +=? Can you make the squares get smaller instead of bigger?",
-    starterCode: `// Let's practice math shortcuts!
+    starterCode: `// Let's practice maths shortcuts!
 let score = 0;
 let lives = 5;
 let size = 20;
@@ -129,7 +134,7 @@ score += 100; // Add bonus points!
 x += 120;
 drawRect(x, 100, size, size, 'green');
 drawText(x, 130, 'Final Score: ' + score, 'green');`,
-    expectedOutput: "Three rectangles showing math shortcuts in action",
+    expectedOutput: "Three rectangles showing maths shortcuts in action",
     order: 3,
   },
   {
@@ -474,7 +479,7 @@ onSpaceBar(() => {
     title: "Your Own Game!",
     description: "Create your own game using everything you've learned",
     content:
-      "Congratulations! You've learned all the basics of programming and game development. Now it's time to create something totally your own!\n\n🎯 What You Can Build:\n• A different type of game (Pong, Pac-Man style, platformer)\n• An interactive art program\n• A physics simulation\n• A drawing tool with special effects\n• Your own twist on Snake\n\n🛠️ Tools You've Mastered:\n• Drawing shapes and colors\n• Variables and math\n• Loops and patterns\n• Random numbers\n• Animation with setInterval\n• Keyboard controls\n• Game logic and collision detection\n\n🌟 Your Challenge:\nStart with a blank canvas and create something amazing! Don't be afraid to experiment, break things, and try new ideas. Programming is all about creativity and problem-solving!",
+      "Congratulations! You've learned all the basics of programming and game development. Now it's time to create something totally your own!\n\n🎯 What You Can Build:\n• A different type of game (Pong, Pac-Man style, platformer)\n• An interactive art program\n• A physics simulation\n• A drawing tool with special effects\n• Your own twist on Snake\n\n🛠️ Tools You've Mastered:\n• Drawing shapes and colors\n• Variables and maths\n• Loops and patterns\n• Random numbers\n• Animation with setInterval\n• Keyboard controls\n• Game logic and collision detection\n\n🌟 Your Challenge:\nStart with a blank canvas and create something amazing! Don't be afraid to experiment, break things, and try new ideas. Programming is all about creativity and problem-solving!",
     starterCode: `// Your blank canvas - create anything you want!
 // Here are some ideas to get you started:
 
