@@ -70,7 +70,7 @@ export default function VersionChecker() {
   }, []);
 
   return (
-    <Dialog open={showUpdateDialog} onOpenChange={() => {}}>
+    <Dialog open={showUpdateDialog} onOpenChange={setShowUpdateDialog}>
       <DialogContent className="max-w-md bg-white border border-slate-200 shadow-2xl">
         <DialogHeader className="text-center">
           <DialogTitle className="flex items-center justify-center text-slate-800 text-xl">
