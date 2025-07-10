@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Tutorial } from "@shared/schema";
@@ -110,6 +111,9 @@ export default function HelpModal({
             </div>
             Need Help?
           </DialogTitle>
+          <DialogDescription className="text-slate-600">
+            Get help with your current tutorial, drawing commands, and troubleshooting tips.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 p-1">

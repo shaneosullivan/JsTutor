@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ClientProvider from "@/components/ClientProvider";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import VersionChecker from "@/components/VersionChecker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -237,6 +238,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="mobile-web-app-capable" content="yes" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -249,6 +251,7 @@ export default function RootLayout({
         <ClientProvider>
           <TooltipProvider>
             <Toaster />
+            <VersionChecker />
             {children}
           </TooltipProvider>
         </ClientProvider>

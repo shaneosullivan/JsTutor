@@ -7,3 +7,5 @@ vite.config.ts.*
 .last_modified_timestamp
 tmp
 .next
+config
+public/buildId.json
