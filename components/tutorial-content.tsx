@@ -92,7 +92,7 @@ export default function TutorialContent({
   };
 
   const handleCanvasError = (
-    error: { message: string; line?: number } | null,
+    error: { message: string; line?: number } | null
   ) => {
     setCanvasError(error);
   };
@@ -100,6 +100,11 @@ export default function TutorialContent({
   const handleShowAiChat = () => {
     setShowAiChat(true);
   };
+
+  let maxHeight = 0;
+  if (keyboard.isVisible && typeof document !== "undefined") {
+    maxHeight = document.querySelector("main")?.offsetHeight || 0;
+  }
 
   return (
     <div className="h-full flex flex-col">
@@ -178,7 +183,7 @@ export default function TutorialContent({
         <div
           className={cn(
             "border-r border-slate-200 bg-white flex flex-col transition-all duration-300",
-            isExplanationOpen ? "w-96" : "w-12",
+            isExplanationOpen ? "w-96" : "w-12"
           )}
         >
           {/* Collapse Toggle */}
@@ -344,7 +349,7 @@ export default function TutorialContent({
         <div className="flex-1 flex overflow-hidden">
           {/* Code Editor */}
           <div className="w-1/2 border-r border-slate-200 bg-white">
-            <div className="h-full p-4">
+            <div className={"h-full " + (keyboard.isVisible ? "" : " p-4")}>
               <div className="h-full border border-slate-200 rounded-lg overflow-hidden">
                 <CodeEditor
                   value={userCode}
@@ -359,7 +364,7 @@ export default function TutorialContent({
 
           {/* Canvas/Output Area */}
           <div className="w-1/2 bg-slate-50 relative">
-            <div className="h-full p-4">
+            <div className={"h-full " + (keyboard.isVisible ? "" : " p-4")}>
               <div
                 className={cn(
                   "h-full border border-slate-200 rounded-lg bg-white relative",
@@ -367,14 +372,14 @@ export default function TutorialContent({
                     ? "flex flex-col"
                     : courseType === "iframe"
                       ? "flex flex-col"
-                      : "flex items-center justify-center overflow-hidden",
+                      : "flex items-center justify-center overflow-hidden"
                 )}
               >
                 {/* AI Chat - Always mounted but positioned absolutely */}
                 <div
                   className={cn(
                     "absolute inset-0 z-10",
-                    showAiChat ? "block" : "hidden",
+                    showAiChat ? "block" : "hidden"
                   )}
                   style={{ display: showAiChat ? "block" : "none" }}
                 >
@@ -392,12 +397,13 @@ export default function TutorialContent({
                 <div
                   className={cn(
                     courseType === "iframe" ? "h-full" : "",
-                    "relative z-0",
+                    "relative z-0"
                   )}
                 >
                   {courseType === "canvas" && (
                     <DrawingCanvas
                       code={userCode}
+                      maxHeight={maxHeight}
                       onOutput={setOutput}
                       onError={handleCanvasError}
                     />

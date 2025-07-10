@@ -11,12 +11,14 @@ interface ErrorInfo {
 
 interface DrawingCanvasProps {
   code: string;
+  maxHeight: number;
   onOutput: (output: string[]) => void;
   onError?: (error: ErrorInfo | null) => void;
 }
 
 export default function DrawingCanvas({
   code,
+  maxHeight,
   onOutput,
   onError,
 }: DrawingCanvasProps) {
@@ -108,13 +110,13 @@ export default function DrawingCanvas({
           "wrappedSetInterval",
           "wrappedSetTimeout",
           "providedPrintData",
-          safeCode,
+          safeCode
         );
         executeCode(
           canvasAPI,
           wrappedSetInterval,
           wrappedSetTimeout,
-          printData,
+          printData
         );
 
         setError(null);
@@ -125,7 +127,7 @@ export default function DrawingCanvas({
         if (allOutput.length === 0) {
           allOutput.push(
             "✨ Code executed successfully!",
-            "🎨 Your drawing is looking great!",
+            "🎨 Your drawing is looking great!"
           );
         }
         onOutput(allOutput);
@@ -178,12 +180,18 @@ export default function DrawingCanvas({
     };
   }, [code, onOutput]);
 
+  maxHeight = maxHeight || 400; // Default to 400 if not provided
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 h-full">
       <canvas
         ref={canvasRef}
-        className="tutorial-canvas w-full h-full max-w-[400px] max-h-[400px] mx-auto rounded shadow-lg"
-        style={{ imageRendering: "pixelated" }}
+        className={`tutorial-canvas w-full h-full mx-auto rounded shadow-lg`}
+        style={{
+          imageRendering: "pixelated",
+          maxHeight: `${maxHeight}px`,
+          maxWidth: `${maxHeight}px`,
+        }}
       />
       {error && (
         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
