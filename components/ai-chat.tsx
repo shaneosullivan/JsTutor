@@ -300,9 +300,9 @@ export default function AiChat({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="h-8 w-8 p-0"
+            className="h-10 w-10 p-0 border-2 border-gray-300 bg-white hover:border-gray-500 hover:bg-gray-50"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </Button>
         </div>
       </div>

@@ -64,7 +64,7 @@ export default function TutorialContent({
   };
 
   const handleShowAiChat = () => {
-    setShowAiChat(true);
+    setShowAiChat(!showAiChat);
   };
 
   const handleReset = () => {
