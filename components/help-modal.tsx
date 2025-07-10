@@ -1,6 +1,6 @@
 "use client";
 
-import { X, CircleHelp, Code, Palette, AlertCircle } from "lucide-react";
+import { CircleHelp, Code, Palette, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -105,7 +105,9 @@ export default function HelpModal({
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white border border-slate-200 shadow-2xl">
         <DialogHeader className="border-b border-slate-100 pb-4">
           <DialogTitle className="flex items-center text-slate-800">
-            <CircleHelp className="text-blue-500 mr-2" size={24} />
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded p-1 mr-2">
+              <CircleHelp className="h-4 w-4" />
+            </div>
             Need Help?
           </DialogTitle>
         </DialogHeader>
@@ -122,14 +124,16 @@ export default function HelpModal({
               </CardHeader>
               <CardContent>
                 <div className="prose prose-sm max-w-none mb-4">
-                  {currentTutorial.content.split("\n").map((paragraph, index) => (
-                    <p
-                      key={index}
-                      className="mb-3 last:mb-0 text-slate-700 leading-relaxed"
-                    >
-                      {paragraph}
-                    </p>
-                  ))}
+                  {currentTutorial.content
+                    .split("\n")
+                    .map((paragraph, index) => (
+                      <p
+                        key={index}
+                        className="mb-3 last:mb-0 text-slate-700 leading-relaxed"
+                      >
+                        {paragraph}
+                      </p>
+                    ))}
                 </div>
                 {currentTutorial.expectedOutput && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
@@ -141,6 +145,17 @@ export default function HelpModal({
                     </p>
                   </div>
                 )}
+
+                {/* Reminder about help button */}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 mt-4">
+                  <div className="flex items-center justify-center text-sm text-purple-700">
+                    <span className="mr-2">💡 Need help again? Click the</span>
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded p-1 mx-1 shadow-sm">
+                      <CircleHelp className="h-3 w-3" />
+                    </div>
+                    <span className="ml-1">button anytime!</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           )}

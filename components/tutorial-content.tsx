@@ -1,19 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  RotateCcw,
-  ArrowRight,
-  Eraser,
-  Lightbulb,
-  ChevronLeft,
-  Bot,
-  CircleHelp,
-  Book,
-} from "lucide-react";
+import { ArrowRight, Bot, CircleHelp, Book } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CodeEditor from "@/components/code-editor";
 import DrawingCanvas from "@/components/drawing-canvas";
 import PrintDataDisplay from "@/components/print-data-display";
@@ -47,8 +37,7 @@ export default function TutorialContent({
   onShowReference,
 }: TutorialContentProps) {
   const keyboard = useKeyboard();
-  const [output, setOutput] = useState<string[]>([]);
-  const [isExplanationOpen, setIsExplanationOpen] = useState(true);
+  const [, setOutput] = useState<string[]>([]);
   const [showAiChat, setShowAiChat] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [canvasError, setCanvasError] = useState<{
@@ -56,32 +45,16 @@ export default function TutorialContent({
     line?: number;
   } | null>(null);
 
-  // Auto-expand "What You'll Learn" when tutorial changes
+  // Auto-show help dialog when tutorial changes
   useEffect(() => {
     setOutput([]);
     setCanvasError(null);
-    setIsExplanationOpen(true); // Always expand when moving to a new tutorial
+    setShowHelp(true); // Show help dialog when moving to a new tutorial
     setShowAiChat(false); // Reset AI chat visibility when tutorial changes
   }, [tutorial.id]);
 
-  // Handle explanation toggle
-  const handleExplanationToggle = () => {
-    setIsExplanationOpen(!isExplanationOpen);
-  };
-
   const handleComplete = () => {
     onComplete();
-  };
-
-  const handleReset = () => {
-    onCodeChange(tutorial.starterCode || "");
-    setOutput([]);
-    setCanvasError(null);
-  };
-
-  const handleClearCanvas = () => {
-    setOutput([]);
-    setCanvasError(null);
   };
 
   const handleCanvasError = (
@@ -172,176 +145,23 @@ export default function TutorialContent({
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel - Tutorial Instructions (Collapsible) */}
-        <div
-          className={cn(
-            "border-r border-slate-200 bg-white flex flex-col transition-all duration-300",
-            isExplanationOpen ? "w-96" : "w-12",
-          )}
-        >
-          {/* Collapse Toggle */}
-          <div className="p-3 border-b border-slate-200">
-            {isExplanationOpen ? (
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleExplanationToggle}
-                  className="p-1 h-8"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setShowHelp(true)}
-                  className="p-1 h-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0"
-                  title="Get Help"
-                >
-                  <CircleHelp className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center space-y-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleExplanationToggle}
-                  className="w-full justify-center p-1 h-8"
-                >
-                  <Lightbulb className="h-4 w-4 text-yellow-500" />
-                </Button>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setShowHelp(true)}
-                  className="w-full justify-center p-1 h-8 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0"
-                  title="Get Help"
-                >
-                  <CircleHelp className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Collapsible Content */}
-          {isExplanationOpen && (
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="p-6 flex-1 overflow-y-auto">
-                {/* What You'll Learn Header */}
-                <div className="flex items-center space-x-2 mb-4">
-                  <Lightbulb className="h-5 w-5 text-yellow-500" />
-                  <span className="font-semibold text-slate-800">
-                    What You'll Learn
-                  </span>
-                </div>
-
-                {/* Tutorial Content */}
-                <Card className="mb-6 border-yellow-200 bg-yellow-50">
-                  <CardContent className="p-4">
-                    <div className="prose prose-sm max-w-none">
-                      {tutorial.content.split("\n").map((paragraph, index) => (
-                        <p
-                          key={index}
-                          className="mb-3 last:mb-0 text-slate-700 leading-relaxed"
-                        >
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Expected Output */}
-                {tutorial.expectedOutput && (
-                  <Card className="mb-4 border-blue-200 bg-blue-50">
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium text-blue-800 flex items-center">
-                        <svg
-                          className="w-4 h-4 mr-2"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        What You'll Create
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <p className="text-blue-700 text-sm">
-                        {tutorial.expectedOutput}
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Output Console - Hidden for iframe courses as it's built into IframeDisplay */}
-                {courseType !== "iframe" && (
-                  <Card className="mb-4">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm font-medium text-slate-700">
-                          Output
-                        </CardTitle>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleClearCanvas}
-                          className="h-6 px-2 text-xs"
-                        >
-                          <Eraser className="h-3 w-3 mr-1" />
-                          Clear
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="bg-slate-900 rounded-md p-3 min-h-[100px] max-h-[200px] overflow-y-auto">
-                        {output.length > 0 ? (
-                          output.map((line, index) => (
-                            <div
-                              key={index}
-                              className="text-green-400 text-sm font-mono mb-1"
-                            >
-                              {line}
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-slate-500 text-sm">
-                            Run your code to see output here...
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-
-              {/* Controls */}
-              <div className="border-t border-slate-200 p-4">
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleReset}
-                    className="flex items-center w-full justify-center"
-                  >
-                    <RotateCcw className="h-4 w-4 mr-1" />
-                    Reset Code
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Panel - Code Editor and Canvas (Side by Side) */}
+        {/* Code Editor and Canvas (Side by Side) */}
         <div className="flex-1 flex overflow-hidden">
           {/* Code Editor */}
-          <div className="w-1/2 border-r border-slate-200 bg-white editor-container">
+          <div className="w-1/2 border-r border-slate-200 bg-white editor-container relative">
+            {/* Floating Help Button */}
+            <Button
+              onClick={() => setShowHelp(true)}
+              className={
+                (keyboard.isVisible ? "top-2 right-2" : "top-6 right-6") +
+                " absolute z-10 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0 p-2 h-8 w-8"
+              }
+              size="sm"
+              title="Get Help"
+            >
+              <CircleHelp className="h-4 w-4" />
+            </Button>
+
             <div
               className={
                 "h-full keyboard-transition " +

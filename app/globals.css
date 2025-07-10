@@ -278,7 +278,8 @@ html.keyboard-constrained [data-allow-scroll="true"] {
 
 /* Fun wiggle animation */
 @keyframes wiggle {
-  0%, 7% {
+  0%,
+  7% {
     transform: rotateZ(0);
   }
   15% {
@@ -296,7 +297,8 @@ html.keyboard-constrained [data-allow-scroll="true"] {
   35% {
     transform: rotateZ(-4deg);
   }
-  40%, 100% {
+  40%,
+  100% {
     transform: rotateZ(0);
   }
 }
@@ -307,7 +309,8 @@ html.keyboard-constrained [data-allow-scroll="true"] {
 
 /* Gentle float animation */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
