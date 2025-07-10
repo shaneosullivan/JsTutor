@@ -58,7 +58,7 @@ export default function TutorialContent({
   };
 
   const handleCanvasError = (
-    error: { message: string; line?: number } | null
+    error: { message: string; line?: number } | null,
   ) => {
     setCanvasError(error);
   };
@@ -174,10 +174,12 @@ export default function TutorialContent({
           {/* Canvas/Output Area */}
           <div className="w-1/2 bg-slate-50 relative editor-container">
             {/* Floating Action Buttons */}
-            <div className={
-              (keyboard.isVisible ? "top-2 left-2" : "top-6 left-6") +
-              " absolute z-20 flex flex-col gap-2"
-            }>
+            <div
+              className={
+                (keyboard.isVisible ? "top-2 left-2" : "top-6 left-6") +
+                " absolute z-20 flex flex-col gap-2"
+              }
+            >
               <Button
                 onClick={() => setShowHelp(true)}
                 className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0 p-2 h-8 w-8"
@@ -186,7 +188,7 @@ export default function TutorialContent({
               >
                 <CircleHelp className="h-4 w-4" />
               </Button>
-              
+
               <Button
                 onClick={handleReset}
                 className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0 p-2 h-8 w-8"
@@ -210,14 +212,14 @@ export default function TutorialContent({
                     ? "flex flex-col"
                     : courseType === "iframe"
                       ? "flex flex-col"
-                      : "flex items-center justify-center overflow-hidden"
+                      : "flex items-center justify-center overflow-hidden",
                 )}
               >
                 {/* AI Chat - Always mounted but positioned absolutely */}
                 <div
                   className={cn(
                     "absolute inset-0 z-10",
-                    showAiChat ? "block" : "hidden"
+                    showAiChat ? "block" : "hidden",
                   )}
                   style={{ display: showAiChat ? "block" : "none" }}
                 >
@@ -235,7 +237,7 @@ export default function TutorialContent({
                 <div
                   className={cn(
                     courseType === "iframe" ? "h-full" : "",
-                    "relative z-0"
+                    "relative z-0",
                   )}
                 >
                   {courseType === "canvas" && (

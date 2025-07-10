@@ -326,3 +326,87 @@ html.keyboard-constrained [data-allow-scroll="true"] {
 .hover\:scale-102:hover {
   transform: scale(1.02);
 }
+
+/* Syntax highlighting styles for code blocks */
+.hljs {
+  background-color: #f8f9fa !important;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  font-family: "Fira Code", "Monaco", "Menlo", "Consolas", monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+.hljs-keyword {
+  color: #d73a49;
+  font-weight: bold;
+}
+
+.hljs-string {
+  color: #032f62;
+}
+
+.hljs-number {
+  color: #005cc5;
+}
+
+.hljs-comment {
+  color: #6a737d;
+  font-style: italic;
+}
+
+.hljs-function {
+  color: #6f42c1;
+}
+
+.hljs-variable {
+  color: #e36209;
+}
+
+/* Improve markdown code block rendering */
+.prose code {
+  font-family: "Fira Code", "Monaco", "Menlo", "Consolas", monospace !important;
+}
+
+.prose pre {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.prose pre code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Inline code styling */
+.prose :not(pre) > code {
+  background-color: #e9ecef;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.help-prose.prose
+  :where(code):not(
+    :where([class~="not-prose"], [class~="not-prose"] *)
+  )::before {
+  content: none;
+}
+
+.help-prose.prose
+  :where(code):not(
+    :where([class~="not-prose"], [class~="not-prose"] *)
+  )::after {
+  content: none;
+}

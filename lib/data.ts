@@ -53,8 +53,22 @@ export const tutorials = [
     courseId: 1,
     title: "Your First Variable",
     description: "Learn to store information",
-    content:
-      "Variables are like boxes that hold information. You can put numbers, text, or other things in them and use them later!\n\n🎨 About the Drawing Functions:\n• drawCircle(x, y, radius, color) - The first number (x) is how many pixels from the LEFT edge to place the center. The second number (y) is how many pixels from the TOP edge. The radius is how big the circle is (like measuring from the center to the edge).\n• drawText(x, y, text, color) - Places text at a position. X is pixels from left, Y is pixels from top.\n\n📍 Think of the canvas like a grid: (0,0) is the top-left corner, (400,400) is the bottom-right!\n\n🌟 Your Challenge:\nAfter trying the example, clear the code and write your own! Try creating a variable with your favorite number, then draw a circle using that number. Can you draw your initials on the canvas too?",
+    content: `## What are Variables?
+
+Variables are like **boxes** that hold information. You can put numbers, text, or other things in them and use them later!
+
+### 🎨 About the Drawing Functions:
+
+- \`drawCircle(x, y, radius, color)\` - The first number (\`x\`) is how many pixels from the LEFT edge to place the center. The second number (\`y\`) is how many pixels from the TOP edge. The radius is how big the circle is (like measuring from the center to the edge).
+- \`drawText(x, y, text, color)\` - Places text at a position. \`x\` is pixels from left, \`y\` is pixels from top.
+
+### 📍 Canvas Coordinates
+
+Think of the canvas like a grid: \`(0,0)\` is the top-left corner, \`(400,400)\` is the bottom-right!
+
+### 🌟 Your Challenge:
+
+After trying the example, clear the code and write your own! Try creating a variable with your favorite number, then draw a circle using that number. Can you draw your initials on the canvas too?`,
     starterCode: `// Let's create our first variable!
 // This grey text is called a 'comment'. It doesn't
 // affect the code, it's just for us to read.
@@ -81,8 +95,17 @@ drawText(200, 300, myName, 'black');`,
     courseId: 1,
     title: "Maths is Fun!",
     description: "Add, subtract, and more",
-    content:
-      "JavaScript can do maths just like you! You can add (+), subtract (-), multiply (*), and divide (/) numbers.\n\n🎨 New Drawing Function:\n• drawRect(x, y, width, height, color) - Draws a rectangle! X and Y tell us where the TOP-LEFT corner goes. Width is how wide (left to right), height is how tall (top to bottom). Think of it like drawing a box!\n\n🌟 Your Challenge:\nClear the code and try this on your own! Create variables for your age and your favorite number, then do some maths with them. Draw rectangles using the results - maybe make a building or a robot face!",
+    content: `## Math Operations in JavaScript
+
+JavaScript can do maths just like you! You can add \`+\`, subtract \`-\`, multiply \`*\`, and divide \`/\` numbers.
+
+### 🎨 New Drawing Function:
+
+- \`drawRect(x, y, width, height, color)\` - Draws a rectangle! \`x\` and \`y\` tell us where the **TOP-LEFT** corner goes. \`width\` is how wide (left to right), \`height\` is how tall (top to bottom). Think of it like drawing a box!
+
+### 🌟 Your Challenge:
+
+Clear the code and try this on your own! Create variables for your age and your favorite number, then do some maths with them. Draw rectangles using the results - maybe make a building or a robot face!`,
     starterCode: `// Let's do some maths and draw with it!
 let x = 100;
 let y = 150;
@@ -99,8 +122,27 @@ drawRect(x + 150, y, size / 2, size, 'blue');`,
     courseId: 1,
     title: "Shortcuts with Math",
     description: "Learn faster ways to do maths with variables",
-    content:
-      "Sometimes you want to change a variable by adding or subtracting from it. There are shortcuts that make this easier!\n\n🚀 Maths Shortcuts:\n• += means 'add to this variable' (like score += 10 means score = score + 10)\n• -= means 'subtract from this variable' (like lives -= 1 means lives = lives - 1)\n• *= means 'multiply this variable' (like size *= 2 means size = size * 2)\n• /= means 'divide this variable' (like speed /= 2 means speed = speed / 2)\n\n✨ Why Use Shortcuts?\n• They're faster to type\n• They're easier to read\n• They help prevent mistakes\n• Real programmers use them all the time!\n\n🌟 Your Challenge:\nTry changing the code to use different shortcuts. What happens if you use *= instead of +=? Can you make the squares get smaller instead of bigger?",
+    content: `## Shortcuts with Math
+
+Sometimes you want to change a variable by adding or subtracting from it. There are shortcuts that make this easier!
+
+### 🚀 Math Shortcuts:
+
+- \`+=\` means 'add to this variable' (like \`score += 10\` means \`score = score + 10\`)
+- \`-=\` means 'subtract from this variable' (like \`lives -= 1\` means \`lives = lives - 1\`)
+- \`*=\` means 'multiply this variable' (like \`size *= 2\` means \`size = size * 2\`)
+- \`/=\` means 'divide this variable' (like \`speed /= 2\` means \`speed = speed / 2\`)
+
+### ✨ Why Use Shortcuts?
+
+- They're faster to type
+- They're easier to read
+- They help prevent mistakes
+- Real programmers use them all the time!
+
+### 🌟 Your Challenge:
+
+Try changing the code to use different shortcuts. What happens if you use \`*=\` instead of \`+=\`? Can you make the squares get smaller instead of bigger?`,
     starterCode: `// Let's practice maths shortcuts!
 let score = 0;
 let lives = 5;
@@ -142,8 +184,34 @@ drawText(x, 130, 'Final Score: ' + score, 'green');`,
     courseId: 1,
     title: "Simple Repeating",
     description: "Learn while loops - the easiest way to repeat code",
-    content:
-      "While loops are the simplest way to repeat code! They keep going 'while' something is true.\n\n🔄 How While Loops Work:\n• while (condition) means 'keep doing this while condition is true'\n• We need a counter variable to track how many times we've done something\n• We must change the counter inside the loop or it will go forever!\n• Much easier to understand than for loops\n\n🎨 New Drawing Function:\n• drawLine(x1, y1, x2, y2, color) - Draws a line from one point to another! The first two numbers (x1, y1) are where the line starts, and the next two (x2, y2) are where it ends.\n\n🌟 Your Challenge:\nTry changing the condition! What happens if you change 'i < 5' to 'i < 8'? Can you make the circles change color each time?",
+    content: `## Simple Repeating with While Loops
+
+\`While\` loops are the simplest way to repeat code! They keep going 'while' something is true.
+
+### 🔄 How While Loops Work:
+
+- \`while (condition)\` means 'keep doing this while condition is true'
+- We need a **counter variable** to track how many times we've done something
+- We **must change the counter** inside the loop or it will go forever!
+- Much easier to understand than \`for\` loops
+
+### Basic Structure:
+
+\`\`\`javascript
+let i = 0;              // Start counter
+while (i < 5) {         // Keep going while true
+    // do something
+    i += 1;             // IMPORTANT: change counter!
+}
+\`\`\`
+
+### 🎨 New Drawing Function:
+
+- \`drawLine(x1, y1, x2, y2, color)\` - Draws a line from one point to another! The first two numbers \`(x1, y1)\` are where the line starts, and the next two \`(x2, y2)\` are where it ends.
+
+### 🌟 Your Challenge:
+
+Try changing the condition! What happens if you change \`i < 5\` to \`i < 8\`? Can you make the circles change color each time?`,
     starterCode: `// Let's draw with a while loop!
 let i = 0;  // Start counting at 0
 
@@ -166,8 +234,33 @@ drawText(50, 100, 'Drew ' + i + ' circles!', 'black');`,
     courseId: 1,
     title: "Advanced Repeating",
     description: "Learn for loops - a more powerful way to repeat",
-    content:
-      "For loops are a more compact way to write loops! They put the counter, condition, and increment all in one line.\n\n🚀 For Loop Structure:\n• for (start; condition; increment) - all the loop parts in parentheses\n• let i = 0 (start counting at 0)\n• i < 5 (keep going while i is less than 5)\n• i++ (add 1 to i each time - same as i += 1)\n\n🔄 For vs While:\n• For loops are more compact when you know how many times to repeat\n• While loops are clearer when the condition is more complex\n• Both do the same thing, just written differently!\n\n🌟 Your Challenge:\nTry changing the for loop numbers! What happens if you change 'i < 5' to 'i < 8'? Can you make a diagonal pattern by changing the y position too?",
+    content: `## Advanced Repeating with For Loops
+
+\`For\` loops are a more compact way to write loops! They put the counter, condition, and increment all in one line.
+
+### 🚀 For Loop Structure:
+
+\`\`\`javascript
+for (start; condition; increment) {
+    // code to repeat
+}
+\`\`\`
+
+Breaking it down:
+
+- \`let i = 0\` (start counting at 0)
+- \`i < 5\` (keep going while \`i\` is less than 5)
+- \`i++\` (add 1 to \`i\` each time - same as \`i += 1\`)
+
+### 🔄 For vs While:
+
+- **For loops** are more compact when you know how many times to repeat
+- **While loops** are clearer when the condition is more complex
+- Both do the same thing, just written differently!
+
+### 🌟 Your Challenge:
+
+Try changing the \`for\` loop numbers! What happens if you change \`i < 5\` to \`i < 8\`? Can you make a diagonal pattern by changing the \`y\` position too?`,
     starterCode: `// Let's draw a pattern with a for loop!
 for (let i = 0; i < 5; i++) {
     let x = i * 60;
@@ -193,22 +286,98 @@ for (let i = 0; i < 5; i++) {
     courseId: 1,
     title: "Making Decisions",
     description: "Computer choices with if statements",
-    content:
-      "Sometimes you want your program to make choices! 'If' statements let the computer decide what to do.\n\n🎨 New Drawing Function:\n• drawPixel(x, y, color) - Draws a single tiny dot at a specific position! Perfect for making detailed patterns or stars in the sky.\n\n🌟 Your Challenge:\nTry changing the numbers to see different results! Can you make it so circles appear in different colors based on different conditions?",
+    content: `## 🤔 What are IF statements?
+
+Sometimes your program needs to make choices! An \`if\` statement lets the computer ask a question and then decide what to do based on the answer.
+
+### 📝 Basic IF Syntax:
+
+\`\`\`javascript
+if (condition) {
+    // code to run if condition is true
+}
+\`\`\`
+
+### 🔍 Let's break this down:
+
+- \`if\` is a special word (keyword) that starts the statement
+- The round brackets \`( )\` contain a question that has a true/false answer
+- The curly brackets \`{ }\` contain the code that runs ONLY if the answer is true
+- Every line of code inside ends with a semicolon \`;\`
+
+### ✅ Understanding TRUE and FALSE:
+
+Computers think in true/false (called **boolean** values):
+
+- \`5 > 3\` is **TRUE** (5 is greater than 3)
+- \`'red' === 'blue'\` is **FALSE** (red does not equal blue)
+- \`i % 2 === 0\` is **TRUE** when \`i\` is an even number
+
+### 🔧 Comparison Operators (how to ask questions):
+
+- \`===\` means 'exactly equal to'
+- \`!==\` means 'not equal to'
+- \`>\` means 'greater than'
+- \`<\` means 'less than'
+- \`>=\` means 'greater than or equal to'
+- \`<=\` means 'less than or equal to'
+
+### 🌟 Adding ELSE:
+
+You can also tell the computer what to do if the condition is **FALSE**:
+
+\`\`\`javascript
+if (condition) {
+    // runs if TRUE
+} else {
+    // runs if FALSE
+}
+\`\`\`
+
+### 💡 The % operator:
+
+The \`%\` symbol finds the remainder after division:
+
+- \`4 % 2 = 0\` (4 divided by 2 = 2 remainder 0)
+- \`5 % 2 = 1\` (5 divided by 2 = 2 remainder 1)
+- This helps us find even/odd numbers!
+
+### 🎨 New Drawing Function:
+
+- \`drawPixel(x, y, color)\` - Draws a single tiny dot at a specific position!
+
+### 🌟 Your Challenge:
+
+Look at the code below. Can you:
+
+1. Change the colors?
+2. Try different conditions?
+3. Add more shapes?`,
     starterCode: `// Let's make the computer choose colors!
+// This loop runs 10 times, with i going from 0 to 9
 for (let i = 0; i < 10; i++) {
-    let x = i * 40;
-    let y = 200;
+    // Calculate position for each shape
+    let x = i * 40;  // Spread them across the canvas
+    let y = 200;     // Keep them at the same height
     
+    // Ask: "Is i an even number?"
     if (i % 2 === 0) {
-        // Even numbers get blue circles
+        // If TRUE (even): draw a blue circle
         drawCircle(x, y, 20, 'blue');
     } else {
-        // Odd numbers get red squares
+        // If FALSE (odd): draw a red square
         drawRect(x - 10, y - 10, 20, 20, 'red');
     }
+    
+    // Try changing this! What if you used:
+    // if (i > 5) {
+    //     drawCircle(x, y, 20, 'green');
+    // } else {
+    //     drawCircle(x, y, 20, 'purple');
+    // }
 }`,
-    expectedOutput: "Alternating blue circles and red squares",
+    expectedOutput:
+      "Alternating blue circles and red squares based on even/odd numbers",
     order: 6,
   },
   {
@@ -216,8 +385,30 @@ for (let i = 0; i < 10; i++) {
     courseId: 1,
     title: "Listening to Keys",
     description: "Make your program respond to keyboard input",
-    content:
-      "Learn to make your programs interactive! You can make things happen when keys are pressed.\n\n🎮 New Functions:\n• onKeyPress(callback) - Runs your code when ANY key is pressed\n• onArrowKeys(callback) - Runs your code when arrow keys are pressed\n• onSpaceBar(callback) - Runs your code when spacebar is pressed\n• isKeyPressed(key) - Checks if a specific key is currently being held down\n\n🌟 Your Challenge:\nTry adding your own key controls! Can you make different shapes appear when different keys are pressed?",
+    content: `## Listening to Keys
+
+Learn to make your programs **interactive**! You can make things happen when keys are pressed.
+
+### 🎮 New Functions:
+
+- \`onKeyPress(callback)\` - Runs your code when **ANY** key is pressed
+- \`onArrowKeys(callback)\` - Runs your code when **arrow keys** are pressed
+- \`onSpaceBar(callback)\` - Runs your code when **spacebar** is pressed
+- \`isKeyPressed(key)\` - Checks if a specific key is currently being held down
+
+### How It Works:
+
+\`\`\`javascript
+onArrowKeys((direction) => {
+    if (direction === 'up') {
+        // do something when up arrow pressed
+    }
+});
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try adding your own key controls! Can you make different shapes appear when different keys are pressed?`,
     starterCode: `// Let's make an interactive drawing!
 let x = 200;
 let y = 200;
@@ -255,8 +446,26 @@ onSpaceBar(() => {
     courseId: 1,
     title: "Colors and Shapes",
     description: "Learn about different colors and drawing shapes",
-    content:
-      "Let's explore different colors and learn to draw more shapes! Colors make our drawings come alive.\n\n🎨 Color Tips:\n• You can use color names like 'red', 'blue', 'green', 'purple', 'orange', 'yellow'\n• You can also use hex codes like '#FF0000' for red, '#00FF00' for green\n• Try mixing different colors to make your art colorful!\n\n🌟 Your Challenge:\nDraw a simple house using rectangles for the walls, lines for the roof, and a circle for the sun. Use at least 3 different colors!",
+    content: `## Colors and Shapes
+
+Let's explore different colors and learn to draw more shapes! Colors make our drawings come alive.
+
+### 🎨 Color Tips:
+
+- You can use **color names** like \`'red'\`, \`'blue'\`, \`'green'\`, \`'purple'\`, \`'orange'\`, \`'yellow'\`
+- You can also use **hex codes** like \`'#FF0000'\` for red, \`'#00FF00'\` for green
+- Try mixing different colors to make your art colorful!
+
+### Common Color Names:
+
+\`\`\`javascript
+'red', 'blue', 'green', 'yellow', 'purple', 'orange', 
+'pink', 'brown', 'black', 'white', 'gray', 'cyan'
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Draw a simple house using rectangles for the walls, lines for the roof, and a circle for the sun. Use at least 3 different colors!`,
     starterCode: `// Let's draw with different colors!
 drawRect(150, 200, 100, 80, 'brown');  // House walls
 drawRect(175, 240, 20, 40, 'darkbrown'); // Door
@@ -274,8 +483,33 @@ drawCircle(50, 50, 30, 'yellow');      // Sun
     courseId: 1,
     title: "Making Patterns",
     description: "Use loops to create repeating patterns",
-    content:
-      "Loops help us repeat code without writing it over and over! It's like telling the computer 'do this 10 times'.\n\n🔄 About Loops:\n• A 'for loop' repeats code a certain number of times\n• We use 'i' as a counter that changes each time\n• The loop runs while i is less than the number we set\n\n✨ Loop Magic:\n• i starts at 0, then becomes 1, 2, 3, and so on\n• We can use i in our drawing to make patterns\n• i * 50 means: 0, 50, 100, 150... (perfect for spacing!)\n\n🌟 Your Challenge:\nCreate your own pattern! Try changing the numbers, colors, or shapes. What happens if you use i for the color or size?",
+    content: `## Making Patterns
+
+Loops help us repeat code without writing it over and over! It's like telling the computer **'do this 10 times'**.
+
+### 🔄 About Loops:
+
+- A \`for loop\` repeats code a certain number of times
+- We use \`i\` as a **counter** that changes each time
+- The loop runs while \`i\` is less than the number we set
+
+### ✨ Loop Magic:
+
+- \`i\` starts at \`0\`, then becomes \`1, 2, 3\`, and so on
+- We can use \`i\` in our drawing to make patterns
+- \`i * 50\` means: \`0, 50, 100, 150...\` (perfect for spacing!)
+
+### Pattern Example:
+
+\`\`\`javascript
+for (let i = 0; i < 5; i++) {
+    drawCircle(50 + i * 60, 200, 20, 'purple');
+}
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Create your own pattern! Try changing the numbers, colors, or shapes. What happens if you use \`i\` for the color or size?`,
     starterCode: `// Let's make a pattern with a loop!
 for (let i = 0; i < 5; i++) {
   // Can you see why the circles are spaced out?
@@ -296,8 +530,34 @@ for (let i = 0; i < 3; i++) {
     courseId: 1,
     title: "Random Fun",
     description: "Add randomness to make things unpredictable",
-    content:
-      "Random numbers make our programs exciting and different every time! It's like rolling dice in your code.\n\n🎲 Random Magic:\n• Math.random() gives us a number between 0 and 1\n• Math.random() * 400 gives us a number between 0 and 400\n• Math.floor() removes the decimal part (1.7 becomes 1)\n• This helps us get random positions on our canvas!\n\n🌈 Random Ideas:\n• Random positions for stars in the sky\n• Random colors for a rainbow\n• Random sizes for bubbles\n\n🌟 Your Challenge:\nRun your code multiple times and watch it change! Try adding more random elements - maybe random colors or sizes!",
+    content: `## Random Fun
+
+Random numbers make our programs exciting and **different every time**! It's like rolling dice in your code.
+
+### 🎲 Random Magic:
+
+- \`Math.random()\` gives us a number between \`0\` and \`1\`
+- \`Math.random() * 400\` gives us a number between \`0\` and \`400\`
+- \`Math.floor()\` removes the decimal part (\`1.7\` becomes \`1\`)
+- This helps us get random positions on our canvas!
+
+### Random Examples:
+
+\`\`\`javascript
+let randomX = Math.floor(Math.random() * 400);  // 0 to 399
+let randomY = Math.floor(Math.random() * 300);  // 0 to 299
+drawCircle(randomX, randomY, 20, 'blue');
+\`\`\`
+
+### 🌈 Random Ideas:
+
+- Random positions for stars in the sky
+- Random colors for a rainbow
+- Random sizes for bubbles
+
+### 🌟 Your Challenge:
+
+Run your code multiple times and watch it change! Try adding more random elements - maybe random colors or sizes!`,
     starterCode: `// Let's add some randomness!
 clearCanvas();
 
@@ -319,8 +579,36 @@ for (let i = 0; i < 10; i++) {
     courseId: 1,
     title: "Moving Things",
     description: "Learn to animate objects",
-    content:
-      "Animation makes things move on screen! We use setInterval to run code over and over, creating motion.\n\n⏰ About setInterval:\n• setInterval(function, milliseconds) runs code repeatedly\n• 100 milliseconds = 0.1 seconds (pretty fast!)\n• We change positions each time to create movement\n• clearCanvas() erases the old drawing before drawing the new one\n\n🏃‍♀️ Movement Tips:\n• Increase x to move right, decrease to move left\n• Increase y to move down, decrease to move up\n• Check boundaries to keep things on screen\n\n🌟 Your Challenge:\nTry changing the speed (100 to 50 for faster, 200 for slower) or direction. Can you make the ball bounce off the edges?",
+    content: `## Simple Animation
+
+Animation makes things **move on screen**! We use \`setInterval\` to run code over and over, creating motion.
+
+### ⏰ About setInterval:
+
+- \`setInterval(function, milliseconds)\` runs code repeatedly
+- \`100\` milliseconds = \`0.1\` seconds (pretty fast!)
+- We change positions each time to create movement
+- \`clearCanvas()\` erases the old drawing before drawing the new one
+
+### Basic Animation:
+
+\`\`\`javascript
+setInterval(() => {
+    clearCanvas();              // Clear old drawing
+    drawCircle(ballX, ballY, 20, 'red');  // Draw new position
+    ballX += 2;                // Move ball right
+}, 100);
+\`\`\`
+
+### 🏃‍♀️ Movement Tips:
+
+- Increase \`x\` to move right, decrease to move left
+- Increase \`y\` to move down, decrease to move up
+- Check boundaries to keep things on screen
+
+### 🌟 Your Challenge:
+
+Try changing the speed (\`100\` to \`50\` for faster, \`200\` for slower) or direction. Can you make the ball bounce off the edges?`,
     starterCode: `// Let's make a moving ball!
 let ballX = 50;
 let ballY = 200;
@@ -344,8 +632,36 @@ setInterval(() => {
     courseId: 1,
     title: "Spacebar Magic",
     description: "Add special actions with the spacebar",
-    content:
-      "The spacebar is perfect for special actions! In games, it's often used for jumping, shooting, or resetting things.\n\n🚀 Spacebar Power:\n• onSpaceBar() listens specifically for the spacebar\n• Great for 'action' buttons in games\n• Can trigger special effects or reset your game\n• Works great with other keyboard controls\n\n✨ Action Ideas:\n• Jump or change color\n• Create new objects\n• Reset positions\n• Trigger animations\n\n🌟 Your Challenge:\nTry combining arrow keys AND spacebar! Maybe the spacebar changes the player's color, or creates a trail behind them?",
+    content: `## Spacebar Magic
+
+The **spacebar** is perfect for special actions! In games, it's often used for jumping, shooting, or resetting things.
+
+### 🚀 Spacebar Power:
+
+- \`onSpaceBar()\` listens specifically for the spacebar
+- Great for **'action'** buttons in games
+- Can trigger special effects or reset your game
+- Works great with other keyboard controls
+
+### How to Use:
+
+\`\`\`javascript
+onSpaceBar(() => {
+    // This runs when spacebar is pressed
+    drawCircle(playerX, playerY, 30, 'gold');
+});
+\`\`\`
+
+### ✨ Action Ideas:
+
+- Jump or change color
+- Create new objects
+- Reset positions
+- Trigger animations
+
+### 🌟 Your Challenge:
+
+Try combining arrow keys **AND** spacebar! Maybe the spacebar changes the player's color, or creates a trail behind them?`,
     starterCode: `// Spacebar creates colorful circles!
 let playerX = 200;
 let playerY = 200;
@@ -394,8 +710,37 @@ redrawEverything();`,
     courseId: 1,
     title: "Snake Game",
     description: "Build the classic Snake game",
-    content:
-      "Let's build the famous Snake game! This combines everything we've learned: drawing, movement, keyboard controls, and game logic.\n\n🐍 Snake Game Rules:\n• Snake moves continuously in one direction\n• Arrow keys change the direction\n• Snake grows when it eats food\n• Game ends if snake hits the walls or itself\n• Score increases with each food eaten\n\n🎮 Game Programming Concepts:\n• Game loop (setInterval) keeps everything moving\n• Arrays store the snake's body segments\n• Collision detection checks for hits\n• Game state manages score and game over\n\n🌟 Your Challenge:\nTry making the game your own! Change colors, speed, or add new features. What about power-ups or obstacles?",
+    content: `## Snake Game
+
+Let's build the famous **Snake game**! This combines everything we've learned: drawing, movement, keyboard controls, and game logic.
+
+### 🐍 Snake Game Rules:
+
+- Snake moves continuously in one direction
+- Arrow keys change the direction
+- Snake grows when it eats food
+- Game ends if snake hits the walls or itself
+- Score increases with each food eaten
+
+### 🎮 Game Programming Concepts:
+
+- **Game loop** (\`setInterval\`) keeps everything moving
+- **Arrays** store the snake's body segments
+- **Collision detection** checks for hits
+- **Game state** manages score and game over
+
+### Core Game Structure:
+
+\`\`\`javascript
+let snake = [{x: 200, y: 200}];  // Snake body
+let direction = 'right';         // Current direction
+let food = {x: 160, y: 160};     // Food position
+let gameOver = false;            // Game state
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try making the game your own! Change colors, speed, or add new features. What about power-ups or obstacles?`,
     starterCode: `// Snake Game!
 let snake = [{x: 200, y: 200}];
 let direction = 'right';
@@ -481,8 +826,54 @@ onSpaceBar(() => {
     courseId: 1,
     title: "Your Own Game!",
     description: "Create your own game using everything you've learned",
-    content:
-      "Congratulations! You've learned all the basics of programming and game development. Now it's time to create something totally your own!\n\n🎯 What You Can Build:\n• A different type of game (Pong, Pac-Man style, platformer)\n• An interactive art program\n• A physics simulation\n• A drawing tool with special effects\n• Your own twist on Snake\n\n🛠️ Tools You've Mastered:\n• Drawing shapes and colors\n• Variables and maths\n• Loops and patterns\n• Random numbers\n• Animation with setInterval\n• Keyboard controls\n• Game logic and collision detection\n\n🌟 Your Challenge:\nStart with a blank canvas and create something amazing! Don't be afraid to experiment, break things, and try new ideas. Programming is all about creativity and problem-solving!",
+    content: `## Your Own Game!
+
+**Congratulations!** You've learned all the basics of programming and game development. Now it's time to create something totally your own!
+
+### 🎯 What You Can Build:
+
+- A different type of game (Pong, Pac-Man style, platformer)
+- An interactive art program
+- A physics simulation
+- A drawing tool with special effects
+- Your own twist on Snake
+
+### 🛠️ Tools You've Mastered:
+
+- **Drawing** shapes and colors
+- **Variables** and maths
+- **Loops** and patterns
+- **Random numbers**
+- **Animation** with \`setInterval\`
+- **Keyboard controls**
+- **Game logic** and collision detection
+
+### Programming Concepts You Know:
+
+\`\`\`javascript
+// Variables and Math
+let score = 0;
+score += 10;
+
+// Loops and Patterns
+for (let i = 0; i < 5; i++) {
+    drawCircle(i * 50, 200, 20, 'blue');
+}
+
+// Conditions and Logic
+if (player.x > enemy.x) {
+    // Player is to the right
+}
+
+// Animation and Interaction
+setInterval(() => {
+    // Game loop
+}, 100);
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Start with a blank canvas and create something **amazing**! Don't be afraid to experiment, break things, and try new ideas. Programming is all about creativity and problem-solving!`,
     starterCode: `// Your blank canvas - create anything you want!
 // Here are some ideas to get you started:
 
@@ -515,8 +906,35 @@ drawText(150, 200, 'Your turn to create!', 'purple');`,
     courseId: 2,
     title: "forEach - Do Something with Each Item",
     description: "Loop through arrays the easy way",
-    content:
-      "forEach is like a magic loop that goes through each item in your array automatically!\n\n🔍 What You'll Learn:\n• How forEach works\n• How to access each item and its position\n• Why forEach is better than regular for loops for arrays\n\n🌟 Your Challenge:\nTry using forEach with your own array. Maybe an array of your favorite colors or numbers!",
+    content: `## forEach - Do Something with Each Item
+
+\`forEach\` is like a **magic loop** that goes through each item in your array automatically!
+
+### 🔍 What You'll Learn:
+
+- How \`forEach\` works
+- How to access each item and its position
+- Why \`forEach\` is better than regular \`for\` loops for arrays
+
+### Basic forEach Syntax:
+
+\`\`\`javascript
+array.forEach((item, index) => {
+    // Do something with each item
+    console.log(item);
+});
+\`\`\`
+
+### How It Works:
+
+- **First parameter** (\`item\`) is the current array element
+- **Second parameter** (\`index\`) is the position (0, 1, 2...)
+- Automatically loops through **every** item
+- Much cleaner than traditional \`for\` loops!
+
+### 🌟 Your Challenge:
+
+Try using \`forEach\` with your own array. Maybe an array of your favorite colors or numbers!`,
     starterCode: `// Let's use forEach to go through an array!
 let numbers = [2, 4, 6, 8, 10];
 
@@ -543,8 +961,42 @@ names.forEach((name) => {
     courseId: 2,
     title: "map - Transform Each Item",
     description: "Create a new array by changing each item",
-    content:
-      "map is like a factory that takes each item in your array, transforms it, and creates a new array with the results!\n\n🔍 What You'll Learn:\n• How map transforms arrays\n• The difference between map and forEach\n• How to create new arrays from existing ones\n\n🌟 Your Challenge:\nTry mapping numbers to their squares, or words to their lengths!",
+    content: `## map - Transform Each Item
+
+\`map\` is like a **factory** that takes each item in your array, transforms it, and creates a **new array** with the results!
+
+### 🔍 What You'll Learn:
+
+- How \`map\` transforms arrays
+- The difference between \`map\` and \`forEach\`
+- How to create new arrays from existing ones
+
+### Basic map Syntax:
+
+\`\`\`javascript
+let newArray = oldArray.map(item => {
+    // Transform the item
+    return item * 2;
+});
+\`\`\`
+
+### Key Differences:
+
+- **\`forEach\`**: Loops through items, doesn't return anything
+- **\`map\`**: Transforms items and **returns a new array**
+- **Original array**: Never changed by \`map\`
+
+### Example:
+
+\`\`\`javascript
+let numbers = [1, 2, 3];
+let doubled = numbers.map(n => n * 2);  // [2, 4, 6]
+// numbers is still [1, 2, 3]
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try mapping numbers to their squares, or words to their lengths!`,
     starterCode: `// Let's transform an array with map!
 let numbers = [1, 2, 3, 4, 5];
 
@@ -578,8 +1030,48 @@ printData(uppercase);`,
     courseId: 2,
     title: "filter - Keep Only Some Items",
     description: "Create a new array with only the items you want",
-    content:
-      "filter is like a gatekeeper that only lets certain items through to create a new array!\n\n🔍 What You'll Learn:\n• How filter selects items\n• How to write conditions for filtering\n• Creating subsets of your data\n\n🌟 Your Challenge:\nTry filtering for your favorite items, or numbers that meet certain conditions!",
+    content: `## filter - Keep Only Some Items
+
+\`filter\` is like a **gatekeeper** that only lets certain items through to create a new array!
+
+### 🔍 What You'll Learn:
+
+- How \`filter\` selects items
+- How to write conditions for filtering
+- Creating subsets of your data
+
+### Basic filter Syntax:
+
+\`\`\`javascript
+let filtered = array.filter(item => {
+    // Return true to keep, false to remove
+    return item > 5;
+});
+\`\`\`
+
+### How It Works:
+
+- \`filter\` tests each item with your condition
+- If condition returns \`true\`, item is **kept**
+- If condition returns \`false\`, item is **removed**
+- Returns a **new array** with only the items that passed
+
+### Common Filter Examples:
+
+\`\`\`javascript
+// Keep even numbers
+numbers.filter(n => n % 2 === 0);
+
+// Keep long words
+words.filter(word => word.length > 5);
+
+// Keep positive numbers
+numbers.filter(n => n > 0);
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try filtering for your favorite items, or numbers that meet certain conditions!`,
     starterCode: `// Let's filter an array!
 let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -613,8 +1105,48 @@ printData(longNames);`,
     courseId: 2,
     title: "reduce - Combine All Items",
     description: "Combine all array items into a single value",
-    content:
-      "reduce is like a blender that combines all your array items into one result!\n\n🔍 What You'll Learn:\n• How reduce combines items\n• How to use an accumulator\n• Common reduce patterns\n\n🌟 Your Challenge:\nTry using reduce to find the longest word, or to count how many times each item appears!",
+    content: `## reduce - Combine All Items
+
+\`reduce\` is like a **blender** that combines all your array items into one result!
+
+### 🔍 What You'll Learn:
+
+- How \`reduce\` combines items
+- How to use an **accumulator**
+- Common \`reduce\` patterns
+
+### Basic reduce Syntax:
+
+\`\`\`javascript
+let result = array.reduce((accumulator, item) => {
+    // Combine accumulator with current item
+    return accumulator + item;
+}, startingValue);
+\`\`\`
+
+### How It Works:
+
+- **Accumulator**: The running total/result so far
+- **Item**: Current array element being processed
+- **Starting value**: What to begin with (often \`0\` or \`''\`)
+- Returns: Single combined value
+
+### Common reduce Examples:
+
+\`\`\`javascript
+// Sum all numbers
+numbers.reduce((sum, n) => sum + n, 0);
+
+// Find maximum
+numbers.reduce((max, n) => n > max ? n : max);
+
+// Join words
+words.reduce((sentence, word) => sentence + ' ' + word, '');
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try using \`reduce\` to find the longest word, or to count how many times each item appears!`,
     starterCode: `// Let's use reduce to combine things!
 let numbers = [1, 2, 3, 4, 5];
 
@@ -652,8 +1184,42 @@ printData(sentence);`,
     courseId: 3,
     title: "What is HTML?",
     description: "Learn the basics of HTML structure and the DOM",
-    content:
-      "HTML is the language that creates web pages! Think of it like building blocks that tell the browser how to display content.\n\n🏗️ HTML Structure:\n• HTML pages have a <head> (invisible info) and <body> (visible content)\n• Tags are like containers: <h1>Title</h1> wraps text to make it a heading\n• Attributes give extra info to tags: <h1 id=\"title\">Hello</h1>\n• The browser creates a 'document' object you can control with JavaScript\n\n🌟 Your Challenge:\nTry changing the text, adding your own paragraph, or modifying the styles!",
+    content: `## What is HTML?
+
+HTML is the **language that creates web pages**! Think of it like building blocks that tell the browser how to display content.
+
+### 🏗️ HTML Structure:
+
+- HTML pages have a \`<head>\` (invisible info) and \`<body>\` (visible content)
+- **Tags** are like containers: \`<h1>Title</h1>\` wraps text to make it a heading
+- **Attributes** give extra info to tags: \`<h1 id="title">Hello</h1>\`
+- The browser creates a **'document'** object you can control with JavaScript
+
+### Basic HTML Structure:
+
+\`\`\`html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Page Title</title>
+</head>
+<body>
+    <h1>My Heading</h1>
+    <p>My paragraph</p>
+</body>
+</html>
+\`\`\`
+
+### Common HTML Tags:
+
+- \`<h1>\`, \`<h2>\`, \`<h3>\` - Headings
+- \`<p>\` - Paragraphs
+- \`<div>\` - Containers
+- \`<button>\` - Clickable buttons
+
+### 🌟 Your Challenge:
+
+Try changing the text, adding your own paragraph, or modifying the styles!`,
     starterCode: `<!DOCTYPE html>
 <html>
 <head>
@@ -713,8 +1279,32 @@ printData(sentence);`,
     courseId: 3,
     title: "Finding Elements",
     description: "Learn to find and select HTML elements",
-    content:
-      "The DOM (Document Object Model) is like a map of your webpage. You can find any element and change it!\n\n🔍 What You'll Learn:\n• How to find elements by ID, class, and tag\n• The difference between querySelector and querySelectorAll\n• How to check if elements exist\n\n🌟 Your Challenge:\nTry finding different elements and changing their text!",
+    content: `## Finding Elements
+
+The **DOM** (Document Object Model) is like a map of your webpage. You can find any element and change it!
+
+### 🔍 What You'll Learn:
+
+- How to find elements by ID, class, and tag
+- The difference between \`querySelector\` and \`querySelectorAll\`
+- How to check if elements exist
+
+### Finding Elements:
+
+\`\`\`javascript
+// By ID
+document.getElementById('myId');
+
+// By class (first match)
+document.querySelector('.myClass');
+
+// By tag (all matches)
+document.querySelectorAll('p');
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try finding different elements and changing their text!`,
     starterCode: `<!DOCTYPE html>
 <html>
 <head>
@@ -758,8 +1348,31 @@ printData(sentence);`,
     courseId: 3,
     title: "Changing Styles",
     description: "Make your webpage look different with JavaScript",
-    content:
-      "You can change how elements look using JavaScript! Change colors, sizes, positions, and more.\n\n🔍 What You'll Learn:\n• How to change CSS properties with JavaScript\n• How to add and remove CSS classes\n• How to create visual effects\n\n🌟 Your Challenge:\nTry changing different style properties and see what happens!",
+    content: `## Changing Styles
+
+You can change how elements look using **JavaScript**! Change colors, sizes, positions, and more.
+
+### 🔍 What You'll Learn:
+
+- How to change CSS properties with JavaScript
+- How to add and remove CSS classes
+- How to create visual effects
+
+### Changing Styles:
+
+\`\`\`javascript
+// Change CSS properties directly
+element.style.color = 'red';
+element.style.fontSize = '20px';
+
+// Add/remove CSS classes
+element.classList.add('highlight');
+element.classList.remove('old-style');
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try changing different style properties and see what happens!`,
     starterCode: `<!DOCTYPE html>
 <html>
 <head>
@@ -820,8 +1433,33 @@ printData(sentence);`,
     courseId: 3,
     title: "Creating New Elements",
     description: "Add new HTML elements with JavaScript",
-    content:
-      "You can create brand new HTML elements and add them to your page!\n\n🔍 What You'll Learn:\n• How to create new elements\n• How to add them to the page\n• How to remove elements\n\n🌟 Your Challenge:\nTry creating different types of elements and adding them in different places!",
+    content: `## Creating New Elements
+
+You can create **brand new HTML elements** and add them to your page!
+
+### 🔍 What You'll Learn:
+
+- How to create new elements
+- How to add them to the page
+- How to remove elements
+
+### Creating Elements:
+
+\`\`\`javascript
+// Create a new element
+let newDiv = document.createElement('div');
+newDiv.textContent = 'Hello World!';
+
+// Add to page
+document.body.appendChild(newDiv);
+
+// Remove from page
+newDiv.remove();
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try creating different types of elements and adding them in different places!`,
     starterCode: `<!DOCTYPE html>
 <html>
 <head>
@@ -887,8 +1525,32 @@ printData(sentence);`,
     courseId: 3,
     title: "Working with Forms",
     description: "Get input from users with forms",
-    content:
-      "Forms let users type information and interact with your webpage!\n\n🔍 What You'll Learn:\n• How to get values from input fields\n• How to respond to form submissions\n• How to validate user input\n\n🌟 Your Challenge:\nTry adding more form fields and creating a more complex form!",
+    content: `## Working with Forms
+
+**Forms** let users type information and interact with your webpage!
+
+### 🔍 What You'll Learn:
+
+- How to get values from input fields
+- How to respond to form submissions
+- How to validate user input
+
+### Form Basics:
+
+\`\`\`javascript
+// Get input value
+let inputValue = document.getElementById('myInput').value;
+
+// Listen for form submission
+form.addEventListener('submit', (e) => {
+    e.preventDefault(); // Stop page reload
+    // Handle form data
+});
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try adding more form fields and creating a more complex form!`,
     starterCode: `<!DOCTYPE html>
 <html>
 <head>
@@ -982,8 +1644,34 @@ printData(sentence);`,
     courseId: 4,
     title: "What Are Algorithms?",
     description: "Learn what algorithms are and why they're important",
-    content:
-      "An algorithm is like a recipe - it's a set of steps to solve a problem!\n\n🔍 What You'll Learn:\n• What algorithms are\n• How to break down problems into steps\n• Why algorithms are everywhere\n\n🌟 Your Challenge:\nTry creating your own algorithm to solve a simple problem!",
+    content: `## What Are Algorithms?
+
+An **algorithm** is like a recipe - it's a set of steps to solve a problem!
+
+### 🔍 What You'll Learn:
+
+- What algorithms are
+- How to break down problems into steps
+- Why algorithms are everywhere
+
+### Algorithm Examples:
+
+\`\`\`javascript
+// Algorithm to find largest number
+function findLargest(numbers) {
+    let largest = numbers[0];
+    for (let i = 1; i < numbers.length; i++) {
+        if (numbers[i] > largest) {
+            largest = numbers[i];
+        }
+    }
+    return largest;
+}
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try creating your own algorithm to solve a simple problem!`,
     starterCode: `// Let's create a simple algorithm!
 
 // Algorithm: Find the largest number in an array
@@ -1030,8 +1718,43 @@ testWords.forEach(word => {
     courseId: 4,
     title: "Searching Algorithms",
     description: "Learn different ways to find things in lists",
-    content:
-      "There are many ways to search for items in a list. Let's explore the most common ones!\n\n🔍 What You'll Learn:\n• Linear search (checking each item one by one)\n• Binary search (for sorted lists)\n• When to use each method\n\n🌟 Your Challenge:\nTry searching for different items and see how many steps each algorithm takes!",
+    content: `## Searching Algorithms
+
+There are many ways to **search for items** in a list. Let's explore the most common ones!
+
+### 🔍 What You'll Learn:
+
+- **Linear search** (checking each item one by one)
+- **Binary search** (for sorted lists)
+- When to use each method
+
+### Search Types:
+
+\`\`\`javascript
+// Linear Search - check each item
+function linearSearch(array, target) {
+    for (let i = 0; i < array.length; i++) {
+        if (array[i] === target) return i;
+    }
+    return -1; // Not found
+}
+
+// Binary Search - for sorted arrays
+function binarySearch(array, target) {
+    let left = 0, right = array.length - 1;
+    while (left <= right) {
+        let mid = Math.floor((left + right) / 2);
+        if (array[mid] === target) return mid;
+        if (array[mid] < target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return -1;
+}
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try searching for different items and see how many steps each algorithm takes!`,
     starterCode: `// Linear Search - Check each item one by one
 function linearSearch(array, target) {
     let steps = 0;
@@ -1090,8 +1813,36 @@ printData(\`Binary search was \$\{linearResult.steps - binaryResult.steps\} step
     courseId: 4,
     title: "Sorting Algorithms",
     description: "Learn how to put things in order",
-    content:
-      "Sorting is putting things in order - like organizing your toys by size or alphabetically!\n\n🔍 What You'll Learn:\n• Bubble sort (compare neighbors)\n• Selection sort (find the smallest)\n• How different sorting methods work\n\n🌟 Your Challenge:\nTry sorting different types of data - numbers, words, or even custom objects!",
+    content: `## Sorting Algorithms
+
+**Sorting** is putting things in order - like organizing your toys by size or alphabetically!
+
+### 🔍 What You'll Learn:
+
+- **Bubble sort** (compare neighbors)
+- **Selection sort** (find the smallest)
+- How different sorting methods work
+
+### Sorting Examples:
+
+\`\`\`javascript
+// Bubble Sort
+function bubbleSort(arr) {
+    for (let i = 0; i < arr.length; i++) {
+        for (let j = 0; j < arr.length - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                // Swap elements
+                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            }
+        }
+    }
+    return arr;
+}
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try sorting different types of data - numbers, words, or even custom objects!`,
     starterCode: `// Bubble Sort - Compare neighbors and swap if needed
 function bubbleSort(array) {
     let arr = [...array]; // Make a copy
@@ -1165,8 +1916,35 @@ printData(bubbleSort(words).sorted);`,
     courseId: 4,
     title: "Introduction to Recursion",
     description: "Learn how functions can call themselves",
-    content:
-      "Recursion is when a function calls itself! It's like looking in a mirror that reflects another mirror.\n\n🔍 What You'll Learn:\n• What recursion is\n• How to write recursive functions\n• When recursion is useful\n\n🌟 Your Challenge:\nTry writing your own recursive function to solve a problem!",
+    content: `## Introduction to Recursion
+
+**Recursion** is when a function calls itself! It's like looking in a mirror that reflects another mirror.
+
+### 🔍 What You'll Learn:
+
+- What recursion is
+- How to write recursive functions
+- When recursion is useful
+
+### Recursion Basics:
+
+\`\`\`javascript
+// Recursive function needs:
+// 1. Base case (when to stop)
+// 2. Recursive case (calling itself)
+
+function factorial(n) {
+    // Base case
+    if (n <= 1) return 1;
+    
+    // Recursive case
+    return n * factorial(n - 1);
+}
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try writing your own recursive function to solve a problem!`,
     starterCode: `// Recursive function to calculate factorial
 // 5! = 5 × 4 × 3 × 2 × 1 = 120
 function factorial(n) {
@@ -1230,8 +2008,40 @@ for (let i = 0; i < 10; i++) {
     courseId: 4,
     title: "Problem Solving Strategies",
     description: "Learn how to approach complex problems",
-    content:
-      "Breaking down big problems into smaller ones is the key to solving anything!\n\n🔍 What You'll Learn:\n• Divide and conquer approach\n• How to identify patterns\n• Step-by-step problem solving\n\n🌟 Your Challenge:\nTry solving a complex problem by breaking it down into smaller parts!",
+    content: `## Problem Solving Strategies
+
+**Breaking down big problems** into smaller ones is the key to solving anything!
+
+### 🔍 What You'll Learn:
+
+- **Divide and conquer** approach
+- How to identify patterns
+- Step-by-step problem solving
+
+### Problem Solving Steps:
+
+1. **Understand** the problem
+2. **Break it down** into smaller parts
+3. **Solve** each part individually
+4. **Combine** solutions together
+5. **Test** and refine
+
+### Example Strategy:
+
+\`\`\`javascript
+// Complex problem: Sort and remove duplicates
+function sortAndRemoveDuplicates(arr) {
+    // Step 1: Remove duplicates
+    let unique = [...new Set(arr)];
+    
+    // Step 2: Sort the array
+    return unique.sort((a, b) => a - b);
+}
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try solving a complex problem by breaking it down into smaller parts!`,
     starterCode: `// Problem: Find all anagrams of a word
 // An anagram is a word made by rearranging letters of another word
 
@@ -1342,8 +2152,36 @@ printData(path);`,
     courseId: 5,
     title: "What is Remote Data?",
     description: "Learn about APIs and fetching data from servers",
-    content:
-      "Remote data means getting information from other computers on the internet!\n\n🔍 What You'll Learn:\n• What APIs are\n• How data travels over the internet\n• Why we need remote data\n\n🌟 Your Challenge:\nTry making your first API request and see what data you get back!",
+    content: `## What is Remote Data?
+
+**Remote data** means getting information from other computers on the internet!
+
+### 🔍 What You'll Learn:
+
+- What **APIs** are
+- How data travels over the internet
+- Why we need remote data
+
+### API Basics:
+
+\`\`\`javascript
+// Making an API request
+fetch('https://api.example.com/users')
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+    });
+\`\`\`
+
+### Key Concepts:
+
+- **API**: Application Programming Interface
+- **HTTP**: How computers talk to each other
+- **JSON**: Format for sending data
+
+### 🌟 Your Challenge:
+
+Try making your first API request and see what data you get back!`,
     starterCode: `// Let's fetch some data from a server!
 // We'll use a test API that returns fake data
 
@@ -1405,8 +2243,33 @@ printData('Requests sent! Waiting for responses...');`,
     courseId: 5,
     title: "GET Requests",
     description: "Learn to retrieve data from servers",
-    content:
-      "GET requests are how we ask servers for information, like asking a librarian for a book!\n\n🔍 What You'll Learn:\n• How to make GET requests\n• How to handle different response formats\n• Error handling for network requests\n\n🌟 Your Challenge:\nTry fetching different types of data and see how the format changes!",
+    content: `## GET Requests
+
+**GET requests** are how we ask servers for information, like asking a librarian for a book!
+
+### 🔍 What You'll Learn:
+
+- How to make GET requests
+- How to handle different response formats
+- Error handling for network requests
+
+### GET Request Examples:
+
+\`\`\`javascript
+// Basic GET request
+fetch('/api/users')
+    .then(response => response.json())
+    .then(users => console.log(users));
+
+// GET with parameters
+fetch('/api/users?page=1&limit=10')
+    .then(response => response.json())
+    .then(data => console.log(data));
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try fetching different types of data and see how the format changes!`,
     starterCode: `// Different types of GET requests
 
 // 1. Get a single item by ID
@@ -1495,8 +2358,37 @@ printData('All GET requests sent!');`,
     courseId: 5,
     title: "POST Requests",
     description: "Learn to send data to servers",
-    content:
-      "POST requests let us send information to servers, like filling out a form!\n\n🔍 What You'll Learn:\n• How to send data with POST requests\n• Different data formats (JSON, form data)\n• Handling server responses\n\n🌟 Your Challenge:\nTry creating different types of data and sending them to the server!",
+    content: `## POST Requests
+
+**POST requests** let us send information to servers, like filling out a form!
+
+### 🔍 What You'll Learn:
+
+- How to send data with POST requests
+- Different data formats (JSON, form data)
+- Handling server responses
+
+### POST Request Examples:
+
+\`\`\`javascript
+// Sending JSON data
+fetch('/api/users', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        name: 'John',
+        email: 'john@example.com'
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try creating different types of data and sending them to the server!`,
     starterCode: `// Different types of POST requests
 
 // 1. Create a new user
@@ -1605,8 +2497,41 @@ printData('All POST requests sent!');`,
     courseId: 5,
     title: "Error Handling",
     description: "Learn to handle different types of errors",
-    content:
-      "Sometimes things go wrong when talking to servers. Let's learn how to handle errors gracefully!\n\n🔍 What You'll Learn:\n• Different types of errors (network, server, client)\n• HTTP status codes\n• How to retry failed requests\n\n🌟 Your Challenge:\nTry making requests that will fail and see how to handle them!",
+    content: `## Error Handling
+
+Sometimes things go wrong when talking to servers. Let's learn how to **handle errors gracefully**!
+
+### 🔍 What You'll Learn:
+
+- Different types of errors (network, server, client)
+- **HTTP status codes**
+- How to retry failed requests
+
+### Error Handling Examples:
+
+\`\`\`javascript
+fetch('/api/data')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(\`HTTP error! status: \${response.status}\`);
+        }
+        return response.json();
+    })
+    .then(data => console.log(data))
+    .catch(error => {
+        console.error('Error:', error.message);
+    });
+\`\`\`
+
+### Common Status Codes:
+
+- **200**: Success
+- **404**: Not Found
+- **500**: Server Error
+
+### 🌟 Your Challenge:
+
+Try making requests that will fail and see how to handle them!`,
     starterCode: `// Error handling for different scenarios
 
 // 1. Network timeout
@@ -1729,8 +2654,47 @@ handleDifferentErrors();`,
     courseId: 5,
     title: "Real-World API Integration",
     description: "Put it all together with a complete example",
-    content:
-      "Let's build a complete application that uses everything we've learned!\n\n🔍 What You'll Learn:\n• Combining GET and POST requests\n• Managing application state\n• Creating a real user interface\n\n🌟 Your Challenge:\nTry extending this example with more features!",
+    content: `## Real-World API Integration
+
+Let's build a **complete application** that uses everything we've learned!
+
+### 🔍 What You'll Learn:
+
+- Combining GET and POST requests
+- Managing application state
+- Creating a real user interface
+
+### Complete Example:
+
+\`\`\`javascript
+class TodoApp {
+    constructor() {
+        this.todos = [];
+        this.loadTodos();
+    }
+    
+    async loadTodos() {
+        const response = await fetch('/api/todos');
+        this.todos = await response.json();
+        this.render();
+    }
+    
+    async addTodo(text) {
+        const response = await fetch('/api/todos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        const newTodo = await response.json();
+        this.todos.push(newTodo);
+        this.render();
+    }
+}
+\`\`\`
+
+### 🌟 Your Challenge:
+
+Try extending this example with more features!`,
     starterCode: `// A complete todo list application using remote data
 
 class TodoApp {

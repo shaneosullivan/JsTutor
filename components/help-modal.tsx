@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { CircleHelp, Code, Palette, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +11,9 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeHighlight from "rehype-highlight";
 import type { Tutorial } from "@shared/schema";
 
 interface HelpModalProps {
@@ -112,7 +116,8 @@ export default function HelpModal({
             Need Help?
           </DialogTitle>
           <DialogDescription className="text-slate-600">
-            Get help with your current tutorial, drawing commands, and troubleshooting tips.
+            Get help with your current tutorial, drawing commands, and
+            troubleshooting tips.
           </DialogDescription>
         </DialogHeader>
 
@@ -127,17 +132,98 @@ export default function HelpModal({
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="prose prose-sm max-w-none mb-4">
-                  {currentTutorial.content
-                    .split("\n")
-                    .map((paragraph, index) => (
-                      <p
-                        key={index}
-                        className="mb-3 last:mb-0 text-slate-700 leading-relaxed"
-                      >
-                        {paragraph}
-                      </p>
-                    ))}
+                <div className="help-prose prose prose-sm max-w-none mb-4">
+                  <div className="text-slate-700 leading-relaxed">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeHighlight]}
+                      components={{
+                        code: ({ className, children, ...props }: any) => {
+                          const isInline = !className?.includes("language-");
+
+                          // Clean up backticks that might appear in inline code
+                          let cleanChildren = children;
+                          if (typeof children === "string" && isInline) {
+                            cleanChildren = children.replace(/^`+|`+$/g, "");
+                          }
+                          console.log("Rendering code block:", cleanChildren);
+
+                          if (isInline) {
+                            return (
+                              <code
+                                className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded text-sm font-mono"
+                                {...props}
+                              >
+                                {cleanChildren}
+                              </code>
+                            );
+                          } else {
+                            return (
+                              <code
+                                className={`${className} block bg-gray-100 text-gray-800 p-3 rounded-lg text-sm font-mono overflow-x-auto whitespace-pre`}
+                                {...props}
+                              >
+                                {children}
+                              </code>
+                            );
+                          }
+                        },
+                        pre: ({ children }) => (
+                          <pre className="bg-gray-100 rounded-lg p-3 overflow-x-auto mb-4">
+                            {children}
+                          </pre>
+                        ),
+                        h1: ({ children }) => (
+                          <h1 className="text-lg font-bold text-slate-800 mb-3 mt-4 first:mt-0">
+                            {children}
+                          </h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className="text-md font-semibold text-slate-800 mb-2 mt-3">
+                            {children}
+                          </h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="text-sm font-semibold text-slate-800 mb-2 mt-3">
+                            {children}
+                          </h3>
+                        ),
+                        p: ({ children }) => (
+                          <p className="mb-3 last:mb-0 text-slate-700 leading-relaxed">
+                            {children}
+                          </p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="list-disc list-inside mb-3 space-y-1 ml-4">
+                            {children}
+                          </ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="list-decimal list-inside mb-3 space-y-1 ml-4">
+                            {children}
+                          </ol>
+                        ),
+                        li: ({ children }) => (
+                          <li className="text-slate-700 ml-2">{children}</li>
+                        ),
+                        strong: ({ children }) => (
+                          <strong className="font-semibold text-slate-800">
+                            {children}
+                          </strong>
+                        ),
+                        em: ({ children }) => (
+                          <em className="italic text-slate-700">{children}</em>
+                        ),
+                        blockquote: ({ children }) => (
+                          <blockquote className="border-l-4 border-blue-500 pl-4 italic text-slate-600 mb-3">
+                            {children}
+                          </blockquote>
+                        ),
+                      }}
+                    >
+                      {currentTutorial.content.replace(/\\\`/g, "`")}
+                    </ReactMarkdown>
+                  </div>
                 </div>
                 {currentTutorial.expectedOutput && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">

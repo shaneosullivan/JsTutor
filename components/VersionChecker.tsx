@@ -29,7 +29,7 @@ export default function VersionChecker() {
           "New version available:",
           data.BUILD_ID,
           " current:",
-          BUILD_ID
+          BUILD_ID,
         );
         setShowUpdateDialog(true);
       }
