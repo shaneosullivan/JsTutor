@@ -52,7 +52,23 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
       htmlElement.scrollTop = 0; // Reset scroll position to top
     }
 
-    const preventScroll = (e: TouchEvent) => {
+    const preventWheelScroll = (e: WheelEvent) => {
+      // Allow scrolling within the code editor and other scrollable elements
+      const target = e.target as HTMLElement;
+      const scrollableParent = target.closest(
+        '.cm-scroller, .overflow-y-auto, .overflow-auto, [data-allow-scroll="true"]',
+      );
+
+      if (scrollableParent) {
+        // Allow scrolling within these elements
+        return;
+      }
+
+      // Prevent all other scrolling
+      e.preventDefault();
+    };
+
+    const preventGestureScroll = (e: Event) => {
       // Allow scrolling within the code editor and other scrollable elements
       const target = e.target as HTMLElement;
       const scrollableParent = target.closest(
@@ -152,25 +168,25 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
     document.addEventListener("touchmove", preventTouchMove, {
       passive: false,
     });
-    document.addEventListener("wheel", preventScroll, { passive: false });
+    document.addEventListener("wheel", preventWheelScroll, { passive: false });
 
     // Additional iOS Safari specific prevention
-    document.addEventListener("gesturestart", preventScroll, {
+    document.addEventListener("gesturestart", preventGestureScroll, {
       passive: false,
     });
-    document.addEventListener("gesturechange", preventScroll, {
+    document.addEventListener("gesturechange", preventGestureScroll, {
       passive: false,
     });
-    document.addEventListener("gestureend", preventScroll, { passive: false });
+    document.addEventListener("gestureend", preventGestureScroll, { passive: false });
 
     return () => {
       document.removeEventListener("touchstart", handleTouchStart);
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchmove", preventTouchMove);
-      document.removeEventListener("wheel", preventScroll);
-      document.removeEventListener("gesturestart", preventScroll);
-      document.removeEventListener("gesturechange", preventScroll);
-      document.removeEventListener("gestureend", preventScroll);
+      document.removeEventListener("wheel", preventWheelScroll);
+      document.removeEventListener("gesturestart", preventGestureScroll);
+      document.removeEventListener("gesturechange", preventGestureScroll);
+      document.removeEventListener("gestureend", preventGestureScroll);
     };
   }, [keyboardState.isVisible]);
 

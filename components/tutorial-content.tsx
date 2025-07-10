@@ -14,11 +14,6 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import CodeEditor from "@/components/code-editor";
 import DrawingCanvas from "@/components/drawing-canvas";
 import PrintDataDisplay from "@/components/print-data-display";
@@ -53,7 +48,6 @@ export default function TutorialContent({
 }: TutorialContentProps) {
   const keyboard = useKeyboard();
   const [output, setOutput] = useState<string[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
   const [isExplanationOpen, setIsExplanationOpen] = useState(true);
   const [showAiChat, setShowAiChat] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -65,7 +59,6 @@ export default function TutorialContent({
   // Auto-expand "What You'll Learn" when tutorial changes
   useEffect(() => {
     setOutput([]);
-    setIsRunning(false);
     setCanvasError(null);
     setIsExplanationOpen(true); // Always expand when moving to a new tutorial
     setShowAiChat(false); // Reset AI chat visibility when tutorial changes
