@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowRight, Bot, CircleHelp, Book } from "lucide-react";
+import { ArrowRight, CircleHelp, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import CodeEditor from "@/components/code-editor";
@@ -65,6 +65,12 @@ export default function TutorialContent({
 
   const handleShowAiChat = () => {
     setShowAiChat(true);
+  };
+
+  const handleReset = () => {
+    onCodeChange(tutorial.starterCode || "");
+    setOutput([]);
+    setCanvasError(null);
   };
 
   let maxHeight = 0;
@@ -147,19 +153,6 @@ export default function TutorialContent({
         <div className="flex-1 flex overflow-hidden">
           {/* Code Editor */}
           <div className="w-1/2 border-r border-slate-200 bg-white editor-container relative">
-            {/* Floating Help Button */}
-            <Button
-              onClick={() => setShowHelp(true)}
-              className={
-                (keyboard.isVisible ? "top-2 right-2" : "top-6 right-6") +
-                " absolute z-10 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0 p-2 h-8 w-8"
-              }
-              size="sm"
-              title="Get Help"
-            >
-              <CircleHelp className="h-4 w-4" />
-            </Button>
-
             <div
               className={
                 "h-full keyboard-transition " +
@@ -180,6 +173,30 @@ export default function TutorialContent({
 
           {/* Canvas/Output Area */}
           <div className="w-1/2 bg-slate-50 relative editor-container">
+            {/* Floating Action Buttons */}
+            <div className={
+              (keyboard.isVisible ? "top-2 left-2" : "top-6 left-6") +
+              " absolute z-20 flex flex-col gap-2"
+            }>
+              <Button
+                onClick={() => setShowHelp(true)}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0 p-2 h-8 w-8"
+                size="sm"
+                title="Get Help"
+              >
+                <CircleHelp className="h-4 w-4" />
+              </Button>
+              
+              <Button
+                onClick={handleReset}
+                className="bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0 p-2 h-8 w-8"
+                size="sm"
+                title="Reset Code"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </div>
+
             <div
               className={
                 "h-full keyboard-transition " +
