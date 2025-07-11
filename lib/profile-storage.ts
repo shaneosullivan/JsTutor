@@ -593,10 +593,8 @@ export async function syncIfNewer(): Promise<boolean> {
             });
           }
         } finally {
-          // Restart auto-save after sync is complete
-          if (firebasePersister) {
-            firebasePersister.startAutoSave();
-          }
+          // Don't restart auto-save immediately after sync to prevent unnecessary POST
+          // Auto-save will be re-enabled when user makes changes via enableFirebaseAutoSave()
         }
       }
 
