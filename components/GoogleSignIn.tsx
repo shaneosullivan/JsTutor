@@ -14,6 +14,7 @@ import {
   createAccount,
   getActiveAccount,
   removeAccount,
+  initializeFirebaseSync,
   type Account,
 } from "@/lib/profile-storage";
 
@@ -83,7 +84,7 @@ export default function GoogleSignIn({
     // const clientId = process.env.GOOGLE_CLIENT_ID;
     if (!clientId || clientId === "YOUR_GOOGLE_CLIENT_ID") {
       console.warn(
-        "Google Client ID not configured. Please set GOOGLE_CLIENT_ID environment variable."
+        "Google Client ID not configured. Please set GOOGLE_CLIENT_ID environment variable.",
       );
       setIsConfigured(false);
       return;
@@ -106,18 +107,76 @@ export default function GoogleSignIn({
     }
   };
 
-  const handleCredentialResponse = (response: any) => {
+  const handleCredentialResponse = async (response: any) => {
     setIsLoading(true);
     try {
-      // Decode the JWT token to get user info
-      const payload = JSON.parse(atob(response.credential.split(".")[1]));
-      const email = payload.email;
+      // Send credential to our OAuth callback API
+      const callbackResponse = await fetch("/api/auth/google/callback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          credential: response.credential,
+          redirectUrl: window.location.pathname,
+        }),
+      });
 
-      // Create account in local storage
-      const newAccount = createAccount(email, "google");
-      setAccount(newAccount);
+      if (!callbackResponse.ok) {
+        throw new Error(
+          `OAuth callback failed: ${callbackResponse.statusText}`,
+        );
+      }
 
-      onSignInSuccess?.(newAccount);
+      const result = await callbackResponse.json();
+
+      if (!result.success) {
+        throw new Error(result.error || "OAuth callback failed");
+      }
+
+      // Create account in local storage using the data from the callback
+      const newAccount = createAccount(result.account.email, "google");
+
+      // Update the account with the correct ID from the server
+      if (newAccount.id !== result.account.id) {
+        // Remove the auto-generated account and create one with the correct ID
+        removeAccount(newAccount.id);
+
+        // Create account with the server-provided ID
+        const accountWithCorrectId = {
+          ...result.account,
+          createdAt: result.account.createdAt || newAccount.createdAt,
+        };
+
+        // Store the account directly in TinyBase
+        const { getStore } = await import("@/lib/profile-storage");
+        const { FIREBASE_ACCOUNTS_COLLECTION } = await import("@/lib/consts");
+        const store = getStore();
+        store.setRow(
+          FIREBASE_ACCOUNTS_COLLECTION,
+          accountWithCorrectId.id,
+          accountWithCorrectId,
+        );
+        store.setValue("activeAccountId", accountWithCorrectId.id);
+
+        setAccount(accountWithCorrectId);
+      } else {
+        setAccount(newAccount);
+      }
+
+      // Initialize Firebase sync for the account
+      try {
+        await initializeFirebaseSync();
+        // Call success callback after sync is complete
+        onSignInSuccess?.(newAccount);
+      } catch (error) {
+        console.warn(
+          "Failed to initialize Firebase sync after sign-in:",
+          error,
+        );
+        // Still call success callback even if sync fails
+        onSignInSuccess?.(newAccount);
+      }
     } catch (error) {
       console.error("Failed to process Google sign-in:", error);
     } finally {
@@ -148,7 +207,6 @@ export default function GoogleSignIn({
       window.google.accounts.id.disableAutoSelect();
     }
   };
-
 
   if (!isConfigured) {
     return (
@@ -228,6 +286,9 @@ export default function GoogleSignIn({
               <p className="text-xs text-gray-500 mt-1">
                 Connected on {new Date(account.createdAt).toLocaleDateString()}
               </p>
+              <div className="text-xs text-green-600 mt-2">
+                ✓ Automatic sync enabled
+              </div>
             </div>
 
             <Button

@@ -57,6 +57,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Skip API routes from caching entirely
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+
   // Network first strategy for dynamic content
   event.respondWith(
     fetch(event.request)
@@ -64,8 +69,8 @@ self.addEventListener("fetch", (event) => {
         // Clone the response for caching
         const responseClone = response.clone();
 
-        // Cache successful responses
-        if (response.status === 200) {
+        // Cache successful GET responses only (POST requests cannot be cached)
+        if (response.status === 200 && event.request.method === 'GET') {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone);
           });

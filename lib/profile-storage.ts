@@ -3,7 +3,9 @@
 
 import { createStore } from "tinybase";
 import { createLocalPersister } from "tinybase/persisters/persister-browser";
+import { createCustomPersister } from "tinybase/persisters";
 import type { Store } from "tinybase";
+import { FIREBASE_ACCOUNTS_COLLECTION } from "./consts";
 
 export interface UserProfile {
   id: string;
@@ -27,10 +29,66 @@ const DEFAULT_PROFILE_ID = "default";
 // Create TinyBase store with localStorage persistence
 const store: Store = createStore();
 let persister: any = null;
+let firebasePersister: any = null;
 
 // Initialize persistence only on client side
 if (typeof window !== "undefined") {
   persister = createLocalPersister(store, "jstutor");
+
+  // Create Firebase custom persister
+  firebasePersister = createCustomPersister(
+    store,
+    // getPersisted: Load data from Firebase
+    async () => {
+      const activeAccount = getActiveAccount();
+      if (!activeAccount) {
+        return null; // No account, no remote data
+      }
+
+      try {
+        const response = await fetch(`/api/sync?accountId=${activeAccount.id}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            return null; // Account not found, return null to use local data
+          }
+          throw new Error(`Failed to load: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        return result.data.data; // Return the TinyBase store data
+      } catch (error) {
+        console.warn("Failed to load from Firebase:", error);
+        return null; // Return null to use local data
+      }
+    },
+    // setPersisted: Save data to Firebase
+    async (getContent) => {
+      const activeAccount = getActiveAccount();
+      if (!activeAccount) {
+        return; // No account, no remote save
+      }
+
+      try {
+        const content = getContent();
+        await fetch("/api/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accountId: activeAccount.id,
+            email: activeAccount.email,
+            data: content,
+          }),
+        });
+      } catch (error) {
+        console.warn("Failed to save to Firebase:", error);
+        // Don't throw - let local persistence continue
+      }
+    },
+    // addPersisterListener: No external change detection needed
+    () => null,
+    // delPersisterListener: Cleanup function (not needed)
+    () => {},
+  );
 
   // Start persistence
   persister
@@ -38,6 +96,9 @@ if (typeof window !== "undefined") {
     .then(() => {
       persister.startAutoSave();
       ensureDefaultProfile();
+
+      // Initialize Firebase persister after local data is loaded
+      initializeFirebasePersister();
     })
     .catch((error: any) => {
       console.warn(
@@ -49,6 +110,33 @@ if (typeof window !== "undefined") {
 } else {
   // Server-side: just ensure default profile (no persistence)
   ensureDefaultProfile();
+}
+
+// Initialize Firebase persister when user signs in
+async function initializeFirebasePersister(): Promise<void> {
+  if (typeof window === "undefined" || !firebasePersister) {
+    return;
+  }
+
+  const activeAccount = getActiveAccount();
+  if (!activeAccount) {
+    return; // No account, no Firebase sync
+  }
+
+  try {
+    // Load from Firebase first (if data exists and is newer)
+    await firebasePersister.load();
+
+    // Start auto-save to Firebase
+    firebasePersister.startAutoSave();
+
+    console.log(
+      "Firebase persister initialized for account:",
+      activeAccount.email,
+    );
+  } catch (error) {
+    console.warn("Failed to initialize Firebase persister:", error);
+  }
 }
 
 // Table schemas in TinyBase:
@@ -313,8 +401,21 @@ export function getPersister() {
   return persister;
 }
 
+// Export the Firebase persister
+export function getFirebasePersister() {
+  return firebasePersister;
+}
+
+// Initialize Firebase sync for an account
+export async function initializeFirebaseSync(): Promise<void> {
+  await initializeFirebasePersister();
+}
+
 // Account management functions
-export function createAccount(email: string, provider: "google" = "google"): Account {
+export function createAccount(
+  email: string,
+  provider: "google" = "google",
+): Account {
   const newAccount: Account = {
     id: `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
     email: email,
@@ -323,7 +424,7 @@ export function createAccount(email: string, provider: "google" = "google"): Acc
     lastSignIn: new Date().toISOString(),
   };
 
-  store.setRow("accounts", newAccount.id, newAccount as any);
+  store.setRow(FIREBASE_ACCOUNTS_COLLECTION, newAccount.id, newAccount as any);
   store.setValue("activeAccountId", newAccount.id);
   return newAccount;
 }
@@ -332,28 +433,38 @@ export function getActiveAccount(): Account | null {
   const activeAccountId = store.getValue("activeAccountId") as string;
   if (!activeAccountId) return null;
 
-  const account = store.getRow("accounts", activeAccountId) as unknown as Account;
+  const account = store.getRow(
+    FIREBASE_ACCOUNTS_COLLECTION,
+    activeAccountId,
+  ) as unknown as Account;
   return account || null;
 }
 
 export function getAllAccounts(): Account[] {
-  const accountsTable = store.getTable("accounts");
+  const accountsTable = store.getTable(FIREBASE_ACCOUNTS_COLLECTION);
   return Object.values(accountsTable).map((row) => row as unknown as Account);
 }
 
 export function updateAccountLastSignIn(accountId: string): void {
-  const account = store.getRow("accounts", accountId) as unknown as Account;
+  const account = store.getRow(
+    FIREBASE_ACCOUNTS_COLLECTION,
+    accountId,
+  ) as unknown as Account;
   if (account) {
     const updatedAccount = { ...account, lastSignIn: new Date().toISOString() };
-    store.setRow("accounts", accountId, updatedAccount as any);
+    store.setRow(
+      FIREBASE_ACCOUNTS_COLLECTION,
+      accountId,
+      updatedAccount as any,
+    );
   }
 }
 
 export function removeAccount(accountId: string): boolean {
-  const account = store.getRow("accounts", accountId);
+  const account = store.getRow(FIREBASE_ACCOUNTS_COLLECTION, accountId);
   if (!account) return false;
 
-  store.delRow("accounts", accountId);
+  store.delRow(FIREBASE_ACCOUNTS_COLLECTION, accountId);
 
   // If this was the active account, clear it
   const activeAccountId = store.getValue("activeAccountId") as string;
@@ -365,13 +476,19 @@ export function removeAccount(accountId: string): boolean {
 }
 
 export function setActiveAccount(accountId: string): boolean {
-  const account = store.getRow("accounts", accountId) as unknown as Account;
+  const account = store.getRow(
+    FIREBASE_ACCOUNTS_COLLECTION,
+    accountId,
+  ) as unknown as Account;
   if (!account) return false;
 
   store.setValue("activeAccountId", accountId);
   updateAccountLastSignIn(accountId);
   return true;
 }
+
+// Firebase sync using TinyBase custom persister
+// The sync is handled automatically by the persister
 
 // Initialize profile system explicitly (useful for components that need to ensure profiles exist)
 export async function initializeProfileSystem(): Promise<void> {
@@ -387,6 +504,12 @@ export async function initializeProfileSystem(): Promise<void> {
 
     // Ensure default profile exists
     ensureDefaultProfile();
+
+    // Check if user has an account and initialize Firebase sync if needed
+    const activeAccount = getActiveAccount();
+    if (activeAccount) {
+      await initializeFirebasePersister();
+    }
 
     // Force save if we created the default profile
     if (persister) {

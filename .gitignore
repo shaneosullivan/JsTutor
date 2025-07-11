@@ -10,3 +10,4 @@ tmp
 config
 public/buildId.json
 jstutor.env
+firebase.json

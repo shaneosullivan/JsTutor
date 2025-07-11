@@ -42,6 +42,7 @@ import {
   createProfile,
   updateProfile,
   deleteProfile,
+  getStore,
   type UserProfile,
   type Account,
 } from "@/lib/profile-storage";
@@ -51,7 +52,9 @@ interface ProfilesPageClientProps {
   googleClientId?: string;
 }
 
-export default function ProfilesPageClient({ googleClientId }: ProfilesPageClientProps) {
+export default function ProfilesPageClient({
+  googleClientId,
+}: ProfilesPageClientProps) {
   const router = useRouter();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [activeProfile, setActiveProfileState] = useState<UserProfile | null>(
@@ -88,11 +91,35 @@ export default function ProfilesPageClient({ googleClientId }: ProfilesPageClien
 
     // Load immediately, no delays
     loadProfiles();
+
+    // Set up TinyBase listener to refresh when store changes
+    const store = getStore();
+    const listenerId = store.addTablesListener(() => {
+      // Refresh profiles when any table data changes
+      loadProfiles();
+    });
+
+    // Cleanup listener on unmount
+    return () => {
+      store.delListener(listenerId);
+    };
   }, []);
 
   // Track when Google is ready
   const handleGoogleReady = () => {
     setIsGoogleReady(true);
+  };
+
+  // Refresh profiles from storage
+  const refreshProfiles = () => {
+    try {
+      const loadedProfiles = getAllProfiles();
+      const currentActive = getActiveProfile();
+      setProfiles(loadedProfiles);
+      setActiveProfileState(currentActive);
+    } catch (error) {
+      console.error("Failed to refresh profiles:", error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -291,11 +318,12 @@ export default function ProfilesPageClient({ googleClientId }: ProfilesPageClien
               <GoogleSignIn
                 clientId={googleClientId || ""}
                 onSignInSuccess={(account: Account) => {
-                  console.log('Successfully signed in:', account);
-                  // You can add additional logic here when sign-in succeeds
+                  console.log("Successfully signed in:", account);
+                  // Refresh profiles after successful sign-in and sync
+                  refreshProfiles();
                 }}
                 onSignOut={() => {
-                  console.log('Successfully signed out');
+                  console.log("Successfully signed out");
                   // You can add additional logic here when sign-out occurs
                 }}
                 onReady={handleGoogleReady}
@@ -306,7 +334,7 @@ export default function ProfilesPageClient({ googleClientId }: ProfilesPageClien
 
         {/* Hidden GoogleSignIn to trigger loading without rendering */}
         {!isGoogleReady && (
-          <div style={{ display: 'none' }}>
+          <div style={{ display: "none" }}>
             <GoogleSignIn
               clientId={googleClientId || ""}
               onSignInSuccess={() => {}}
