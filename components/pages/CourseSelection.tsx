@@ -24,6 +24,7 @@ import {
   User,
 } from "lucide-react";
 import GithubIcon from "@/components/GithubIcon";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import Analytics from "@/components/Analytics";
 import { 
   getCompletedCourses as getCompletedCoursesFromStorage,
@@ -121,15 +122,19 @@ export default function CourseSelection() {
               </Button>
             </Link>
             
-            <a
-              href="https://github.com/shaneosullivan/JsTutor"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center w-8 h-8 text-slate-600 hover:text-slate-800 transition-colors hover:scale-110"
-              title="View on GitHub"
-            >
-              <GithubIcon size={20} />
-            </a>
+            <div className="flex items-center space-x-3">
+              <a
+                href="https://github.com/shaneosullivan/JsTutor"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-8 h-8 text-slate-600 hover:text-slate-800 transition-colors hover:scale-110"
+                title="View on GitHub"
+              >
+                <GithubIcon size={20} />
+              </a>
+              
+              <ProfileAvatar size={32} />
+            </div>
           </div>
 
           {/* Hero Section */}

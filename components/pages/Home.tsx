@@ -8,6 +8,7 @@ import TutorialSidebar from "@/components/tutorial-sidebar";
 import TutorialContent from "@/components/tutorial-content";
 import ApiDocumentation from "@/components/api-documentation";
 import GithubIcon from "@/components/GithubIcon";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import { useKeyboard } from "@/components/KeyboardProvider";
 import { Code, Star, Book } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -319,6 +320,8 @@ export default function Home() {
               >
                 <GithubIcon size={20} />
               </a>
+
+              <ProfileAvatar size={32} />
             </div>
           </div>
         </div>

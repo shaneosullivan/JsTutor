@@ -31,6 +31,7 @@ import {
   setProfileItem
 } from "@/lib/profile-storage";
 import GithubIcon from "@/components/GithubIcon";
+import ProfileAvatar from "@/components/ProfileAvatar";
 import { useKeyboard } from "@/components/KeyboardProvider";
 import { useTutorial } from "@/hooks/use-course-tutorial";
 import Analytics from "@/components/Analytics";
@@ -350,6 +351,8 @@ export default function CoursePage({ courseId }: CoursePageProps) {
               >
                 <GithubIcon size={20} />
               </a>
+
+              <ProfileAvatar size={32} />
             </div>
           </div>
         </div>
