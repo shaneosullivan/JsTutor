@@ -2,11 +2,11 @@ import { Metadata } from "next";
 import CoursePage from "@/components/pages/CoursePage";
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const courseId = params.id;
+  const { id: courseId } = await params;
 
   // You can fetch course data here for dynamic metadata
   return {
@@ -20,6 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function CoursePageRoute({ params }: Props) {
-  return <CoursePage courseId={params.id} />;
+export default async function CoursePageRoute({ params }: Props) {
+  const { id } = await params;
+  return <CoursePage courseId={id} />;
 }

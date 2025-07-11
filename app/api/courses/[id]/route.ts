@@ -3,9 +3,10 @@ import { getCourse } from "@/lib/dataUtils";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const courseId = parseInt(params.id);
+  const { id } = await params;
+  const courseId = parseInt(id);
   const course = getCourse(courseId);
 
   if (!course) {
