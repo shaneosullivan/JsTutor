@@ -13,6 +13,14 @@ export interface UserProfile {
   lastActive: string;
 }
 
+export interface Account {
+  id: string;
+  email: string;
+  provider: "google";
+  createdAt: string;
+  lastSignIn: string;
+}
+
 // Constants
 const DEFAULT_PROFILE_ID = "default";
 
@@ -45,6 +53,7 @@ if (typeof window !== "undefined") {
 
 // Table schemas in TinyBase:
 // - 'profiles': stores user profiles
+// - 'accounts': stores account information for cross-device sync
 // - 'settings': stores app settings like activeProfileId
 // - 'userData': stores user data scoped by profile
 
@@ -302,6 +311,66 @@ export function getStore(): Store {
 // Export the persister for advanced usage
 export function getPersister() {
   return persister;
+}
+
+// Account management functions
+export function createAccount(email: string, provider: "google" = "google"): Account {
+  const newAccount: Account = {
+    id: `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+    email: email,
+    provider: provider,
+    createdAt: new Date().toISOString(),
+    lastSignIn: new Date().toISOString(),
+  };
+
+  store.setRow("accounts", newAccount.id, newAccount as any);
+  store.setValue("activeAccountId", newAccount.id);
+  return newAccount;
+}
+
+export function getActiveAccount(): Account | null {
+  const activeAccountId = store.getValue("activeAccountId") as string;
+  if (!activeAccountId) return null;
+
+  const account = store.getRow("accounts", activeAccountId) as unknown as Account;
+  return account || null;
+}
+
+export function getAllAccounts(): Account[] {
+  const accountsTable = store.getTable("accounts");
+  return Object.values(accountsTable).map((row) => row as unknown as Account);
+}
+
+export function updateAccountLastSignIn(accountId: string): void {
+  const account = store.getRow("accounts", accountId) as unknown as Account;
+  if (account) {
+    const updatedAccount = { ...account, lastSignIn: new Date().toISOString() };
+    store.setRow("accounts", accountId, updatedAccount as any);
+  }
+}
+
+export function removeAccount(accountId: string): boolean {
+  const account = store.getRow("accounts", accountId);
+  if (!account) return false;
+
+  store.delRow("accounts", accountId);
+
+  // If this was the active account, clear it
+  const activeAccountId = store.getValue("activeAccountId") as string;
+  if (activeAccountId === accountId) {
+    store.delValue("activeAccountId");
+  }
+
+  return true;
+}
+
+export function setActiveAccount(accountId: string): boolean {
+  const account = store.getRow("accounts", accountId) as unknown as Account;
+  if (!account) return false;
+
+  store.setValue("activeAccountId", accountId);
+  updateAccountLastSignIn(accountId);
+  return true;
 }
 
 // Initialize profile system explicitly (useful for components that need to ensure profiles exist)

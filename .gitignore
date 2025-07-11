@@ -9,3 +9,4 @@ tmp
 .next
 config
 public/buildId.json
+jstutor.env

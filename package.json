@@ -8,7 +8,7 @@
     "email": "shaneosullivan1@gmail.com"
   },
   "scripts": {
-    "dev": "lsof -ti:3020 | xargs kill -9 && PORT=3020 next dev",
+    "dev": "lsof -ti:3020 | xargs kill -9 && source jstutor.env && PORT=3020 next dev",
     "build": "scripts/cleanBuild.sh && bun scripts/build-data.ts && bun scripts/generateBuildId.ts && next build",
     "start": "next start",
     "check": "tsc",
