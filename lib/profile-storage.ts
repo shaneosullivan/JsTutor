@@ -91,7 +91,7 @@ if (typeof window !== "undefined") {
     // addPersisterListener: No external change detection needed
     () => null,
     // delPersisterListener: Cleanup function (not needed)
-    () => {},
+    () => {}
   );
 
   // Start persistence
@@ -107,7 +107,7 @@ if (typeof window !== "undefined") {
     .catch((error: any) => {
       console.warn(
         "Failed to load from localStorage, creating default profile:",
-        error,
+        error
       );
       ensureDefaultProfile();
     });
@@ -117,26 +117,60 @@ if (typeof window !== "undefined") {
 }
 
 // Initialize Firebase persister when user signs in
-async function initializeFirebasePersister(): Promise<void> {
+async function initializeFirebasePersister(
+  isNewAccount: boolean = false
+): Promise<void> {
   if (typeof window === "undefined" || !firebasePersister) {
     return;
   }
 
   const activeAccount = getActiveAccount();
-  if (!activeAccount) {
-    return; // No account, no Firebase sync
+  if (!activeAccount || !activeAccount.id) {
+    return; // No account or no account ID, no Firebase sync
   }
 
   try {
-    // Load from Firebase first (if data exists and is newer)
-    await firebasePersister.load();
+    if (isNewAccount) {
+      // For new accounts: immediately enable auto-save to post initial data
+      firebasePersister.startAutoSave();
+      console.log("Auto-save enabled for new account:", activeAccount.email);
+    } else {
+      // For existing accounts: load data but don't enable auto-save yet
+      try {
+        // Get the remote data to check timestamp
+        const response = await fetch(`/api/sync?accountId=${activeAccount.id}`);
+        if (response.ok) {
+          const result = await response.json();
 
-    // Start auto-save to Firebase
-    firebasePersister.startAutoSave();
+          // Load the data using the persister
+          await firebasePersister.load();
+
+          // Update sync timestamp after successful load
+          setLastSyncTimestamp(result.data.lastUpdated);
+
+          // Force save to localStorage to persist the fetched data and timestamp
+          if (persister) {
+            await persister.save();
+          }
+
+          console.log(
+            "Data loaded for existing account:",
+            activeAccount.email,
+            "timestamp:",
+            result.data.lastUpdated
+          );
+        } else {
+          console.log("No remote data found for account:", activeAccount.email);
+        }
+      } catch (error) {
+        console.warn("Failed to load remote data for existing account:", error);
+      }
+    }
 
     console.log(
       "Firebase persister initialized for account:",
       activeAccount.email,
+      isNewAccount ? "(new account)" : "(existing account)"
     );
   } catch (error) {
     console.warn("Failed to initialize Firebase persister:", error);
@@ -153,7 +187,7 @@ async function initializeFirebasePersister(): Promise<void> {
 function getProfilesInternal(): UserProfile[] {
   const profilesTable = store.getTable("profiles");
   return Object.values(profilesTable).map(
-    (row) => row as unknown as UserProfile,
+    (row) => row as unknown as UserProfile
   );
 }
 
@@ -197,7 +231,7 @@ export function getActiveProfile(): UserProfile {
     (store.getValue("activeProfileId") as string) || DEFAULT_PROFILE_ID;
   const profile = store.getRow(
     "profiles",
-    activeProfileId,
+    activeProfileId
   ) as unknown as UserProfile;
 
   if (!profile) {
@@ -229,12 +263,16 @@ export function setActiveProfile(profileId: string): boolean {
   store.setRow("profiles", profileId, updatedProfile as any);
 
   store.setValue("activeProfileId", profileId);
+
+  // Enable auto-save for existing accounts when they make changes
+  enableFirebaseAutoSave();
+
   return true;
 }
 
 export function createProfile(
   name: string,
-  icon: string = "short_brown",
+  icon: string = "short_brown"
 ): UserProfile {
   const newProfile: UserProfile = {
     id: `profile_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
@@ -245,6 +283,10 @@ export function createProfile(
   };
 
   store.setRow("profiles", newProfile.id, newProfile as any);
+
+  // Enable auto-save for existing accounts when they make changes
+  enableFirebaseAutoSave();
+
   return newProfile;
 }
 
@@ -260,6 +302,9 @@ export function updateProfile(updatedProfile: UserProfile): boolean {
     lastActive: new Date().toISOString(),
   };
   store.setRow("profiles", updatedProfile.id, profileWithTimestamp as any);
+
+  // Enable auto-save for existing accounts when they make changes
+  enableFirebaseAutoSave();
 
   return true;
 }
@@ -337,7 +382,7 @@ export function setProfileItemAsArray(key: string, value: any[]): void {
 
 export function getProfileItemAsObject(
   key: string,
-  defaultValue: any = {},
+  defaultValue: any = {}
 ): any {
   try {
     const item = getProfileItem(key);
@@ -359,7 +404,7 @@ export function getCompletedTutorials(courseId: number): number[] {
 
 export function setCompletedTutorials(
   courseId: number,
-  tutorialIds: number[],
+  tutorialIds: number[]
 ): void {
   setProfileItemAsArray(`completedTutorials_course_${courseId}`, tutorialIds);
 }
@@ -371,11 +416,11 @@ export function getCurrentTutorial(courseId: number): number | null {
 
 export function setCurrentTutorial(
   courseId: number,
-  tutorialOrder: number,
+  tutorialOrder: number
 ): void {
   setProfileItem(
     `currentTutorial_course_${courseId}`,
-    tutorialOrder.toString(),
+    tutorialOrder.toString()
   );
 }
 
@@ -411,8 +456,18 @@ export function getFirebasePersister() {
 }
 
 // Initialize Firebase sync for an account
-export async function initializeFirebaseSync(): Promise<void> {
-  await initializeFirebasePersister();
+export async function initializeFirebaseSync(
+  isNewAccount: boolean = false
+): Promise<void> {
+  await initializeFirebasePersister(isNewAccount);
+}
+
+// Enable auto-save for existing accounts (call this when user makes first change)
+export function enableFirebaseAutoSave(): void {
+  if (firebasePersister && getActiveAccount()) {
+    firebasePersister.startAutoSave();
+    console.log("Auto-save enabled for existing account");
+  }
 }
 
 // Get the last sync timestamp for the active account
@@ -442,13 +497,13 @@ export function setLastSyncTimestamp(timestamp: string): void {
 // Check if remote data is newer without downloading it
 export async function isRemoteDataNewer(): Promise<boolean> {
   const activeAccount = getActiveAccount();
-  if (!activeAccount) {
+  if (!activeAccount || !activeAccount.id) {
     return false;
   }
 
   try {
     const response = await fetch(
-      `/api/sync/timestamp?accountId=${activeAccount.id}`,
+      `/api/sync/timestamp?accountId=${activeAccount.id}`
     );
 
     if (!response.ok) {
@@ -456,7 +511,7 @@ export async function isRemoteDataNewer(): Promise<boolean> {
         return false; // No remote data
       }
       throw new Error(
-        `Failed to check remote timestamp: ${response.statusText}`,
+        `Failed to check remote timestamp: ${response.statusText}`
       );
     }
 
@@ -476,7 +531,7 @@ export async function isRemoteDataNewer(): Promise<boolean> {
 // Sync from remote if newer data is available
 export async function syncIfNewer(): Promise<boolean> {
   const activeAccount = getActiveAccount();
-  if (!activeAccount || !firebasePersister) {
+  if (!activeAccount) {
     return false;
   }
 
@@ -484,10 +539,69 @@ export async function syncIfNewer(): Promise<boolean> {
     const isNewer = await isRemoteDataNewer();
     if (isNewer) {
       console.log("Remote data is newer, syncing...");
-      await firebasePersister.load();
 
-      // Update our local sync timestamp
-      setLastSyncTimestamp(new Date().toISOString());
+      // Directly fetch and apply the data without using the persister
+      const response = await fetch(`/api/sync?accountId=${activeAccount.id}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return false; // Account not found
+        }
+        throw new Error(`Failed to load: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      // Apply the data to the store
+      const remoteData = result.data.data;
+      if (remoteData && Array.isArray(remoteData) && remoteData.length >= 2) {
+        const currentActiveAccount = getActiveAccount();
+        if (
+          !currentActiveAccount ||
+          currentActiveAccount.id !== activeAccount.id
+        ) {
+          console.warn(
+            "Active account has changed during sync, aborting to prevent data loss."
+          );
+          return false;
+        }
+
+        // Temporarily stop auto-save to prevent POST requests during sync
+        if (firebasePersister) {
+          firebasePersister.stopAutoSave();
+        }
+
+        try {
+          // Clear and rebuild the store with remote data
+          store.delTables();
+          store.delValues();
+
+          // Set tables - remoteData[0] contains the tables
+          const tables = remoteData[0];
+          if (tables) {
+            Object.entries(tables).forEach(([tableId, table]) => {
+              Object.entries(table as any).forEach(([rowId, row]) => {
+                store.setRow(tableId, rowId, row as any);
+              });
+            });
+          }
+
+          // Set values - remoteData[1] contains the values
+          const values = remoteData[1];
+          if (values) {
+            Object.entries(values).forEach(([valueId, value]) => {
+              store.setValue(valueId, value as any);
+            });
+          }
+        } finally {
+          // Restart auto-save after sync is complete
+          if (firebasePersister) {
+            firebasePersister.startAutoSave();
+          }
+        }
+      }
+
+      // Update sync timestamp
+      setLastSyncTimestamp(result.data.lastUpdated);
       return true;
     }
     return false;
@@ -500,7 +614,7 @@ export async function syncIfNewer(): Promise<boolean> {
 // Account management functions
 export function createAccount(
   email: string,
-  provider: "google" = "google",
+  provider: "google" = "google"
 ): Account {
   const newAccount: Account = {
     id: `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
@@ -521,7 +635,7 @@ export function getActiveAccount(): Account | null {
 
   const account = store.getRow(
     FIREBASE_ACCOUNTS_COLLECTION,
-    activeAccountId,
+    activeAccountId
   ) as unknown as Account;
   return account || null;
 }
@@ -534,22 +648,26 @@ export function getAllAccounts(): Account[] {
 export function updateAccountLastSignIn(accountId: string): void {
   const account = store.getRow(
     FIREBASE_ACCOUNTS_COLLECTION,
-    accountId,
+    accountId
   ) as unknown as Account;
   if (account) {
     const updatedAccount = { ...account, lastSignIn: new Date().toISOString() };
     store.setRow(
       FIREBASE_ACCOUNTS_COLLECTION,
       accountId,
-      updatedAccount as any,
+      updatedAccount as any
     );
   }
 }
 
 export function removeAccount(accountId: string): boolean {
-  const account = store.getRow(FIREBASE_ACCOUNTS_COLLECTION, accountId);
-  if (!account) return false;
-
+  console.log("Removing account:", accountId);
+  const account = accountId
+    ? store.getRow(FIREBASE_ACCOUNTS_COLLECTION, accountId)
+    : null;
+  if (!account) {
+    return false;
+  }
   store.delRow(FIREBASE_ACCOUNTS_COLLECTION, accountId);
 
   // If this was the active account, clear it
@@ -558,13 +676,20 @@ export function removeAccount(accountId: string): boolean {
     store.delValue("activeAccountId");
   }
 
+  // Force save to localStorage to persist the sign-out changes
+  if (persister) {
+    persister.save().catch((error: any) => {
+      console.warn("Failed to save sign-out changes to localStorage:", error);
+    });
+  }
+
   return true;
 }
 
 export function setActiveAccount(accountId: string): boolean {
   const account = store.getRow(
     FIREBASE_ACCOUNTS_COLLECTION,
-    accountId,
+    accountId
   ) as unknown as Account;
   if (!account) return false;
 
@@ -598,9 +723,9 @@ export async function initializeProfileSystem(): Promise<void> {
     }
 
     // Force save if we created the default profile
-    if (persister) {
-      await persister.save();
-    }
+    // if (persister) {
+    //   await persister.save();
+    // }
   } catch (error) {
     console.error("Failed to initialize profile system:", error);
     // Fallback: create default profile without persistence

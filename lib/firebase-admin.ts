@@ -185,9 +185,7 @@ export async function findAccountByEmail(
 }
 
 // Create or get existing account atomically by email
-export async function createOrGetAccountByEmail(
-  email: string
-): Promise<{
+export async function createOrGetAccountByEmail(email: string): Promise<{
   accountId: string;
   isNewAccount: boolean;
   accountData: FirestoreAccountData;

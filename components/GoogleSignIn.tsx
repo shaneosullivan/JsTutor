@@ -166,7 +166,7 @@ export default function GoogleSignIn({
 
       // Initialize Firebase sync for the account
       try {
-        await initializeFirebaseSync();
+        await initializeFirebaseSync(result.isNewAccount);
         // Call success callback after sync is complete
         onSignInSuccess?.(newAccount);
       } catch (error) {
@@ -197,11 +197,29 @@ export default function GoogleSignIn({
   };
 
   const handleSignOut = () => {
-    if (account) {
-      removeAccount(account.id);
-      setAccount(null);
-      onSignOut?.();
+    // Get the currently active account from the store
+    const activeAccount = getActiveAccount();
+    if (activeAccount && activeAccount.id) {
+      removeAccount(activeAccount.id);
+    } else {
+      // Fallback: clear activeAccountId directly if no account found
+      const { getStore } = require("@/lib/profile-storage");
+      const store = getStore();
+      store.delValue("activeAccountId");
+      
+      // Force save to localStorage
+      const { getPersister } = require("@/lib/profile-storage");
+      const persister = getPersister();
+      if (persister) {
+        persister.save().catch((error: any) => {
+          console.warn("Failed to save sign-out changes to localStorage:", error);
+        });
+      }
     }
+    
+    setAccount(null);
+    onSignOut?.();
+    
     // Also disable Google auto-select
     if (window.google?.accounts) {
       window.google.accounts.id.disableAutoSelect();
