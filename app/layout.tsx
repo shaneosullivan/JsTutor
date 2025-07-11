@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ClientProvider from "@/components/ClientProvider";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import VersionChecker from "@/components/VersionChecker";
+import ProfileEnsurer from "@/components/ProfileEnsurer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -259,7 +260,9 @@ export default function RootLayout({
           <TooltipProvider>
             <Toaster />
             <VersionChecker />
-            {children}
+            <ProfileEnsurer>
+              {children}
+            </ProfileEnsurer>
           </TooltipProvider>
         </ClientProvider>
       </body>

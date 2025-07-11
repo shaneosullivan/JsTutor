@@ -21,9 +21,14 @@ import {
   Globe,
   Layers,
   Database,
+  User,
 } from "lucide-react";
 import GithubIcon from "@/components/GithubIcon";
 import Analytics from "@/components/Analytics";
+import { 
+  getCompletedCourses as getCompletedCoursesFromStorage,
+  setProfileItem
+} from "@/lib/profile-storage";
 
 interface Course {
   id: number;
@@ -39,16 +44,15 @@ export default function CourseSelection() {
     queryKey: ["/api/courses"],
   });
 
-  // Get completion status from localStorage
+  // Get completion status from profile storage
   const getCompletedCourses = (): number[] => {
     if (typeof window === "undefined") return [];
-    const saved = localStorage.getItem("completedCourses");
-    return saved ? JSON.parse(saved) : [];
+    return getCompletedCoursesFromStorage();
   };
 
   const [completedCourses, setCompletedCourses] = useState<number[]>([]);
 
-  // Initialize state from localStorage after component mounts
+  // Initialize state from profile storage after component mounts
   useEffect(() => {
     setCompletedCourses(getCompletedCourses());
   }, []);
@@ -105,7 +109,18 @@ export default function CourseSelection() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <Link href="/profiles">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
+              >
+                <User className="h-4 w-4" />
+                Manage Profiles
+              </Button>
+            </Link>
+            
             <a
               href="https://github.com/shaneosullivan/JsTutor"
               target="_blank"
@@ -169,7 +184,7 @@ export default function CourseSelection() {
                       href={course.id === 1 ? "/" : `/course/${course.id}`}
                       onClick={() => {
                         if (typeof window !== "undefined") {
-                          localStorage.setItem(
+                          setProfileItem(
                             "lastCourseId",
                             course.id.toString(),
                           );

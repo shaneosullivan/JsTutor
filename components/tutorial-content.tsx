@@ -11,6 +11,7 @@ import IframeDisplay from "@/components/iframe-display";
 import AiChat from "@/components/ai-chat";
 import HelpModal from "@/components/help-modal";
 import { useKeyboard } from "@/components/KeyboardProvider";
+import { getUserCode } from "@/lib/profile-storage";
 import type { Tutorial } from "@shared/schema";
 
 interface TutorialContentProps {
@@ -52,7 +53,7 @@ export default function TutorialContent({
     setShowAiChat(false); // Reset AI chat visibility when tutorial changes
     
     // Check if this is the first time viewing this tutorial by looking for saved code
-    const savedCode = localStorage.getItem(`userCode_tutorial_${tutorial.id}`);
+    const savedCode = getUserCode(tutorial.id);
     const isFirstTimeView = !savedCode;
     
     if (isFirstTimeView) {

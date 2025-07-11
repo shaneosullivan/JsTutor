@@ -19,6 +19,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Analytics from "@/components/Analytics";
+import {
+  getCompletedTutorials,
+  setCompletedTutorials as setCompletedTutorialsInStorage,
+  getCurrentTutorial,
+  setCurrentTutorial as setCurrentTutorialInStorage,
+  getUserCode,
+  setUserCode as setUserCodeInStorage,
+  getCompletedCourses,
+  setCompletedCourses as setCompletedCoursesInStorage,
+  getProfileItem,
+  setProfileItem
+} from "@/lib/profile-storage";
 
 interface Course {
   id: number;
@@ -40,7 +52,7 @@ export default function Home() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const lastCourseId = localStorage.getItem("lastCourseId");
+    const lastCourseId = getProfileItem("lastCourseId");
 
     if (!lastCourseId && courses.length > 0) {
       // No course selected, redirect to course selection
@@ -74,21 +86,19 @@ export default function Home() {
     useTutorial();
 
   // Local state for course-specific progress (similar to course.tsx)
-  const getCompletedTutorials = (): number[] => {
+  const getCompletedTutorialsFromStorage = (): number[] => {
     if (typeof window === "undefined") return [];
-    const saved = localStorage.getItem(`completedTutorials_course_1`);
-    return saved ? JSON.parse(saved) : [];
+    return getCompletedTutorials(1);
   };
 
-  const getCurrentTutorial = (): number => {
+  const getCurrentTutorialFromStorage = (): number => {
     if (typeof window === "undefined") return 1;
-    const saved = localStorage.getItem(`currentTutorial_course_1`);
-    return saved ? parseInt(saved) : 1;
+    return getCurrentTutorial(1) || 1;
   };
 
   const getHighestTutorialReached = (): number => {
     if (typeof window === "undefined") return 1;
-    const saved = localStorage.getItem(`highestTutorial_course_1`);
+    const saved = getProfileItem(`highestTutorial_course_1`);
     return saved ? parseInt(saved) : 1;
   };
 
@@ -99,11 +109,11 @@ export default function Home() {
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
   const [showReferenceDialog, setShowReferenceDialog] = useState(false);
 
-  // Initialize state from localStorage after component mounts
+  // Initialize state from profile storage after component mounts
   useEffect(() => {
     if (tutorials.length > 0 && !hasRestoredFromStorage) {
-      const restoredCompleted = getCompletedTutorials();
-      const restoredCurrent = getCurrentTutorial();
+      const restoredCompleted = getCompletedTutorialsFromStorage();
+      const restoredCurrent = getCurrentTutorialFromStorage();
       const restoredHighest = getHighestTutorialReached();
 
       // Mark all tutorials below the highest reached as completed
@@ -124,22 +134,16 @@ export default function Home() {
 
   const isLoading = tutorialsLoading;
 
-  // Save progress to localStorage
+  // Save progress to profile storage
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        `completedTutorials_course_1`,
-        JSON.stringify(completedTutorials),
-      );
+    if (typeof window !== "undefined" && hasRestoredFromStorage) {
+      setCompletedTutorialsInStorage(1, completedTutorials);
     }
-  }, [completedTutorials]);
+  }, [completedTutorials, hasRestoredFromStorage]);
 
   useEffect(() => {
     if (typeof window !== "undefined" && hasRestoredFromStorage) {
-      localStorage.setItem(
-        `currentTutorial_course_1`,
-        currentTutorialOrder.toString(),
-      );
+      setCurrentTutorialInStorage(1, currentTutorialOrder);
       // Update highest tutorial reached if current is higher
       if (currentTutorialOrder > highestTutorialReached) {
         setHighestTutorialReached(currentTutorialOrder);
@@ -147,10 +151,10 @@ export default function Home() {
     }
   }, [currentTutorialOrder, hasRestoredFromStorage, highestTutorialReached]);
 
-  // Save highest tutorial reached to localStorage
+  // Save highest tutorial reached to profile storage
   useEffect(() => {
     if (typeof window !== "undefined" && hasRestoredFromStorage) {
-      localStorage.setItem(
+      setProfileItem(
         `highestTutorial_course_1`,
         highestTutorialReached.toString(),
       );
@@ -173,14 +177,9 @@ export default function Home() {
         : false;
     if (isLastTutorial && typeof window !== "undefined") {
       // Mark course as completed
-      const completedCourses = JSON.parse(
-        localStorage.getItem("completedCourses") || "[]",
-      );
+      const completedCourses = getCompletedCourses();
       if (!completedCourses.includes(1)) {
-        localStorage.setItem(
-          "completedCourses",
-          JSON.stringify([...completedCourses, 1]),
-        );
+        setCompletedCoursesInStorage([...completedCourses, 1]);
       }
     }
   };
@@ -226,9 +225,7 @@ export default function Home() {
     if (currentTutorial && currentTutorial.starterCode) {
       if (typeof window !== "undefined") {
         // Check if we have saved user code for this tutorial
-        const savedCode = localStorage.getItem(
-          `userCode_tutorial_${currentTutorial.id}`,
-        );
+        const savedCode = getUserCode(currentTutorial.id);
         if (savedCode) {
           setUserCode(savedCode);
         } else {
@@ -245,7 +242,7 @@ export default function Home() {
   // Save user code when it changes
   useEffect(() => {
     if (currentTutorial && userCode && typeof window !== "undefined") {
-      localStorage.setItem(`userCode_tutorial_${currentTutorial.id}`, userCode);
+      setUserCodeInStorage(currentTutorial.id, userCode);
     }
   }, [currentTutorial, userCode]);
 

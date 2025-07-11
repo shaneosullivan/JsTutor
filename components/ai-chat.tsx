@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bot, User, Send, X, Loader2 } from "lucide-react";
 import ApiKeySetup from "@/components/api-key-setup";
 import MessageContent from "@/components/message-content";
+import { getProfileItem } from "@/lib/profile-storage";
 
 interface Message {
   role: "user" | "assistant";
@@ -47,7 +48,7 @@ export default function AiChat({
 
   // Check for existing API key on mount
   useEffect(() => {
-    const storedApiKey = localStorage.getItem("openai_api_key");
+    const storedApiKey = getProfileItem("openai_api_key");
     if (storedApiKey) {
       setApiKey(storedApiKey);
     } else {

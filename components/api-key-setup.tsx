@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Key, Sparkles, Heart, CheckCircle } from "lucide-react";
+import { setProfileItem } from "@/lib/profile-storage";
 
 interface ApiKeySetupProps {
   onKeyValidated: (apiKey: string) => void;
@@ -70,7 +71,7 @@ export default function ApiKeySetup({
     const isValid = await validateApiKey(apiKey);
 
     if (isValid) {
-      localStorage.setItem("openai_api_key", apiKey);
+      setProfileItem("openai_api_key", apiKey);
       onKeyValidated(apiKey);
     } else {
       setError(
