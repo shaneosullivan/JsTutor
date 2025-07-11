@@ -30,7 +30,7 @@ import {
   getCompletedCourses,
   setCompletedCourses as setCompletedCoursesInStorage,
   getProfileItem,
-  setProfileItem
+  setProfileItem,
 } from "@/lib/profile-storage";
 
 interface Course {

@@ -28,7 +28,7 @@ import {
   getCompletedCourses,
   setCompletedCourses as setCompletedCoursesInStorage,
   getProfileItem,
-  setProfileItem
+  setProfileItem,
 } from "@/lib/profile-storage";
 import GithubIcon from "@/components/GithubIcon";
 import ProfileAvatar from "@/components/ProfileAvatar";

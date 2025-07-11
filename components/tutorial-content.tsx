@@ -51,11 +51,11 @@ export default function TutorialContent({
     setOutput([]);
     setCanvasError(null);
     setShowAiChat(false); // Reset AI chat visibility when tutorial changes
-    
+
     // Check if this is the first time viewing this tutorial by looking for saved code
     const savedCode = getUserCode(tutorial.id);
     const isFirstTimeView = !savedCode;
-    
+
     if (isFirstTimeView) {
       setShowHelp(true);
     }

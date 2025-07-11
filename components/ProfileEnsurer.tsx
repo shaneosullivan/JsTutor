@@ -30,12 +30,12 @@ export default function ProfileEnsurer({ children }: ProfileEnsurerProps) {
       try {
         // Use the explicit initialization function to ensure persistence
         await initializeProfileSystem();
-        
+
         // Verify profiles exist after initialization
         const profiles = getAllProfiles();
         if (profiles.length === 0) {
           console.warn(
-            "Profile system initialization failed - no profiles found"
+            "Profile system initialization failed - no profiles found",
           );
         }
 
@@ -63,9 +63,9 @@ export default function ProfileEnsurer({ children }: ProfileEnsurerProps) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
         <div className="text-center">
-          <div 
-            className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4" 
-            role="status" 
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"
+            role="status"
             aria-label="Loading profiles"
           ></div>
           <p className="text-gray-600 font-medium">Initializing profiles...</p>

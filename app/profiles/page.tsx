@@ -2,17 +2,25 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, Edit2, Trash2, User, Calendar, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  Plus,
+  Edit2,
+  Trash2,
+  User,
+  Calendar,
+  Clock,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
@@ -34,18 +42,24 @@ import {
   createProfile,
   updateProfile,
   deleteProfile,
-  type UserProfile
+  type UserProfile,
 } from "@/lib/profile-storage";
 
 export default function ProfilesPage() {
   const router = useRouter();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
-  const [activeProfile, setActiveProfileState] = useState<UserProfile | null>(null);
+  const [activeProfile, setActiveProfileState] = useState<UserProfile | null>(
+    null,
+  );
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [editingProfile, setEditingProfile] = useState<UserProfile | null>(null);
-  const [deletingProfile, setDeletingProfile] = useState<UserProfile | null>(null);
+  const [editingProfile, setEditingProfile] = useState<UserProfile | null>(
+    null,
+  );
+  const [deletingProfile, setDeletingProfile] = useState<UserProfile | null>(
+    null,
+  );
   const [profileName, setProfileName] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("short_brown");
 
@@ -62,7 +76,7 @@ export default function ProfilesPage() {
 
   const handleCreateProfile = () => {
     if (!profileName.trim()) return;
-    
+
     createProfile(profileName.trim(), selectedIcon);
     setProfileName("");
     setSelectedIcon("short_brown");
@@ -72,8 +86,12 @@ export default function ProfilesPage() {
 
   const handleEditProfile = () => {
     if (!editingProfile || !profileName.trim()) return;
-    
-    const updatedProfile = { ...editingProfile, name: profileName.trim(), icon: selectedIcon };
+
+    const updatedProfile = {
+      ...editingProfile,
+      name: profileName.trim(),
+      icon: selectedIcon,
+    };
     updateProfile(updatedProfile);
     setProfileName("");
     setSelectedIcon("short_brown");
@@ -84,7 +102,7 @@ export default function ProfilesPage() {
 
   const handleDeleteProfile = () => {
     if (!deletingProfile) return;
-    
+
     const success = deleteProfile(deletingProfile.id);
     if (success) {
       setDeletingProfile(null);
@@ -101,7 +119,7 @@ export default function ProfilesPage() {
   const openEditDialog = (profile: UserProfile) => {
     setEditingProfile(profile);
     setProfileName(profile.name);
-    setSelectedIcon(profile.icon || 'short_brown');
+    setSelectedIcon(profile.icon || "short_brown");
     setIsEditDialogOpen(true);
   };
 
@@ -111,12 +129,12 @@ export default function ProfilesPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -140,13 +158,15 @@ export default function ProfilesPage() {
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">User Profiles</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                User Profiles
+              </h1>
               <p className="text-gray-600 mt-1">
                 Manage your learning profiles and switch between them
               </p>
             </div>
           </div>
-          
+
           <Button
             onClick={() => setIsCreateDialogOpen(true)}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
@@ -159,12 +179,12 @@ export default function ProfilesPage() {
         {/* Profiles Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {profiles.map((profile) => (
-            <Card 
+            <Card
               key={profile.id}
               className={`relative transition-all duration-200 hover:shadow-lg ${
-                activeProfile?.id === profile.id 
-                  ? 'ring-2 ring-blue-500 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50' 
-                  : 'hover:shadow-md'
+                activeProfile?.id === profile.id
+                  ? "ring-2 ring-blue-500 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50"
+                  : "hover:shadow-md"
               }`}
             >
               <CardHeader className="pb-3">
@@ -172,7 +192,9 @@ export default function ProfilesPage() {
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full flex items-center justify-center p-1 bg-white shadow-md">
                       {(() => {
-                        const iconData = getProfileIcon(profile.icon || 'short_brown');
+                        const iconData = getProfileIcon(
+                          profile.icon || "short_brown",
+                        );
                         if (iconData) {
                           const IconComponent = iconData.component;
                           return <IconComponent size={44} />;
@@ -185,13 +207,16 @@ export default function ProfilesPage() {
                         {profile.name}
                       </CardTitle>
                       {activeProfile?.id === profile.id && (
-                        <Badge variant="default" className="mt-1 bg-green-100 text-green-800 border-green-200">
+                        <Badge
+                          variant="default"
+                          className="mt-1 bg-green-100 text-green-800 border-green-200"
+                        >
                           Active
                         </Badge>
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
@@ -214,7 +239,7 @@ export default function ProfilesPage() {
                   </div>
                 </div>
               </CardHeader>
-              
+
               <CardContent className="pt-0">
                 <div className="space-y-2 text-sm text-gray-600 mb-4">
                   <div className="flex items-center gap-2">
@@ -226,7 +251,7 @@ export default function ProfilesPage() {
                     <span>Last active: {formatDate(profile.lastActive)}</span>
                   </div>
                 </div>
-                
+
                 {activeProfile?.id !== profile.id && (
                   <Button
                     onClick={() => handleActivateProfile(profile)}
@@ -245,8 +270,12 @@ export default function ProfilesPage() {
         {profiles.length === 0 && (
           <div className="text-center py-12">
             <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No profiles found</h3>
-            <p className="text-gray-600 mb-4">Create your first profile to get started</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No profiles found
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Create your first profile to get started
+            </p>
             <Button
               onClick={() => setIsCreateDialogOpen(true)}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
@@ -269,7 +298,10 @@ export default function ProfilesPage() {
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div>
-              <Label htmlFor="profileName" className="text-sm font-medium text-gray-700">
+              <Label
+                htmlFor="profileName"
+                className="text-sm font-medium text-gray-700"
+              >
                 Profile Name
               </Label>
               <Input
@@ -278,7 +310,7 @@ export default function ProfilesPage() {
                 onChange={(e) => setProfileName(e.target.value)}
                 placeholder="Enter profile name"
                 className="mt-2 bg-white/70 border-2 border-blue-200 focus:border-purple-400 focus:bg-white transition-all duration-200"
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateProfile()}
+                onKeyDown={(e) => e.key === "Enter" && handleCreateProfile()}
               />
             </div>
             <IconSelector
@@ -287,8 +319,8 @@ export default function ProfilesPage() {
             />
           </div>
           <DialogFooter className="bg-white/50 -m-6 mt-4 p-6 rounded-b-lg">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setIsCreateDialogOpen(false);
                 setProfileName("");
@@ -298,8 +330,8 @@ export default function ProfilesPage() {
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleCreateProfile} 
+            <Button
+              onClick={handleCreateProfile}
               disabled={!profileName.trim()}
               className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0"
             >
@@ -320,7 +352,10 @@ export default function ProfilesPage() {
           </DialogHeader>
           <div className="py-4 space-y-4">
             <div>
-              <Label htmlFor="editProfileName" className="text-sm font-medium text-gray-700">
+              <Label
+                htmlFor="editProfileName"
+                className="text-sm font-medium text-gray-700"
+              >
                 Profile Name
               </Label>
               <Input
@@ -329,7 +364,7 @@ export default function ProfilesPage() {
                 onChange={(e) => setProfileName(e.target.value)}
                 placeholder="Enter profile name"
                 className="mt-2 bg-white/70 border-2 border-emerald-200 focus:border-teal-400 focus:bg-white transition-all duration-200"
-                onKeyDown={(e) => e.key === 'Enter' && handleEditProfile()}
+                onKeyDown={(e) => e.key === "Enter" && handleEditProfile()}
               />
             </div>
             <IconSelector
@@ -338,8 +373,8 @@ export default function ProfilesPage() {
             />
           </div>
           <DialogFooter className="bg-white/50 -m-6 mt-4 p-6 rounded-b-lg">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setIsEditDialogOpen(false);
                 setProfileName("");
@@ -350,8 +385,8 @@ export default function ProfilesPage() {
             >
               Cancel
             </Button>
-            <Button 
-              onClick={handleEditProfile} 
+            <Button
+              onClick={handleEditProfile}
               disabled={!profileName.trim()}
               className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-0"
             >
@@ -362,13 +397,17 @@ export default function ProfilesPage() {
       </Dialog>
 
       {/* Delete Profile Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Profile</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the profile "{deletingProfile?.name}"? 
-              This will permanently remove all progress, completed tutorials, and saved code for this profile.
+              Are you sure you want to delete the profile "
+              {deletingProfile?.name}"? This will permanently remove all
+              progress, completed tutorials, and saved code for this profile.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

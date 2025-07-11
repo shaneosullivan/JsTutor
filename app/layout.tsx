@@ -260,9 +260,7 @@ export default function RootLayout({
           <TooltipProvider>
             <Toaster />
             <VersionChecker />
-            <ProfileEnsurer>
-              {children}
-            </ProfileEnsurer>
+            <ProfileEnsurer>{children}</ProfileEnsurer>
           </TooltipProvider>
         </ClientProvider>
       </body>

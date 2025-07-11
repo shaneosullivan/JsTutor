@@ -26,9 +26,9 @@ import {
 import GithubIcon from "@/components/GithubIcon";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import Analytics from "@/components/Analytics";
-import { 
+import {
   getCompletedCourses as getCompletedCoursesFromStorage,
-  setProfileItem
+  setProfileItem,
 } from "@/lib/profile-storage";
 
 interface Course {
@@ -121,7 +121,7 @@ export default function CourseSelection() {
                 Manage Profiles
               </Button>
             </Link>
-            
+
             <div className="flex items-center space-x-3">
               <a
                 href="https://github.com/shaneosullivan/JsTutor"
@@ -132,7 +132,7 @@ export default function CourseSelection() {
               >
                 <GithubIcon size={20} />
               </a>
-              
+
               <ProfileAvatar size={32} />
             </div>
           </div>
@@ -189,10 +189,7 @@ export default function CourseSelection() {
                       href={course.id === 1 ? "/" : `/course/${course.id}`}
                       onClick={() => {
                         if (typeof window !== "undefined") {
-                          setProfileItem(
-                            "lastCourseId",
-                            course.id.toString(),
-                          );
+                          setProfileItem("lastCourseId", course.id.toString());
                         }
                       }}
                     >
