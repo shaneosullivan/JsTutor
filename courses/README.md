@@ -7,7 +7,8 @@ This folder contains the course and tutorial content in a structured, editable f
 ```
 courses/
 ├── 1 - Basics/                    # Course folder (ID - Name)
-│   ├── course.json                # Course metadata
+│   ├── en.json                    # Course metadata (English)
+│   ├── es.json                    # Course metadata (Spanish) - optional
 │   ├── 1/                         # Tutorial folder (tutorial ID)
 │   │   ├── en.md                  # Tutorial content in English
 │   │   └── code/                  # Starter code folder
@@ -18,23 +19,36 @@ courses/
 │   │       └── en.md
 │   └── ...
 ├── 2 - Array Methods/
-│   ├── course.json
+│   ├── en.json                    # Course metadata (English)
 │   ├── 16/
 │   │   ├── en.md
-│   │   └── code.md
+│   │   └── code/
+│   │       └── en.md
 │   └── ...
 └── README.md                      # This file
 ```
 
 ## File Formats
 
-### course.json
-Contains course metadata:
+### en.json (Course Metadata)
+Contains course metadata in English:
 ```json
 {
   "id": 1,
   "title": "Basics",
   "description": "Learn the fundamentals of JavaScript programming with visual drawing",
+  "type": "canvas",
+  "order": 1,
+  "requiredCourse": null
+}
+```
+
+For additional languages, create `es.json`, `fr.json`, etc. with the same structure but translated text:
+```json
+{
+  "id": 1,
+  "title": "Básicos",
+  "description": "Aprende los fundamentos de la programación JavaScript con dibujo visual",
   "type": "canvas",
   "order": 1,
   "requiredCourse": null
@@ -78,13 +92,14 @@ The structure supports multiple languages:
 ### Multiple Languages
 - Content: `en.md`, `es.md`, `fr.md`, etc.
 - Code: `code/en.md`, `code/es.md`, `code/fr.md`, etc.
-- Courses: Single `course.json` with localized text objects
+- Courses: Multiple locale files (`en.json`, `es.json`, etc.) per course
 
-### Course JSON with Localization
+### Generated Course Structure
+The build process automatically combines all locale files into a single structure:
 ```json
 {
   "id": 1,
-  "type": "canvas",
+  "type": "canvas", 
   "order": 1,
   "requiredCourse": null,
   "text": {
@@ -93,12 +108,14 @@ The structure supports multiple languages:
       "description": "Learn the fundamentals of JavaScript programming with visual drawing"
     },
     "es": {
-      "title": "Básicos",
+      "title": "Básicos", 
       "description": "Aprende los fundamentos de la programación JavaScript con dibujo visual"
     }
   }
 }
 ```
+
+This structure is created by reading all `.json` files in each course folder (e.g., `en.json`, `es.json`) and merging them into the `text` object with locale keys.
 
 ### Generated Data Structure
 The build process creates a clean, localized data structure:

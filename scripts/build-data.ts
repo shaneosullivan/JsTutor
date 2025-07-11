@@ -8,6 +8,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { LOCALES } from "../lib/locales.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -82,6 +83,47 @@ function extractCodeFromMarkdown(content: string): string {
   return match ? match[1] : "";
 }
 
+function ensureLocaleFilesExist(
+  coursePath: string,
+  courseFolder: string,
+): void {
+  // Get the base course data from en.json (should always exist)
+  const enJsonPath = path.join(coursePath, "en.json");
+  if (!fs.existsSync(enJsonPath)) {
+    console.warn(
+      `Warning: ${courseFolder} missing en.json - skipping locale file creation`,
+    );
+    return;
+  }
+
+  const baseCourseData = JSON.parse(fs.readFileSync(enJsonPath, "utf-8"));
+
+  // Ensure all locale files exist
+  for (const locale of LOCALES) {
+    const localeFilePath = path.join(coursePath, `${locale}.json`);
+
+    if (!fs.existsSync(localeFilePath)) {
+      if (locale === "en") {
+        // en.json should always exist, but if not, create it with base structure
+        fs.writeFileSync(
+          localeFilePath,
+          JSON.stringify(baseCourseData, null, 2),
+        );
+        console.log(`Created missing en.json for ${courseFolder}`);
+      } else {
+        // Copy en.json content for missing locale files (will be localized separately)
+        fs.writeFileSync(
+          localeFilePath,
+          JSON.stringify(baseCourseData, null, 2),
+        );
+        console.log(
+          `Created ${locale}.json by copying en.json for ${courseFolder}`,
+        );
+      }
+    }
+  }
+}
+
 function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
   const courses: Course[] = [];
   const tutorials: Tutorial[] = [];
@@ -98,28 +140,49 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
 
   for (const courseFolder of courseFolders) {
     const coursePath = path.join(COURSES_DIR, courseFolder);
-    const courseJsonPath = path.join(coursePath, "course.json");
 
-    if (!fs.existsSync(courseJsonPath)) {
-      console.warn(`Skipping ${courseFolder}: no course.json found`);
+    // Ensure all locale files exist for this course
+    ensureLocaleFilesExist(coursePath, courseFolder);
+
+    // Find all JSON files (locale files) in the course folder
+    const jsonFiles = fs
+      .readdirSync(coursePath)
+      .filter((file) => file.endsWith(".json") && file !== "package.json")
+      .sort();
+
+    if (jsonFiles.length === 0) {
+      console.warn(`Skipping ${courseFolder}: no locale JSON files found`);
       continue;
     }
 
-    // Read course data
-    const courseJsonData = JSON.parse(fs.readFileSync(courseJsonPath, "utf-8"));
+    // Read the English JSON file to get the base course structure (en.json should always have complete data)
+    const enJsonPath = path.join(coursePath, "en.json");
+    const baseCourseData = JSON.parse(fs.readFileSync(enJsonPath, "utf-8"));
+
+    // Build the text object with all locales
+    const text: Record<string, LocalizedText> = {};
+
+    for (const jsonFile of jsonFiles) {
+      const locale = path.basename(jsonFile, ".json"); // e.g., "en" from "en.json"
+      const jsonPath = path.join(coursePath, jsonFile);
+      const courseJsonData = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+
+      // Only add locale to text if it has title and description (not empty)
+      if (courseJsonData.title && courseJsonData.description) {
+        text[locale] = {
+          title: courseJsonData.title,
+          description: courseJsonData.description,
+        };
+      }
+    }
 
     // Convert to localized structure
     const courseData: Course = {
-      id: courseJsonData.id,
-      text: {
-        en: {
-          title: courseJsonData.title,
-          description: courseJsonData.description,
-        },
-      },
-      type: courseJsonData.type,
-      order: courseJsonData.order,
-      requiredCourse: courseJsonData.requiredCourse,
+      id: baseCourseData.id,
+      text,
+      type: baseCourseData.type,
+      order: baseCourseData.order,
+      requiredCourse: baseCourseData.requiredCourse,
     };
 
     courses.push(courseData);
