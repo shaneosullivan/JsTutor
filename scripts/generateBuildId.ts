@@ -24,20 +24,25 @@ writeFileSync(publicBuildIdPath, JSON.stringify({ BUILD_ID }), "utf8");
 
 // Check for the existence of the FIREBASE_KEY environment variable
 // If it exists, write it to to the config/firebase.json file
+const FIREBASE_CONFIG_PATH = join(process.cwd(), "config", "firebase.json");
 if (process.env.FIREBASE_KEY) {
-  const firebaseConfigPath = join(process.cwd(), "config", "firebase.json");
+  console.log(
+    "===> FIREBASE_KEY environment variable found. Writing to firebase.json..."
+  );
   const firebaseConfigContent = JSON.stringify(
     { FIREBASE_KEY: process.env.FIREBASE_KEY },
     null,
-    2,
+    2
   );
 
-  writeFileSync(firebaseConfigPath, firebaseConfigContent, "utf8");
+  writeFileSync(FIREBASE_CONFIG_PATH, firebaseConfigContent, "utf8");
 } else if (existsSync(join(process.cwd(), "firebase.json"))) {
   // In development
-  cpSync(
-    join(process.cwd(), "firebase.json"),
-    join(process.cwd(), "config", "firebase.json"),
-    { force: true },
+  cpSync(join(process.cwd(), "firebase.json"), FIREBASE_CONFIG_PATH, {
+    force: true,
+  });
+} else {
+  console.error(
+    "No FIREBASE_KEY environment variable found and firebase.json does not exist in the project root."
   );
 }
