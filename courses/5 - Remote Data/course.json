@@ -1,0 +1,8 @@
+{
+  "id": 5,
+  "title": "Remote Data",
+  "description": "Work with APIs and fetch data from servers",
+  "type": "printData",
+  "order": 5,
+  "requiredCourse": 1
+}

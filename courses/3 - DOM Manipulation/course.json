@@ -1,0 +1,8 @@
+{
+  "id": 3,
+  "title": "DOM Manipulation",
+  "description": "Learn to interact with web pages and HTML elements",
+  "type": "iframe",
+  "order": 3,
+  "requiredCourse": 1
+}

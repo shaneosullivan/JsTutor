@@ -1,0 +1,8 @@
+{
+  "id": 4,
+  "title": "Algorithms",
+  "description": "Explore problem-solving with recursion and algorithmic thinking",
+  "type": "printData",
+  "order": 4,
+  "requiredCourse": 1
+}

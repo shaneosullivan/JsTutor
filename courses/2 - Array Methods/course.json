@@ -1,0 +1,8 @@
+{
+  "id": 2,
+  "title": "Array Methods",
+  "description": "Master array manipulation with forEach, map, filter, and more",
+  "type": "printData",
+  "order": 2,
+  "requiredCourse": 1
+}

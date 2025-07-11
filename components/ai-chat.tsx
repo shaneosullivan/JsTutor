@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bot, User, Send, X, Loader2 } from "lucide-react";
 import ApiKeySetup from "@/components/api-key-setup";
@@ -292,7 +291,9 @@ export default function AiChat({
   return (
     <div className="h-full flex flex-col max-h-full">
       {/* Header */}
-      <div className={`flex-shrink-0 p-4 border-b bg-white keyboard-responsive-header ${isKeyboardVisible ? "keyboard-hidden" : ""}`}>
+      <div
+        className={`flex-shrink-0 p-4 border-b bg-white keyboard-responsive-header ${isKeyboardVisible ? "keyboard-hidden" : ""}`}
+      >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bot className="w-5 h-5 text-blue-500" />
@@ -395,7 +396,9 @@ export default function AiChat({
           </Button>
         </div>
 
-        <p className={`text-xs text-gray-500 text-center keyboard-responsive-header ${isKeyboardVisible ? "keyboard-hidden" : ""}`}>
+        <p
+          className={`text-xs text-gray-500 text-center keyboard-responsive-header ${isKeyboardVisible ? "keyboard-hidden" : ""}`}
+        >
           I'm here to help explain bugs and suggest next steps. I won't write
           code for you - that's the fun part!
         </p>

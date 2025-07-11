@@ -1,0 +1,8 @@
+{
+  "id": 1,
+  "title": "Basics",
+  "description": "Learn the fundamentals of JavaScript programming with visual drawing",
+  "type": "canvas",
+  "order": 1,
+  "requiredCourse": null
+}
