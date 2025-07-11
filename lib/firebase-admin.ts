@@ -12,7 +12,7 @@ try {
       process.cwd(),
       // "..",
       "config",
-      "firebase.json",
+      "firebase.json"
     );
 
     if (fs.existsSync(configPath)) {
@@ -23,20 +23,20 @@ try {
       // Check if it's a valid config (has required fields)
       if (!serviceAccount.private_key || !serviceAccount.client_email) {
         console.warn(
-          "Firebase config found but incomplete. Firebase sync will be disabled.",
+          "Firebase config found but incomplete. Firebase sync will be disabled."
         );
         serviceAccount = null;
       }
     } else {
       console.warn(
         "Firebase service account config file not found. Firebase sync will be disabled.",
-        configPath,
+        configPath
       );
     }
   }
 } catch (error) {
   console.warn(
-    "Firebase service account config not found. Firebase sync will be disabled.",
+    "Firebase service account config not found. Firebase sync will be disabled."
   );
 }
 
@@ -83,11 +83,11 @@ export interface FirestoreAccountData {
 export async function saveAccountData(
   accountId: string,
   email: string,
-  data: any,
+  data: any
 ): Promise<void> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -109,11 +109,11 @@ export async function saveAccountData(
 
 // Get account data from Firestore
 export async function getAccountData(
-  accountId: string,
+  accountId: string
 ): Promise<FirestoreAccountData | null> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -131,11 +131,11 @@ export async function getAccountData(
 // Check if remote data is newer than local timestamp
 export async function isRemoteDataNewer(
   accountId: string,
-  localTimestamp: string,
+  localTimestamp: string
 ): Promise<boolean> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -153,11 +153,11 @@ export async function isRemoteDataNewer(
 
 // Find account by email address
 export async function findAccountByEmail(
-  email: string,
+  email: string
 ): Promise<string | null> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -181,5 +181,91 @@ export async function findAccountByEmail(
   } catch (error) {
     console.warn("Error searching for account by email:", error);
     return null;
+  }
+}
+
+// Create or get existing account atomically by email
+export async function createOrGetAccountByEmail(
+  email: string
+): Promise<{
+  accountId: string;
+  isNewAccount: boolean;
+  accountData: FirestoreAccountData;
+}> {
+  if (!serviceAccount) {
+    throw new Error(
+      "Firebase is not configured. Please add Firebase service account configuration."
+    );
+  }
+
+  const firestore = getFirestoreDb();
+
+  try {
+    // First, search for existing account by email
+    const query = firestore
+      .collection("accounts")
+      .where("email", "==", email)
+      .limit(1);
+
+    const snapshot = await query.get();
+
+    if (!snapshot.empty) {
+      // Found existing account
+      const existingDoc = snapshot.docs[0];
+      const existingData = existingDoc.data() as FirestoreAccountData;
+
+      return {
+        accountId: existingData.accountId,
+        isNewAccount: false,
+        accountData: existingData,
+      };
+    }
+
+    console.log(
+      "No existing account found, creating new one for email:",
+      email
+    );
+    // No existing account found, create new one
+    const newAccountId = `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    const now = new Date().toISOString();
+
+    const initialAccountData = {
+      tables: {
+        profiles: {},
+        accounts: {
+          [newAccountId]: {
+            id: newAccountId,
+            email: email,
+            provider: "google",
+            createdAt: now,
+            lastSignIn: now,
+          },
+        },
+      },
+      values: {
+        activeAccountId: newAccountId,
+      },
+    };
+
+    const accountData: FirestoreAccountData = {
+      accountId: newAccountId,
+      email: email,
+      data: initialAccountData,
+      lastUpdated: now,
+      version: Date.now(),
+    };
+
+    // Create account document
+    const accountRef = firestore.collection("accounts").doc(newAccountId);
+    await accountRef.set(accountData);
+
+    return {
+      accountId: newAccountId,
+      isNewAccount: true,
+      accountData: accountData,
+    };
+  } catch (error) {
+    console.error("Error in createOrGetAccountByEmail:", error);
+    throw error;
   }
 }

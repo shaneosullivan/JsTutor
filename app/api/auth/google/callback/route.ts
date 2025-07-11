@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { saveAccountData, findAccountByEmail } from "@/lib/firebase-admin";
+import { createOrGetAccountByEmail } from "@/lib/firebase-admin";
 
 // Handle Google OAuth callback
 export async function POST(request: NextRequest) {
@@ -27,57 +27,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Look for existing account in Firebase by email
+    // Atomically create or get existing account by email
     let accountId: string;
     let isNewAccount = false;
 
     try {
-      // Search for existing account by email in Firebase
-      const existingAccountId = await findAccountByEmail(email);
-
-      if (existingAccountId) {
-        accountId = existingAccountId;
-        console.log(
-          "Found existing account for email:",
-          email,
-          "ID:",
-          accountId,
-        );
-      } else {
-        // Create new account ID
-        accountId = `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-        isNewAccount = true;
-        console.log("Creating new account for email:", email, "ID:", accountId);
-
-        // Create minimal account data in Firebase to establish the account
-        const initialAccountData = {
-          tables: {
-            profiles: {},
-            accounts: {
-              [accountId]: {
-                id: accountId,
-                email: email,
-                provider: "google",
-                createdAt: new Date().toISOString(),
-                lastSignIn: new Date().toISOString(),
-              },
-            },
-          },
-          values: {
-            activeAccountId: accountId,
-          },
-        };
-
-        await saveAccountData(accountId, email, initialAccountData);
-      }
-    } catch (error) {
-      console.warn(
-        "Failed to check Firebase for existing account, creating new one:",
-        error,
+      const result = await createOrGetAccountByEmail(email);
+      accountId = result.accountId;
+      isNewAccount = result.isNewAccount;
+      
+      console.log(
+        isNewAccount ? "Created new account for email:" : "Found existing account for email:",
+        email,
+        "ID:",
+        accountId,
       );
-      // If Firebase check fails, create new account ID
-      accountId = `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-      isNewAccount = true;
+    } catch (error) {
+      console.error("Failed to create or get account:", error);
+      return NextResponse.json(
+        { error: "Failed to create or retrieve account" },
+        { status: 500 },
+      );
     }
 
     // Return account information to be stored in localStorage
