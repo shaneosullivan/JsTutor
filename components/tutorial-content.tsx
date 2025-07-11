@@ -232,6 +232,7 @@ export default function TutorialContent({
                     onClose={() => setShowAiChat(false)}
                     isVisible={showAiChat}
                     canvasError={canvasError}
+                    isKeyboardVisible={keyboard.isVisible}
                   />
                 </div>
 
