@@ -45,12 +45,19 @@ export default function TutorialContent({
     line?: number;
   } | null>(null);
 
-  // Auto-show help dialog when tutorial changes
+  // Auto-show help dialog when tutorial changes (only on first view)
   useEffect(() => {
     setOutput([]);
     setCanvasError(null);
-    setShowHelp(true); // Show help dialog when moving to a new tutorial
     setShowAiChat(false); // Reset AI chat visibility when tutorial changes
+    
+    // Check if this is the first time viewing this tutorial by looking for saved code
+    const savedCode = localStorage.getItem(`userCode_tutorial_${tutorial.id}`);
+    const isFirstTimeView = !savedCode;
+    
+    if (isFirstTimeView) {
+      setShowHelp(true);
+    }
   }, [tutorial.id]);
 
   const handleComplete = () => {
