@@ -230,13 +230,18 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
         },
       };
 
+      // Generate a unique global ID for the tutorial
+      // We'll use a simple scheme: courseId * 100 + tutorialOrder
+      const tutorialOrder = frontmatter.order || parseInt(tutorialFolder);
+      const globalId = courseData.id * 100 + tutorialOrder;
+
       const tutorial: Tutorial = {
-        id: frontmatter.id || parseInt(tutorialFolder),
+        id: globalId,
         courseId: frontmatter.courseId || courseData.id,
         text: tutorialText,
         starterCode:
           Object.keys(starterCode).length > 0 ? starterCode : undefined,
-        order: frontmatter.order || parseInt(tutorialFolder),
+        order: tutorialOrder,
       };
 
       tutorials.push(tutorial);
