@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "lsof -ti:3020 | xargs kill -9 && PORT=3020 next dev",
-    "build": "bun scripts/build-data.ts && bun scripts/generateBuildId.ts && next build",
+    "build": "scripts/cleanBuild.sh && bun scripts/build-data.ts && bun scripts/generateBuildId.ts && next build",
     "start": "next start",
     "check": "tsc",
     "generate-icons": "tsx scripts/generate-icons.ts",
