@@ -27,15 +27,11 @@ writeFileSync(publicBuildIdPath, JSON.stringify({ BUILD_ID }), "utf8");
 const FIREBASE_CONFIG_PATH = join(process.cwd(), "config", "firebase.json");
 if (process.env.FIREBASE_KEY) {
   console.log(
-    "===> FIREBASE_KEY environment variable found. Writing to firebase.json..."
-  );
-  const firebaseConfigContent = JSON.stringify(
-    { FIREBASE_KEY: process.env.FIREBASE_KEY },
-    null,
-    2
+    "===> FIREBASE_KEY environment variable found. Writing to " +
+      FIREBASE_CONFIG_PATH
   );
 
-  writeFileSync(FIREBASE_CONFIG_PATH, firebaseConfigContent, "utf8");
+  writeFileSync(FIREBASE_CONFIG_PATH, process.env.FIREBASE_KEY, "utf8");
 } else if (existsSync(join(process.cwd(), "firebase.json"))) {
   // In development
   cpSync(join(process.cwd(), "firebase.json"), FIREBASE_CONFIG_PATH, {
