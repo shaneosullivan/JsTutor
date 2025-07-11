@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BUILD_ID } from "@/config/buildId";
+import { syncIfNewer } from "@/lib/profile-storage";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,17 @@ import { RefreshCw, Sparkles } from "lucide-react";
 export default function VersionChecker() {
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const checkForDataUpdates = async () => {
+    try {
+      const wasSynced = await syncIfNewer();
+      if (wasSynced) {
+        console.log("✅ Synced newer remote data on app focus");
+      }
+    } catch (error) {
+      console.log("Failed to check for data updates:", error);
+    }
+  };
 
   const checkForUpdates = async () => {
     try {
@@ -32,6 +44,9 @@ export default function VersionChecker() {
           BUILD_ID,
         );
         setShowUpdateDialog(true);
+      } else {
+        // No app update, check for data updates
+        await checkForDataUpdates();
       }
     } catch (error) {
       console.log("Failed to check for app updates:", error);

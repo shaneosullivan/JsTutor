@@ -58,7 +58,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   // Skip API routes from caching entirely
-  if (event.request.url.includes('/api/')) {
+  if (event.request.url.includes("/api/")) {
     return;
   }
 
@@ -70,7 +70,7 @@ self.addEventListener("fetch", (event) => {
         const responseClone = response.clone();
 
         // Cache successful GET responses only (POST requests cannot be cached)
-        if (response.status === 200 && event.request.method === 'GET') {
+        if (response.status === 200 && event.request.method === "GET") {
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseClone);
           });

@@ -252,6 +252,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(structuredData),
           }}
+          suppressHydrationWarning={true}
         />
       </head>
       <body className={inter.className}>

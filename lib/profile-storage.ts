@@ -55,6 +55,10 @@ if (typeof window !== "undefined") {
         }
 
         const result = await response.json();
+
+        // Update sync timestamp when we successfully load data
+        setLastSyncTimestamp(result.data.lastUpdated);
+
         return result.data.data; // Return the TinyBase store data
       } catch (error) {
         console.warn("Failed to load from Firebase:", error);
@@ -409,6 +413,88 @@ export function getFirebasePersister() {
 // Initialize Firebase sync for an account
 export async function initializeFirebaseSync(): Promise<void> {
   await initializeFirebasePersister();
+}
+
+// Get the last sync timestamp for the active account
+export function getLastSyncTimestamp(): string | null {
+  const activeAccount = getActiveAccount();
+  if (!activeAccount) {
+    return null;
+  }
+
+  // Store sync timestamp per account
+  const syncKey = `_lastSync_${activeAccount.id}`;
+  const timestamp = store.getValue(syncKey);
+  return timestamp ? String(timestamp) : null;
+}
+
+// Set the last sync timestamp for the active account
+export function setLastSyncTimestamp(timestamp: string): void {
+  const activeAccount = getActiveAccount();
+  if (!activeAccount) {
+    return;
+  }
+
+  const syncKey = `_lastSync_${activeAccount.id}`;
+  store.setValue(syncKey, timestamp);
+}
+
+// Check if remote data is newer without downloading it
+export async function isRemoteDataNewer(): Promise<boolean> {
+  const activeAccount = getActiveAccount();
+  if (!activeAccount) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/sync/timestamp?accountId=${activeAccount.id}`,
+    );
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return false; // No remote data
+      }
+      throw new Error(
+        `Failed to check remote timestamp: ${response.statusText}`,
+      );
+    }
+
+    const remoteInfo = await response.json();
+    const remoteTimestamp = new Date(remoteInfo.lastUpdated).getTime();
+
+    const localTimestamp = getLastSyncTimestamp();
+    const localTime = localTimestamp ? new Date(localTimestamp).getTime() : 0;
+
+    return remoteTimestamp > localTime;
+  } catch (error) {
+    console.warn("Failed to check if remote data is newer:", error);
+    return false;
+  }
+}
+
+// Sync from remote if newer data is available
+export async function syncIfNewer(): Promise<boolean> {
+  const activeAccount = getActiveAccount();
+  if (!activeAccount || !firebasePersister) {
+    return false;
+  }
+
+  try {
+    const isNewer = await isRemoteDataNewer();
+    if (isNewer) {
+      console.log("Remote data is newer, syncing...");
+      await firebasePersister.load();
+
+      // Update our local sync timestamp
+      setLastSyncTimestamp(new Date().toISOString());
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.warn("Failed to sync newer data:", error);
+    return false;
+  }
 }
 
 // Account management functions

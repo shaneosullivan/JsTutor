@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     if (!credential) {
       return NextResponse.json(
         { error: "Google credential is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     if (!email) {
       return NextResponse.json(
         { error: "Email not found in Google credential" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
           "Found existing account for email:",
           email,
           "ID:",
-          accountId
+          accountId,
         );
       } else {
         // Create new account ID
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.warn(
         "Failed to check Firebase for existing account, creating new one:",
-        error
+        error,
       );
       // If Firebase check fails, create new account ID
       accountId = `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
     console.error("Error in Google OAuth callback:", error);
     return NextResponse.json(
       { error: "Failed to process Google authentication" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
