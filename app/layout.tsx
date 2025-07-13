@@ -7,6 +7,7 @@ import ClientProvider from "@/components/ClientProvider";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import VersionChecker from "@/components/VersionChecker";
 import ProfileEnsurer from "@/components/ProfileEnsurer";
+import { BrowserCompatibilityErrorBoundary } from "@/components/BrowserCompatibilityErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -256,14 +257,16 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ServiceWorkerRegistration />
-        <ClientProvider>
-          <TooltipProvider>
-            <Toaster />
-            <VersionChecker />
-            <ProfileEnsurer>{children}</ProfileEnsurer>
-          </TooltipProvider>
-        </ClientProvider>
+        <BrowserCompatibilityErrorBoundary>
+          <ServiceWorkerRegistration />
+          <ClientProvider>
+            <TooltipProvider>
+              <Toaster />
+              <VersionChecker />
+              <ProfileEnsurer>{children}</ProfileEnsurer>
+            </TooltipProvider>
+          </ClientProvider>
+        </BrowserCompatibilityErrorBoundary>
       </body>
     </html>
   );
