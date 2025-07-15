@@ -1,0 +1,8 @@
+{
+  "id": 6,
+  "title": "Modern JavaScript",
+  "description": "Learn the newest and coolest features of JavaScript that make coding easier and more fun!",
+  "type": "printData",
+  "order": 6,
+  "requiredCourse": 1
+}

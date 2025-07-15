@@ -1,0 +1,8 @@
+{
+  "id": 7,
+  "title": "TypeScript",
+  "description": "Learn TypeScript - JavaScript with superpowers! Find bugs before they happen and write safer code.",
+  "type": "printData",
+  "order": 7,
+  "requiredCourse": 6
+}
