@@ -206,20 +206,23 @@ export default function GoogleSignIn({
       const { getStore } = require("@/lib/profile-storage");
       const store = getStore();
       store.delValue("activeAccountId");
-      
+
       // Force save to localStorage
       const { getPersister } = require("@/lib/profile-storage");
       const persister = getPersister();
       if (persister) {
         persister.save().catch((error: any) => {
-          console.warn("Failed to save sign-out changes to localStorage:", error);
+          console.warn(
+            "Failed to save sign-out changes to localStorage:",
+            error,
+          );
         });
       }
     }
-    
+
     setAccount(null);
     onSignOut?.();
-    
+
     // Also disable Google auto-select
     if (window.google?.accounts) {
       window.google.accounts.id.disableAutoSelect();

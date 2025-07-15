@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { 
-  getProfilesByAccountId, 
+import {
+  getProfilesByAccountId,
   getProfileById,
-  createProfile, 
+  createProfile,
   updateProfile,
-  deleteProfile
+  deleteProfile,
 } from "@/lib/firebase-admin";
 import { UserProfile } from "@/lib/types";
 
@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
       // Get specific profile
       const profile = await getProfileById(profileId);
       if (!profile) {
-        return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+        return NextResponse.json(
+          { error: "Profile not found" },
+          { status: 404 },
+        );
       }
       return NextResponse.json({
         success: true,
@@ -35,14 +38,14 @@ export async function GET(request: NextRequest) {
     } else {
       return NextResponse.json(
         { error: "Either accountId or profileId is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
   } catch (error) {
     console.error("Error retrieving profiles:", error);
     return NextResponse.json(
       { error: "Failed to retrieve profiles" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
     if (!profile.id || !profile.accountId || !profile.name) {
       return NextResponse.json(
         { error: "Profile ID, account ID, and name are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -71,7 +74,7 @@ export async function POST(request: NextRequest) {
     console.error("Error creating profile:", error);
     return NextResponse.json(
       { error: "Failed to create profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -85,7 +88,7 @@ export async function PUT(request: NextRequest) {
     if (!profile.id || !profile.accountId || !profile.name) {
       return NextResponse.json(
         { error: "Profile ID, account ID, and name are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -100,7 +103,7 @@ export async function PUT(request: NextRequest) {
     console.error("Error updating profile:", error);
     return NextResponse.json(
       { error: "Failed to update profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -114,7 +117,7 @@ export async function DELETE(request: NextRequest) {
     if (!profileId) {
       return NextResponse.json(
         { error: "Profile ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -128,7 +131,7 @@ export async function DELETE(request: NextRequest) {
     console.error("Error deleting profile:", error);
     return NextResponse.json(
       { error: "Failed to delete profile" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

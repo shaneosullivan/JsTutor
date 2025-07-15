@@ -3,7 +3,12 @@ import { createStore } from "tinybase";
 import { createLocalPersister } from "tinybase/persisters/persister-browser";
 import { createCustomPersister } from "tinybase/persisters";
 import type { Changes, Store } from "tinybase";
-import { AccountData, UserProfile, CourseProgress, TutorialCode } from "@/lib/types";
+import {
+  AccountData,
+  UserProfile,
+  CourseProgress,
+  TutorialCode,
+} from "@/lib/types";
 import {
   getAccountFromStorage,
   saveAccountToStorage,
@@ -48,14 +53,18 @@ if (typeof window !== "undefined") {
 
       try {
         // Load account data
-        const accountResponse = await fetch(`/api/accounts?accountId=${activeAccount.id}`);
+        const accountResponse = await fetch(
+          `/api/accounts?accountId=${activeAccount.id}`,
+        );
         if (accountResponse.ok) {
           const accountResult = await accountResponse.json();
           saveAccountToStorage(accountResult.data);
         }
 
         // Load profiles
-        const profilesResponse = await fetch(`/api/profiles?accountId=${activeAccount.id}`);
+        const profilesResponse = await fetch(
+          `/api/profiles?accountId=${activeAccount.id}`,
+        );
         if (profilesResponse.ok) {
           const profilesResult = await profilesResponse.json();
           profilesResult.data.forEach((profile: UserProfile) => {
@@ -67,7 +76,7 @@ if (typeof window !== "undefined") {
         const activeProfile = getActiveProfile();
         if (activeProfile) {
           const progressResponse = await fetch(
-            `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}`
+            `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}`,
           );
           if (progressResponse.ok) {
             const progressResult = await progressResponse.json();
@@ -99,7 +108,7 @@ if (typeof window !== "undefined") {
       throttledSync(activeAccount, activeProfile);
     },
     () => null, // addPersisterListener
-    () => {} // delPersisterListener
+    () => {}, // delPersisterListener
   );
 
   // Start persistence
@@ -118,7 +127,6 @@ if (typeof window !== "undefined") {
   ensureDefaultProfile();
 }
 
-
 // Throttle sync to avoid too many API calls
 let syncTimeout: NodeJS.Timeout | null = null;
 let pendingChanges = new Set<string>();
@@ -128,7 +136,7 @@ function throttledSync(activeAccount: Account, activeProfile: UserProfile) {
   if (syncTimeout) {
     clearTimeout(syncTimeout);
   }
-  
+
   // Set new timeout to batch changes
   syncTimeout = setTimeout(async () => {
     try {
@@ -147,23 +155,29 @@ let lastSyncedState = {
   tutorialCode: {} as Record<string, any>,
 };
 
-async function processPendingChanges(activeAccount: Account, activeProfile: UserProfile) {
+async function processPendingChanges(
+  activeAccount: Account,
+  activeProfile: UserProfile,
+) {
   // Get current state
   const currentProfiles = store.getTable("profiles");
   const currentAccounts = store.getTable("accounts");
   const currentValues = store.getValues();
-  
+
   // Sync profiles - only sync the currently active profile (since only it can change)
   const activeProfileData = currentProfiles[activeProfile.id];
   const lastActiveProfile = lastSyncedState.profiles[activeProfile.id];
-  
-  if (activeProfileData && JSON.stringify(activeProfileData) !== JSON.stringify(lastActiveProfile)) {
+
+  if (
+    activeProfileData &&
+    JSON.stringify(activeProfileData) !== JSON.stringify(lastActiveProfile)
+  ) {
     const profile = activeProfileData as unknown as UserProfile;
     const profileWithAccount: UserProfile = {
       ...profile,
       accountId: activeAccount.id,
     };
-    
+
     try {
       await fetch("/api/profiles", {
         method: "PUT",
@@ -180,8 +194,11 @@ async function processPendingChanges(activeAccount: Account, activeProfile: User
   // Sync accounts - only sync the currently active account (since only it can change)
   const currentAccountData = currentAccounts[activeAccount.id];
   const lastAccountData = lastSyncedState.accounts[activeAccount.id];
-  
-  if (currentAccountData && JSON.stringify(currentAccountData) !== JSON.stringify(lastAccountData)) {
+
+  if (
+    currentAccountData &&
+    JSON.stringify(currentAccountData) !== JSON.stringify(lastAccountData)
+  ) {
     const account = currentAccountData as unknown as Account;
     const accountForApi: AccountData = {
       id: account.id,
@@ -189,7 +206,7 @@ async function processPendingChanges(activeAccount: Account, activeProfile: User
       lastUpdated: new Date().toISOString(),
       version: Date.now(),
     };
-    
+
     try {
       await fetch("/api/accounts", {
         method: "PUT",
@@ -205,22 +222,25 @@ async function processPendingChanges(activeAccount: Account, activeProfile: User
 
   // Sync tutorial code - only for the active profile (since only it can have changes)
   const currentTutorialCode = store.getTable("tutorialCode");
-  const activeProfileTutorialCode = Object.entries(currentTutorialCode)
-    .filter(([_, tutorialData]) => {
+  const activeProfileTutorialCode = Object.entries(currentTutorialCode).filter(
+    ([_, tutorialData]) => {
       const tutorial = tutorialData as unknown as TutorialCode;
       return tutorial.profileId === activeProfile.id;
-    });
-  
-  // Check if any tutorial code changed for the active profile
-  const changedTutorialCode = activeProfileTutorialCode.filter(([tutorialId, tutorialData]) => 
-    JSON.stringify(tutorialData) !== JSON.stringify(lastSyncedState.tutorialCode[tutorialId])
+    },
   );
-  
+
+  // Check if any tutorial code changed for the active profile
+  const changedTutorialCode = activeProfileTutorialCode.filter(
+    ([tutorialId, tutorialData]) =>
+      JSON.stringify(tutorialData) !==
+      JSON.stringify(lastSyncedState.tutorialCode[tutorialId]),
+  );
+
   if (changedTutorialCode.length > 0) {
     try {
       // Group changed tutorial code by course and sync only affected courses
       const courseGroups = new Map<number, TutorialCode[]>();
-      
+
       changedTutorialCode.forEach(([_, tutorialData]) => {
         const tutorial = tutorialData as unknown as TutorialCode;
         if (!courseGroups.has(tutorial.courseId)) {
@@ -228,37 +248,45 @@ async function processPendingChanges(activeAccount: Account, activeProfile: User
         }
         courseGroups.get(tutorial.courseId)!.push(tutorial);
       });
-      
+
       // Sync each affected course's tutorial code for the active profile
       for (const [courseId, tutorials] of courseGroups) {
-        await syncTutorialCodeForCourse(activeAccount.id, activeProfile.id, courseId, tutorials);
+        await syncTutorialCodeForCourse(
+          activeAccount.id,
+          activeProfile.id,
+          courseId,
+          tutorials,
+        );
       }
-      
+
       // Update last synced state for changed tutorial code
       changedTutorialCode.forEach(([tutorialId, tutorialData]) => {
-        lastSyncedState.tutorialCode[tutorialId] = JSON.parse(JSON.stringify(tutorialData));
+        lastSyncedState.tutorialCode[tutorialId] = JSON.parse(
+          JSON.stringify(tutorialData),
+        );
       });
     } catch (error) {
       console.warn("Failed to sync tutorial code for active profile:", error);
     }
   }
-  
+
   // Sync other course progress values (completed courses, current tutorial, etc.)
   const activeProfilePrefix = `${activeProfile.id}_`;
-  const relevantValues = Object.entries(currentValues).filter(([key]) => 
-    key.startsWith(activeProfilePrefix)
+  const relevantValues = Object.entries(currentValues).filter(([key]) =>
+    key.startsWith(activeProfilePrefix),
   );
-  
+
   // Check if any course progress values changed for the active profile
-  const changedValues = relevantValues.filter(([key, value]) => 
-    JSON.stringify(value) !== JSON.stringify(lastSyncedState.values[key])
+  const changedValues = relevantValues.filter(
+    ([key, value]) =>
+      JSON.stringify(value) !== JSON.stringify(lastSyncedState.values[key]),
   );
-  
+
   if (changedValues.length > 0) {
     try {
       // Group changed values by course and sync only affected courses
       const courseGroups = new Map<string, Record<string, any>>();
-      
+
       changedValues.forEach(([key, value]) => {
         const courseId = extractCourseId(key);
         if (courseId) {
@@ -269,12 +297,17 @@ async function processPendingChanges(activeAccount: Account, activeProfile: User
           courseGroups.get(courseId)![cleanKey] = value;
         }
       });
-      
+
       // Sync each affected course's progress for the active profile
       for (const [courseId, courseData] of courseGroups) {
-        await syncCourseProgressForCourse(activeAccount.id, activeProfile.id, courseId, courseData);
+        await syncCourseProgressForCourse(
+          activeAccount.id,
+          activeProfile.id,
+          courseId,
+          courseData,
+        );
       }
-      
+
       // Update last synced state for changed values
       changedValues.forEach(([key, value]) => {
         lastSyncedState.values[key] = JSON.parse(JSON.stringify(value));
@@ -283,7 +316,7 @@ async function processPendingChanges(activeAccount: Account, activeProfile: User
       console.warn("Failed to sync course progress for active profile:", error);
     }
   }
-  
+
   // Clear pending changes
   pendingChanges.clear();
 }
@@ -307,12 +340,13 @@ async function syncTutorialCodeForCourse(
   accountId: string,
   profileId: string,
   courseId: number,
-  tutorials: TutorialCode[]
+  tutorials: TutorialCode[],
 ): Promise<void> {
   // Get or create course progress
-  let courseProgress = getCourseProgressByAccountAndProfileFromStorage(accountId, profileId).find(
-    cp => cp.courseId === courseId.toString()
-  );
+  let courseProgress = getCourseProgressByAccountAndProfileFromStorage(
+    accountId,
+    profileId,
+  ).find((cp) => cp.courseId === courseId.toString());
 
   if (!courseProgress) {
     courseProgress = {
@@ -326,8 +360,8 @@ async function syncTutorialCodeForCourse(
 
   // Build tutorial code object from the TutorialCode table data
   const tutorialCode: Record<string, any> = { ...courseProgress.tutorialCode };
-  
-  tutorials.forEach(tutorial => {
+
+  tutorials.forEach((tutorial) => {
     tutorialCode[tutorial.tutorialId.toString()] = {
       code: tutorial.code,
       completed: tutorial.completed,
@@ -354,12 +388,13 @@ async function syncCourseProgressForCourse(
   accountId: string,
   profileId: string,
   courseId: string,
-  courseData: Record<string, any>
+  courseData: Record<string, any>,
 ): Promise<void> {
   // Get or create course progress
-  let courseProgress = getCourseProgressByAccountAndProfileFromStorage(accountId, profileId).find(
-    cp => cp.courseId === courseId
-  );
+  let courseProgress = getCourseProgressByAccountAndProfileFromStorage(
+    accountId,
+    profileId,
+  ).find((cp) => cp.courseId === courseId);
 
   if (!courseProgress) {
     courseProgress = {
@@ -374,7 +409,9 @@ async function syncCourseProgressForCourse(
   // Handle completed tutorials from the legacy values
   Object.entries(courseData).forEach(([key, value]) => {
     if (key.startsWith("completedTutorials_course_")) {
-      const completedTutorials = Array.isArray(value) ? value : JSON.parse(value || "[]");
+      const completedTutorials = Array.isArray(value)
+        ? value
+        : JSON.parse(value || "[]");
       completedTutorials.forEach((tutorialId: number) => {
         if (!courseProgress!.tutorialCode[tutorialId.toString()]) {
           courseProgress!.tutorialCode[tutorialId.toString()] = {
@@ -384,7 +421,8 @@ async function syncCourseProgressForCourse(
           };
         }
         courseProgress!.tutorialCode[tutorialId.toString()].completed = true;
-        courseProgress!.tutorialCode[tutorialId.toString()].lastAccessed = new Date().toISOString();
+        courseProgress!.tutorialCode[tutorialId.toString()].lastAccessed =
+          new Date().toISOString();
       });
     }
   });
@@ -403,7 +441,9 @@ async function syncCourseProgressForCourse(
 }
 
 // Initialize Firebase persister
-async function initializeFirebasePersister(isNewAccount: boolean = false): Promise<void> {
+async function initializeFirebasePersister(
+  isNewAccount: boolean = false,
+): Promise<void> {
   if (typeof window === "undefined" || !firebasePersister) {
     return;
   }
@@ -455,7 +495,9 @@ function ensureDefaultProfile(): void {
 
 function getProfilesInternal(): UserProfile[] {
   const profilesTable = store.getTable("profiles");
-  return Object.values(profilesTable).map(row => row as unknown as UserProfile);
+  return Object.values(profilesTable).map(
+    (row) => row as unknown as UserProfile,
+  );
 }
 
 export function getAllProfiles(): UserProfile[] {
@@ -466,8 +508,12 @@ export function getAllProfiles(): UserProfile[] {
 export function getActiveProfile(): UserProfile {
   ensureDefaultProfile();
 
-  const activeProfileId = (store.getValue("activeProfileId") as string) || DEFAULT_PROFILE_ID;
-  const profile = store.getRow("profiles", activeProfileId) as unknown as UserProfile;
+  const activeProfileId =
+    (store.getValue("activeProfileId") as string) || DEFAULT_PROFILE_ID;
+  const profile = store.getRow(
+    "profiles",
+    activeProfileId,
+  ) as unknown as UserProfile;
 
   if (!profile) {
     const profiles = getAllProfiles();
@@ -494,10 +540,19 @@ export function setActiveProfile(profileId: string): boolean {
   store.setValue("activeProfileId", profileId);
 
   enableFirebaseAutoSave();
+
+  // Force the Firebase persister to sync
+  if (firebasePersister) {
+    firebasePersister.save?.();
+  }
+
   return true;
 }
 
-export function createProfile(name: string, icon: string = "short_brown"): UserProfile {
+export function createProfile(
+  name: string,
+  icon: string = "short_brown",
+): UserProfile {
   const activeAccount = getActiveAccount();
   const newProfile: UserProfile = {
     id: `profile_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
@@ -510,6 +565,12 @@ export function createProfile(name: string, icon: string = "short_brown"): UserP
 
   store.setRow("profiles", newProfile.id, newProfile as any);
   enableFirebaseAutoSave();
+
+  // Force the Firebase persister to sync
+  if (firebasePersister) {
+    firebasePersister.save?.();
+  }
+
   return newProfile;
 }
 
@@ -525,6 +586,12 @@ export function updateProfile(updatedProfile: UserProfile): boolean {
   };
   store.setRow("profiles", updatedProfile.id, profileWithTimestamp as any);
   enableFirebaseAutoSave();
+
+  // Force the Firebase persister to sync
+  if (firebasePersister) {
+    firebasePersister.save?.();
+  }
+
   return true;
 }
 
@@ -602,7 +669,10 @@ export function setProfileItemAsArray(key: string, value: any[]): void {
   setProfileItem(key, JSON.stringify(value));
 }
 
-export function getProfileItemAsObject(key: string, defaultValue: any = {}): any {
+export function getProfileItemAsObject(
+  key: string,
+  defaultValue: any = {},
+): any {
   try {
     const item = getProfileItem(key);
     return item ? JSON.parse(item) : defaultValue;
@@ -616,13 +686,15 @@ export function setProfileItemAsObject(key: string, value: any): void {
   setProfileItem(key, JSON.stringify(value));
 }
 
-
 // Tutorial/course convenience functions
 export function getCompletedTutorials(courseId: number): number[] {
   return getProfileItemAsArray(`completedTutorials_course_${courseId}`);
 }
 
-export function setCompletedTutorials(courseId: number, tutorialIds: number[]): void {
+export function setCompletedTutorials(
+  courseId: number,
+  tutorialIds: number[],
+): void {
   setProfileItemAsArray(`completedTutorials_course_${courseId}`, tutorialIds);
 }
 
@@ -631,22 +703,35 @@ export function getCurrentTutorial(courseId: number): number | null {
   return item ? parseInt(item) : null;
 }
 
-export function setCurrentTutorial(courseId: number, tutorialOrder: number): void {
-  setProfileItem(`currentTutorial_course_${courseId}`, tutorialOrder.toString());
+export function setCurrentTutorial(
+  courseId: number,
+  tutorialOrder: number,
+): void {
+  setProfileItem(
+    `currentTutorial_course_${courseId}`,
+    tutorialOrder.toString(),
+  );
 }
 
 // Updated tutorial code functions using TinyBase table
 export function getUserCode(tutorialId: number): string | null {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
-  const tutorialCode = store.getRow("tutorialCode", tutorialCodeId) as unknown as TutorialCode;
+  const tutorialCode = store.getRow(
+    "tutorialCode",
+    tutorialCodeId,
+  ) as unknown as TutorialCode;
   return tutorialCode?.code || null;
 }
 
-export function setUserCode(tutorialId: number, code: string, courseId: number = 1): void {
+export function setUserCode(
+  tutorialId: number,
+  code: string,
+  courseId: number = 1,
+): void {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
-  
+
   const tutorialCode: TutorialCode = {
     id: tutorialCodeId,
     profileId: activeProfile.id,
@@ -656,9 +741,9 @@ export function setUserCode(tutorialId: number, code: string, courseId: number =
     completed: false, // Will be updated separately
     lastAccessed: new Date().toISOString(),
   };
-  
+
   store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
-  
+
   // Force the Firebase persister to sync
   if (firebasePersister) {
     firebasePersister.save?.();
@@ -668,16 +753,26 @@ export function setUserCode(tutorialId: number, code: string, courseId: number =
 export function getTutorialCode(tutorialId: number): TutorialCode | null {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
-  const tutorialCode = store.getRow("tutorialCode", tutorialCodeId) as unknown as TutorialCode;
+  const tutorialCode = store.getRow(
+    "tutorialCode",
+    tutorialCodeId,
+  ) as unknown as TutorialCode;
   return tutorialCode || null;
 }
 
-export function setTutorialCompleted(tutorialId: number, completed: boolean, courseId: number = 1): void {
+export function setTutorialCompleted(
+  tutorialId: number,
+  completed: boolean,
+  courseId: number = 1,
+): void {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
-  
-  let tutorialCode = store.getRow("tutorialCode", tutorialCodeId) as unknown as TutorialCode;
-  
+
+  let tutorialCode = store.getRow(
+    "tutorialCode",
+    tutorialCodeId,
+  ) as unknown as TutorialCode;
+
   if (!tutorialCode) {
     tutorialCode = {
       id: tutorialCodeId,
@@ -695,23 +790,32 @@ export function setTutorialCompleted(tutorialId: number, completed: boolean, cou
       lastAccessed: new Date().toISOString(),
     };
   }
-  
+
   store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
+
+  // Force the Firebase persister to sync
+  if (firebasePersister) {
+    firebasePersister.save?.();
+  }
 }
 
 export function getTutorialCodesForProfile(profileId: string): TutorialCode[] {
   const tutorialCodeTable = store.getTable("tutorialCode");
   return Object.values(tutorialCodeTable)
-    .map(row => row as unknown as TutorialCode)
-    .filter(tutorialCode => tutorialCode.profileId === profileId);
+    .map((row) => row as unknown as TutorialCode)
+    .filter((tutorialCode) => tutorialCode.profileId === profileId);
 }
 
 export function getTutorialCodesForCourse(courseId: number): TutorialCode[] {
   const activeProfile = getActiveProfile();
   const tutorialCodeTable = store.getTable("tutorialCode");
   return Object.values(tutorialCodeTable)
-    .map(row => row as unknown as TutorialCode)
-    .filter(tutorialCode => tutorialCode.profileId === activeProfile.id && tutorialCode.courseId === courseId);
+    .map((row) => row as unknown as TutorialCode)
+    .filter(
+      (tutorialCode) =>
+        tutorialCode.profileId === activeProfile.id &&
+        tutorialCode.courseId === courseId,
+    );
 }
 
 export function getCompletedCourses(): number[] {
@@ -723,7 +827,10 @@ export function setCompletedCourses(courseIds: number[]): void {
 }
 
 // Account management functions
-export function createAccount(email: string, provider: "google" = "google"): Account {
+export function createAccount(
+  email: string,
+  provider: "google" = "google",
+): Account {
   const newAccount: Account = {
     id: `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
     email: email,
@@ -741,13 +848,16 @@ export function getActiveAccount(): Account | null {
   const activeAccountId = store.getValue("activeAccountId") as string;
   if (!activeAccountId) return null;
 
-  const account = store.getRow("accounts", activeAccountId) as unknown as Account;
+  const account = store.getRow(
+    "accounts",
+    activeAccountId,
+  ) as unknown as Account;
   return account || null;
 }
 
 export function getAllAccounts(): Account[] {
   const accountsTable = store.getTable("accounts");
-  return Object.values(accountsTable).map(row => row as unknown as Account);
+  return Object.values(accountsTable).map((row) => row as unknown as Account);
 }
 
 export function updateAccountLastSignIn(accountId: string): void {
@@ -763,7 +873,7 @@ export function removeAccount(accountId: string): boolean {
   if (!account) return false;
 
   store.delRow("accounts", accountId);
-  
+
   const activeAccountId = store.getValue("activeAccountId") as string;
   if (activeAccountId === accountId) {
     store.delValue("activeAccountId");
@@ -800,7 +910,9 @@ export function getFirebasePersister() {
   return firebasePersister;
 }
 
-export async function initializeFirebaseSync(isNewAccount: boolean = false): Promise<void> {
+export async function initializeFirebaseSync(
+  isNewAccount: boolean = false,
+): Promise<void> {
   await initializeFirebasePersister(isNewAccount);
 }
 
@@ -814,15 +926,20 @@ export function enableFirebaseAutoSave(): void {
 function migrateTutorialCodeToTable(): void {
   const allValues = store.getValues();
   const profiles = store.getTable("profiles");
-  
-  Object.keys(profiles).forEach(profileId => {
+
+  Object.keys(profiles).forEach((profileId) => {
     Object.entries(allValues).forEach(([key, value]) => {
       if (key.startsWith(`${profileId}_userCode_tutorial_`)) {
-        const tutorialId = parseInt(key.replace(`${profileId}_userCode_tutorial_`, ""));
+        const tutorialId = parseInt(
+          key.replace(`${profileId}_userCode_tutorial_`, ""),
+        );
         const tutorialCodeId = `${profileId}_${tutorialId}`;
-        
+
         // Check if already exists in table
-        const existingTutorialCode = store.getRow("tutorialCode", tutorialCodeId);
+        const existingTutorialCode = store.getRow(
+          "tutorialCode",
+          tutorialCodeId,
+        );
         if (!existingTutorialCode) {
           const tutorialCode: TutorialCode = {
             id: tutorialCodeId,
@@ -833,7 +950,7 @@ function migrateTutorialCodeToTable(): void {
             completed: false,
             lastAccessed: new Date().toISOString(),
           };
-          
+
           store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
         }
       }
@@ -849,12 +966,12 @@ export async function initializeProfileSystem(): Promise<void> {
       await persister.startAutoLoad();
       persister.startAutoSave();
     }
-    
+
     ensureDefaultProfile();
-    
+
     // Migrate existing tutorial code to the new table structure
     migrateTutorialCodeToTable();
-    
+
     const activeAccount = getActiveAccount();
     if (activeAccount) {
       await initializeFirebasePersister();
@@ -869,7 +986,7 @@ export async function initializeProfileSystem(): Promise<void> {
 export function getLastSyncTimestamp(): string | null {
   const activeAccount = getActiveAccount();
   if (!activeAccount) return null;
-  
+
   const accountData = getAccountFromStorage(activeAccount.id);
   return accountData?.lastUpdated || null;
 }
@@ -877,7 +994,7 @@ export function getLastSyncTimestamp(): string | null {
 export function setLastSyncTimestamp(timestamp: string): void {
   const activeAccount = getActiveAccount();
   if (!activeAccount) return;
-  
+
   const accountData = getAccountFromStorage(activeAccount.id);
   if (accountData) {
     accountData.lastUpdated = timestamp;
@@ -892,11 +1009,13 @@ export async function isRemoteDataNewer(): Promise<boolean> {
   try {
     const response = await fetch(`/api/accounts?accountId=${activeAccount.id}`);
     if (!response.ok) return false;
-    
+
     const result = await response.json();
     const remoteTime = new Date(result.data.lastUpdated).getTime();
-    const localTime = new Date(getLastSyncTimestamp() || "1970-01-01").getTime();
-    
+    const localTime = new Date(
+      getLastSyncTimestamp() || "1970-01-01",
+    ).getTime();
+
     return remoteTime > localTime;
   } catch (error) {
     console.warn("Failed to check remote data:", error);

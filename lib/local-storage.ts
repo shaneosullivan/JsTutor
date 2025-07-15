@@ -8,7 +8,7 @@ const COURSE_PROGRESS_KEY = "jstutor_course_progress";
 // Account local storage operations
 export function getAccountFromStorage(accountId: string): AccountData | null {
   const accounts = getAccountsFromStorage();
-  return accounts.find(account => account.id === accountId) || null;
+  return accounts.find((account) => account.id === accountId) || null;
 }
 
 export function getAccountsFromStorage(): AccountData[] {
@@ -18,27 +18,27 @@ export function getAccountsFromStorage(): AccountData[] {
 
 export function saveAccountToStorage(account: AccountData): void {
   const accounts = getAccountsFromStorage();
-  const existingIndex = accounts.findIndex(a => a.id === account.id);
-  
+  const existingIndex = accounts.findIndex((a) => a.id === account.id);
+
   if (existingIndex >= 0) {
     accounts[existingIndex] = account;
   } else {
     accounts.push(account);
   }
-  
+
   localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
 }
 
 export function removeAccountFromStorage(accountId: string): void {
   const accounts = getAccountsFromStorage();
-  const filtered = accounts.filter(a => a.id !== accountId);
+  const filtered = accounts.filter((a) => a.id !== accountId);
   localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(filtered));
 }
 
 // Profile local storage operations
 export function getProfileFromStorage(profileId: string): UserProfile | null {
   const profiles = getProfilesFromStorage();
-  return profiles.find(profile => profile.id === profileId) || null;
+  return profiles.find((profile) => profile.id === profileId) || null;
 }
 
 export function getProfilesFromStorage(): UserProfile[] {
@@ -46,32 +46,36 @@ export function getProfilesFromStorage(): UserProfile[] {
   return stored ? JSON.parse(stored) : [];
 }
 
-export function getProfilesByAccountFromStorage(accountId: string): UserProfile[] {
+export function getProfilesByAccountFromStorage(
+  accountId: string,
+): UserProfile[] {
   const profiles = getProfilesFromStorage();
-  return profiles.filter(profile => profile.accountId === accountId);
+  return profiles.filter((profile) => profile.accountId === accountId);
 }
 
 export function saveProfileToStorage(profile: UserProfile): void {
   const profiles = getProfilesFromStorage();
-  const existingIndex = profiles.findIndex(p => p.id === profile.id);
-  
+  const existingIndex = profiles.findIndex((p) => p.id === profile.id);
+
   if (existingIndex >= 0) {
     profiles[existingIndex] = profile;
   } else {
     profiles.push(profile);
   }
-  
+
   localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
 }
 
 export function removeProfileFromStorage(profileId: string): void {
   const profiles = getProfilesFromStorage();
-  const filtered = profiles.filter(p => p.id !== profileId);
+  const filtered = profiles.filter((p) => p.id !== profileId);
   localStorage.setItem(PROFILES_KEY, JSON.stringify(filtered));
-  
+
   // Also remove all course progress for this profile
   const courseProgress = getCourseProgressFromStorage();
-  const filteredProgress = courseProgress.filter(cp => cp.profileId !== profileId);
+  const filteredProgress = courseProgress.filter(
+    (cp) => cp.profileId !== profileId,
+  );
   localStorage.setItem(COURSE_PROGRESS_KEY, JSON.stringify(filteredProgress));
 }
 
@@ -83,50 +87,61 @@ export function getCourseProgressFromStorage(): CourseProgress[] {
 
 export function getCourseProgressByAccountAndProfileFromStorage(
   accountId: string,
-  profileId: string
+  profileId: string,
 ): CourseProgress[] {
   const courseProgress = getCourseProgressFromStorage();
-  return courseProgress.filter(cp => cp.accountId === accountId && cp.profileId === profileId);
+  return courseProgress.filter(
+    (cp) => cp.accountId === accountId && cp.profileId === profileId,
+  );
 }
 
 export function getCourseProgressByIdFromStorage(
   accountId: string,
   profileId: string,
-  courseId: string
+  courseId: string,
 ): CourseProgress | null {
   const courseProgress = getCourseProgressFromStorage();
-  return courseProgress.find(cp => 
-    cp.accountId === accountId && 
-    cp.profileId === profileId && 
-    cp.courseId === courseId
-  ) || null;
+  return (
+    courseProgress.find(
+      (cp) =>
+        cp.accountId === accountId &&
+        cp.profileId === profileId &&
+        cp.courseId === courseId,
+    ) || null
+  );
 }
 
 export function saveCourseProgressToStorage(progress: CourseProgress): void {
   const courseProgress = getCourseProgressFromStorage();
-  const existingIndex = courseProgress.findIndex(cp => 
-    cp.accountId === progress.accountId && 
-    cp.profileId === progress.profileId && 
-    cp.courseId === progress.courseId
+  const existingIndex = courseProgress.findIndex(
+    (cp) =>
+      cp.accountId === progress.accountId &&
+      cp.profileId === progress.profileId &&
+      cp.courseId === progress.courseId,
   );
-  
+
   if (existingIndex >= 0) {
     courseProgress[existingIndex] = progress;
   } else {
     courseProgress.push(progress);
   }
-  
+
   localStorage.setItem(COURSE_PROGRESS_KEY, JSON.stringify(courseProgress));
 }
 
 export function removeCourseProgressFromStorage(
   accountId: string,
   profileId: string,
-  courseId: string
+  courseId: string,
 ): void {
   const courseProgress = getCourseProgressFromStorage();
-  const filtered = courseProgress.filter(cp => 
-    !(cp.accountId === accountId && cp.profileId === profileId && cp.courseId === courseId)
+  const filtered = courseProgress.filter(
+    (cp) =>
+      !(
+        cp.accountId === accountId &&
+        cp.profileId === profileId &&
+        cp.courseId === courseId
+      ),
   );
   localStorage.setItem(COURSE_PROGRESS_KEY, JSON.stringify(filtered));
 }

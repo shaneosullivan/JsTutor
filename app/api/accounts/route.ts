@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { 
-  getAccountById, 
-  createAccount, 
-  updateAccount 
+import {
+  getAccountById,
+  createAccount,
+  updateAccount,
 } from "@/lib/firebase-admin";
 import { AccountData } from "@/lib/types";
 
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     if (!accountId) {
       return NextResponse.json(
         { error: "Account ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     console.error("Error retrieving account:", error);
     return NextResponse.json(
       { error: "Failed to retrieve account" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     if (!account.id || !account.email) {
       return NextResponse.json(
         { error: "Account ID and email are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     console.error("Error saving account:", error);
     return NextResponse.json(
       { error: "Failed to save account" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -76,7 +76,7 @@ export async function PUT(request: NextRequest) {
     if (!account.id || !account.email) {
       return NextResponse.json(
         { error: "Account ID and email are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -91,7 +91,7 @@ export async function PUT(request: NextRequest) {
     console.error("Error updating account:", error);
     return NextResponse.json(
       { error: "Failed to update account" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

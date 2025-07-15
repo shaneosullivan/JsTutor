@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     if (!accountId) {
       return NextResponse.json(
         { error: "Account ID is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     console.error("Error retrieving account data:", error);
     return NextResponse.json(
       { error: "Failed to retrieve account data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!accountId || !email || !data) {
       return NextResponse.json(
         { error: "Account ID, email, and data are required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     console.error("Error saving account data:", error);
     return NextResponse.json(
       { error: "Failed to save account data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

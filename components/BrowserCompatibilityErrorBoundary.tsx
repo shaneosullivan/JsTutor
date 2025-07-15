@@ -1,7 +1,13 @@
 "use client";
 
 import React, { Component, ReactNode } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 interface Props {
   children: ReactNode;
@@ -36,44 +42,49 @@ export class BrowserCompatibilityErrorBoundary extends Component<Props, State> {
     const features: BrowserFeature[] = [
       {
         name: "ES6 Modules",
-        isSupported: typeof window !== "undefined" && "noModule" in HTMLScriptElement.prototype,
-        description: "Support for modern JavaScript modules"
+        isSupported:
+          typeof window !== "undefined" &&
+          "noModule" in HTMLScriptElement.prototype,
+        description: "Support for modern JavaScript modules",
       },
       {
         name: "Fetch API",
         isSupported: typeof window !== "undefined" && "fetch" in window,
-        description: "Modern network request API"
+        description: "Modern network request API",
       },
       {
         name: "Web Workers",
         isSupported: typeof window !== "undefined" && "Worker" in window,
-        description: "Background script execution"
+        description: "Background script execution",
       },
       {
         name: "Local Storage",
         isSupported: typeof window !== "undefined" && "localStorage" in window,
-        description: "Client-side data storage"
+        description: "Client-side data storage",
       },
       {
         name: "Service Workers",
-        isSupported: typeof window !== "undefined" && "serviceWorker" in navigator,
-        description: "Offline functionality and caching"
+        isSupported:
+          typeof window !== "undefined" && "serviceWorker" in navigator,
+        description: "Offline functionality and caching",
       },
       {
         name: "WebAssembly",
         isSupported: typeof window !== "undefined" && "WebAssembly" in window,
-        description: "High-performance code execution"
+        description: "High-performance code execution",
       },
       {
         name: "CSS Grid",
-        isSupported: typeof window !== "undefined" && CSS.supports("display", "grid"),
-        description: "Modern layout system"
+        isSupported:
+          typeof window !== "undefined" && CSS.supports("display", "grid"),
+        description: "Modern layout system",
       },
       {
         name: "CSS Custom Properties",
-        isSupported: typeof window !== "undefined" && CSS.supports("--custom", "value"),
-        description: "Dynamic styling variables"
-      }
+        isSupported:
+          typeof window !== "undefined" && CSS.supports("--custom", "value"),
+        description: "Dynamic styling variables",
+      },
     ];
 
     return features;
@@ -82,7 +93,9 @@ export class BrowserCompatibilityErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       const browserFeatures = this.checkBrowserCompatibility();
-      const unsupportedFeatures = browserFeatures.filter(feature => !feature.isSupported);
+      const unsupportedFeatures = browserFeatures.filter(
+        (feature) => !feature.isSupported,
+      );
 
       return (
         <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
@@ -107,10 +120,11 @@ export class BrowserCompatibilityErrorBoundary extends Component<Props, State> {
                 Browser Compatibility Issue
               </CardTitle>
               <CardDescription className="text-red-600">
-                Your browser doesn't support all the features required to run this application
+                Your browser doesn't support all the features required to run
+                this application
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent className="space-y-6">
               {unsupportedFeatures.length > 0 && (
                 <div>
@@ -180,7 +194,7 @@ export class BrowserCompatibilityErrorBoundary extends Component<Props, State> {
                       </div>
                     </div>
                   </a>
-                  
+
                   <a
                     href="https://www.google.com/chrome/"
                     target="_blank"
@@ -189,13 +203,22 @@ export class BrowserCompatibilityErrorBoundary extends Component<Props, State> {
                   >
                     <div className="w-12 h-12 mr-4 flex-shrink-0">
                       <svg viewBox="0 0 24 24" className="w-full h-full">
-                        <circle cx="12" cy="12" r="10" fill="#4285F4"/>
-                        <circle cx="12" cy="12" r="6" fill="#34A853"/>
-                        <circle cx="12" cy="12" r="3" fill="#EA4335"/>
-                        <path fill="#FBBC05" d="M12 2a10 10 0 0 1 8.66 15H12V2z"/>
-                        <path fill="#EA4335" d="M2 12a10 10 0 0 1 10-10v10H2z"/>
-                        <path fill="#34A853" d="M12 22a10 10 0 0 1-8.66-15H12v15z"/>
-                        <circle cx="12" cy="12" r="3" fill="#FFF"/>
+                        <circle cx="12" cy="12" r="10" fill="#4285F4" />
+                        <circle cx="12" cy="12" r="6" fill="#34A853" />
+                        <circle cx="12" cy="12" r="3" fill="#EA4335" />
+                        <path
+                          fill="#FBBC05"
+                          d="M12 2a10 10 0 0 1 8.66 15H12V2z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M2 12a10 10 0 0 1 10-10v10H2z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 22a10 10 0 0 1-8.66-15H12v15z"
+                        />
+                        <circle cx="12" cy="12" r="3" fill="#FFF" />
                       </svg>
                     </div>
                     <div>
@@ -210,7 +233,9 @@ export class BrowserCompatibilityErrorBoundary extends Component<Props, State> {
 
               {this.state.error && (
                 <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
-                  <h4 className="font-medium text-gray-800 mb-2">Technical Details:</h4>
+                  <h4 className="font-medium text-gray-800 mb-2">
+                    Technical Details:
+                  </h4>
                   <div className="text-sm text-gray-600 font-mono bg-gray-100 p-2 rounded">
                     {this.state.error.message}
                   </div>

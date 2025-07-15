@@ -28,7 +28,7 @@ const FIREBASE_CONFIG_PATH = join(process.cwd(), "config", "firebase.json");
 if (process.env.FIREBASE_KEY) {
   console.log(
     "===> FIREBASE_KEY environment variable found. Writing to " +
-      FIREBASE_CONFIG_PATH
+      FIREBASE_CONFIG_PATH,
   );
 
   writeFileSync(FIREBASE_CONFIG_PATH, process.env.FIREBASE_KEY, "utf8");
@@ -39,6 +39,6 @@ if (process.env.FIREBASE_KEY) {
   });
 } else {
   console.error(
-    "No FIREBASE_KEY environment variable found and firebase.json does not exist in the project root."
+    "No FIREBASE_KEY environment variable found and firebase.json does not exist in the project root.",
   );
 }

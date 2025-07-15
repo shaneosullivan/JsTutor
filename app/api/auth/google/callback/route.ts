@@ -35,9 +35,11 @@ export async function POST(request: NextRequest) {
       const result = await createOrGetAccountByEmail(email);
       accountId = result.accountId;
       isNewAccount = result.isNewAccount;
-      
+
       console.log(
-        isNewAccount ? "Created new account for email:" : "Found existing account for email:",
+        isNewAccount
+          ? "Created new account for email:"
+          : "Found existing account for email:",
         email,
         "ID:",
         accountId,
