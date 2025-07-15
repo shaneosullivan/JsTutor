@@ -479,23 +479,33 @@ export default function ProfilesPageClient({
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-red-950 border-red-800 border-2">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Profile</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-red-200 text-xl font-bold flex items-center gap-2">
+              ⚠️ Delete Profile
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-red-300 font-medium">
               Are you sure you want to delete the profile "
-              {deletingProfile?.name}"? This will permanently remove all
-              progress, completed tutorials, and saved code for this profile.
-              This action cannot be undone.
+              <span className="text-red-100 font-bold">
+                {deletingProfile?.name}
+              </span>
+              "? This will permanently remove all progress, completed tutorials,
+              and saved code for this profile.
+              <br />
+              <span className="text-red-200 font-bold">
+                This action cannot be undone.
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteProfile}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 text-white font-bold"
             >
-              Delete Profile
+              🗑️ Delete Profile
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

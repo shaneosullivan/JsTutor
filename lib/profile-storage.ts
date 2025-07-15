@@ -164,30 +164,31 @@ async function processPendingChanges(
   const currentAccounts = store.getTable("accounts");
   const currentValues = store.getValues();
 
-  // Sync profiles - only sync the currently active profile (since only it can change)
-  const activeProfileData = currentProfiles[activeProfile.id];
-  const lastActiveProfile = lastSyncedState.profiles[activeProfile.id];
+  // Sync profiles - check all profiles for changes, not just the active one
+  for (const [profileId, profileData] of Object.entries(currentProfiles)) {
+    const lastSyncedProfile = lastSyncedState.profiles[profileId];
 
-  if (
-    activeProfileData &&
-    JSON.stringify(activeProfileData) !== JSON.stringify(lastActiveProfile)
-  ) {
-    const profile = activeProfileData as unknown as UserProfile;
-    const profileWithAccount: UserProfile = {
-      ...profile,
-      accountId: activeAccount.id,
-    };
+    if (
+      profileData &&
+      JSON.stringify(profileData) !== JSON.stringify(lastSyncedProfile)
+    ) {
+      const profile = profileData as unknown as UserProfile;
+      const profileWithAccount: UserProfile = {
+        ...profile,
+        accountId: activeAccount.id,
+      };
 
-    try {
-      await fetch("/api/profiles", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profileWithAccount),
-      });
-      saveProfileToStorage(profileWithAccount);
-      lastSyncedState.profiles[activeProfile.id] = { ...profile };
-    } catch (error) {
-      console.warn(`Failed to sync profile ${activeProfile.id}:`, error);
+      try {
+        await fetch("/api/profiles", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(profileWithAccount),
+        });
+        saveProfileToStorage(profileWithAccount);
+        lastSyncedState.profiles[profileId] = { ...profile };
+      } catch (error) {
+        console.warn(`Failed to sync profile ${profileId}:`, error);
+      }
     }
   }
 
