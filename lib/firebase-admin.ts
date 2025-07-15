@@ -70,84 +70,316 @@ export const getFirestoreDb = (): Firestore => {
   return db;
 };
 
-// Account data interface for Firestore
-export interface FirestoreAccountData {
-  accountId: string;
-  email: string;
-  data: any; // TinyBase store data
-  lastUpdated: string; // ISO timestamp
-  version: number; // For conflict resolution
-}
+import { AccountData, UserProfile, CourseProgress } from "@/lib/types";
 
-// Save account data to Firestore
-export async function saveAccountData(
-  accountId: string,
-  email: string,
-  data: any
-): Promise<void> {
+// Account CRUD operations
+export async function getAccountById(accountId: string): Promise<AccountData | null> {
   if (!serviceAccount) {
-    throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration."
-    );
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
   }
 
   const firestore = getFirestoreDb();
-
-  const accountData: FirestoreAccountData = {
-    accountId,
-    email,
-    data,
-    lastUpdated: new Date().toISOString(),
-    version: Date.now(), // Use timestamp as version
-  };
-
-  await firestore
-    .collection("accounts")
-    .doc(accountId)
-    .set(accountData, { merge: true });
-}
-
-// Get account data from Firestore
-export async function getAccountData(
-  accountId: string
-): Promise<FirestoreAccountData | null> {
-  if (!serviceAccount) {
-    throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration."
-    );
-  }
-
-  const firestore = getFirestoreDb();
-
   const doc = await firestore.collection("accounts").doc(accountId).get();
 
   if (!doc.exists) {
     return null;
   }
 
-  return doc.data() as FirestoreAccountData;
+  return doc.data() as AccountData;
 }
 
-// Check if remote data is newer than local timestamp
+export async function createAccount(account: AccountData): Promise<AccountData> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  const accountWithTimestamp = {
+    ...account,
+    lastUpdated: new Date().toISOString(),
+    version: Date.now(),
+  };
+
+  await firestore.collection("accounts").doc(account.id).set(accountWithTimestamp);
+  return accountWithTimestamp;
+}
+
+export async function updateAccount(account: AccountData): Promise<AccountData> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  const accountWithTimestamp = {
+    ...account,
+    lastUpdated: new Date().toISOString(),
+    version: Date.now(),
+  };
+
+  // Use set with merge to handle cases where document doesn't exist
+  await firestore.collection("accounts").doc(account.id).set(accountWithTimestamp, { merge: true });
+  return accountWithTimestamp;
+}
+
+// Profile CRUD operations
+export async function getProfilesByAccountId(accountId: string): Promise<UserProfile[]> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  const snapshot = await firestore
+    .collection("accounts")
+    .doc(accountId)
+    .collection("profiles")
+    .get();
+
+  return snapshot.docs.map(doc => doc.data() as UserProfile);
+}
+
+export async function getProfileById(profileId: string): Promise<UserProfile | null> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  
+  // We need to search across all accounts since we don't know which account the profile belongs to
+  // This could be optimized by storing a profile index, but for now this will work
+  const accountsSnapshot = await firestore.collection("accounts").get();
+  
+  for (const accountDoc of accountsSnapshot.docs) {
+    const profileDoc = await accountDoc.ref.collection("profiles").doc(profileId).get();
+    if (profileDoc.exists) {
+      return profileDoc.data() as UserProfile;
+    }
+  }
+  
+  return null;
+}
+
+export async function createProfile(profile: UserProfile): Promise<UserProfile> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  const profileWithTimestamp = {
+    ...profile,
+    createdAt: profile.createdAt || new Date().toISOString(),
+    lastActive: new Date().toISOString(),
+  };
+
+  await firestore
+    .collection("accounts")
+    .doc(profile.accountId)
+    .collection("profiles")
+    .doc(profile.id)
+    .set(profileWithTimestamp);
+    
+  return profileWithTimestamp;
+}
+
+export async function updateProfile(profile: UserProfile): Promise<UserProfile> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  const profileWithTimestamp = {
+    ...profile,
+    lastActive: new Date().toISOString(),
+  };
+
+  // Use set with merge to handle cases where document doesn't exist
+  await firestore
+    .collection("accounts")
+    .doc(profile.accountId)
+    .collection("profiles")
+    .doc(profile.id)
+    .set(profileWithTimestamp, { merge: true });
+    
+  return profileWithTimestamp;
+}
+
+export async function deleteProfile(profileId: string): Promise<void> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  
+  // First find which account this profile belongs to
+  const profile = await getProfileById(profileId);
+  if (!profile) {
+    throw new Error("Profile not found");
+  }
+
+  // Delete all course progress for this profile
+  const courseProgressSnapshot = await firestore
+    .collection("accounts")
+    .doc(profile.accountId)
+    .collection("profiles")
+    .doc(profileId)
+    .collection("courses")
+    .get();
+    
+  const batch = firestore.batch();
+  courseProgressSnapshot.docs.forEach(doc => {
+    batch.delete(doc.ref);
+  });
+  
+  // Delete the profile
+  batch.delete(
+    firestore
+      .collection("accounts")
+      .doc(profile.accountId)
+      .collection("profiles")
+      .doc(profileId)
+  );
+  
+  await batch.commit();
+}
+
+// Course Progress CRUD operations
+export async function getCourseProgressByAccountAndProfile(
+  accountId: string,
+  profileId: string
+): Promise<CourseProgress[]> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  const snapshot = await firestore
+    .collection("accounts")
+    .doc(accountId)
+    .collection("profiles")
+    .doc(profileId)
+    .collection("courses")
+    .get();
+
+  return snapshot.docs.map(doc => doc.data() as CourseProgress);
+}
+
+export async function getCourseProgressById(
+  accountId: string,
+  profileId: string,
+  courseId: string
+): Promise<CourseProgress | null> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  const doc = await firestore
+    .collection("accounts")
+    .doc(accountId)
+    .collection("profiles")
+    .doc(profileId)
+    .collection("courses")
+    .doc(courseId)
+    .get();
+
+  if (!doc.exists) {
+    return null;
+  }
+
+  return doc.data() as CourseProgress;
+}
+
+export async function createCourseProgress(progress: CourseProgress): Promise<CourseProgress> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  const progressWithTimestamp = {
+    ...progress,
+    lastUpdated: new Date().toISOString(),
+  };
+
+  await firestore
+    .collection("accounts")
+    .doc(progress.accountId)
+    .collection("profiles")
+    .doc(progress.profileId)
+    .collection("courses")
+    .doc(progress.courseId)
+    .set(progressWithTimestamp);
+    
+  return progressWithTimestamp;
+}
+
+export async function updateCourseProgress(progress: CourseProgress): Promise<CourseProgress> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  const progressWithTimestamp = {
+    ...progress,
+    lastUpdated: new Date().toISOString(),
+  };
+
+  // Use set with merge to handle cases where document doesn't exist
+  await firestore
+    .collection("accounts")
+    .doc(progress.accountId)
+    .collection("profiles")
+    .doc(progress.profileId)
+    .collection("courses")
+    .doc(progress.courseId)
+    .set(progressWithTimestamp, { merge: true });
+    
+  return progressWithTimestamp;
+}
+
+export async function deleteCourseProgress(
+  accountId: string,
+  profileId: string,
+  courseId: string
+): Promise<void> {
+  if (!serviceAccount) {
+    throw new Error("Firebase is not configured. Please add Firebase service account configuration.");
+  }
+
+  const firestore = getFirestoreDb();
+  await firestore
+    .collection("accounts")
+    .doc(accountId)
+    .collection("profiles")
+    .doc(profileId)
+    .collection("courses")
+    .doc(courseId)
+    .delete();
+}
+
+// Legacy functions for backward compatibility
+export async function getAccountData(accountId: string): Promise<any> {
+  return await getAccountById(accountId);
+}
+
+export async function saveAccountData(accountId: string, email: string, _data: any): Promise<void> {
+  const account: AccountData = {
+    id: accountId,
+    email,
+    lastUpdated: new Date().toISOString(),
+    version: Date.now(),
+  };
+  await createAccount(account);
+}
+
 export async function isRemoteDataNewer(
   accountId: string,
   localTimestamp: string
 ): Promise<boolean> {
-  if (!serviceAccount) {
-    throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration."
-    );
-  }
-
-  const remoteData = await getAccountData(accountId);
-
+  const remoteData = await getAccountById(accountId);
   if (!remoteData) {
     return false;
   }
-
   const remoteTime = new Date(remoteData.lastUpdated).getTime();
   const localTime = new Date(localTimestamp).getTime();
-
   return remoteTime > localTime;
 }
 
@@ -188,7 +420,7 @@ export async function findAccountByEmail(
 export async function createOrGetAccountByEmail(email: string): Promise<{
   accountId: string;
   isNewAccount: boolean;
-  accountData: FirestoreAccountData;
+  accountData: AccountData;
 }> {
   if (!serviceAccount) {
     throw new Error(
@@ -210,10 +442,10 @@ export async function createOrGetAccountByEmail(email: string): Promise<{
     if (!snapshot.empty) {
       // Found existing account
       const existingDoc = snapshot.docs[0];
-      const existingData = existingDoc.data() as FirestoreAccountData;
+      const existingData = existingDoc.data() as AccountData;
 
       return {
-        accountId: existingData.accountId,
+        accountId: existingData.id,
         isNewAccount: false,
         accountData: existingData,
       };
@@ -227,28 +459,11 @@ export async function createOrGetAccountByEmail(email: string): Promise<{
     const newAccountId = `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     const now = new Date().toISOString();
 
-    const initialAccountData = {
-      tables: {
-        profiles: {},
-        accounts: {
-          [newAccountId]: {
-            id: newAccountId,
-            email: email,
-            provider: "google",
-            createdAt: now,
-            lastSignIn: now,
-          },
-        },
-      },
-      values: {
-        activeAccountId: newAccountId,
-      },
-    };
+    // This is just for backward compatibility, actual account data is simpler now
 
-    const accountData: FirestoreAccountData = {
-      accountId: newAccountId,
+    const accountData: AccountData = {
+      id: newAccountId,
       email: email,
-      data: initialAccountData,
       lastUpdated: now,
       version: Date.now(),
     };

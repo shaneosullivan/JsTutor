@@ -1,20 +1,21 @@
-// Profile management and local storage utilities using TinyBase
-// This module handles all localStorage access with user profile support
-
+// Profile management and local storage utilities using new decoupled system
 import { createStore } from "tinybase";
 import { createLocalPersister } from "tinybase/persisters/persister-browser";
 import { createCustomPersister } from "tinybase/persisters";
-import type { Store } from "tinybase";
-import { FIREBASE_ACCOUNTS_COLLECTION } from "./consts";
+import type { Changes, Store } from "tinybase";
+import { AccountData, UserProfile, CourseProgress, TutorialCode } from "@/lib/types";
+import {
+  getAccountFromStorage,
+  saveAccountToStorage,
+  // getProfilesByAccountFromStorage,
+  saveProfileToStorage,
+  removeProfileFromStorage,
+  getCourseProgressByAccountAndProfileFromStorage,
+  saveCourseProgressToStorage,
+  // removeCourseProgressFromStorage,
+} from "@/lib/local-storage";
 
-export interface UserProfile {
-  id: string;
-  name: string;
-  icon: string;
-  createdAt: string;
-  lastActive: string;
-}
-
+// Legacy interfaces for backward compatibility
 export interface Account {
   id: string;
   email: string;
@@ -33,65 +34,72 @@ let firebasePersister: any = null;
 
 // Initialize persistence only on client side
 if (typeof window !== "undefined") {
-  persister = createLocalPersister(store, "jstutor");
+  persister = createLocalPersister(store, "jstutor_tinybase");
 
-  // Create Firebase custom persister
+  // Create Firebase custom persister with granular updates
   firebasePersister = createCustomPersister(
     store,
-    // getPersisted: Load data from Firebase
-    async () => {
+    // getPersisted: Load data from Firebase (load all data on startup)
+    async (): Promise<undefined> => {
       const activeAccount = getActiveAccount();
       if (!activeAccount) {
-        return null; // No account, no remote data
+        return undefined;
       }
 
       try {
-        const response = await fetch(`/api/sync?accountId=${activeAccount.id}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            return null; // Account not found, return null to use local data
-          }
-          throw new Error(`Failed to load: ${response.statusText}`);
+        // Load account data
+        const accountResponse = await fetch(`/api/accounts?accountId=${activeAccount.id}`);
+        if (accountResponse.ok) {
+          const accountResult = await accountResponse.json();
+          saveAccountToStorage(accountResult.data);
         }
 
-        const result = await response.json();
+        // Load profiles
+        const profilesResponse = await fetch(`/api/profiles?accountId=${activeAccount.id}`);
+        if (profilesResponse.ok) {
+          const profilesResult = await profilesResponse.json();
+          profilesResult.data.forEach((profile: UserProfile) => {
+            saveProfileToStorage(profile);
+          });
+        }
 
-        // Update sync timestamp when we successfully load data
-        setLastSyncTimestamp(result.data.lastUpdated);
+        // Load course progress for active profile
+        const activeProfile = getActiveProfile();
+        if (activeProfile) {
+          const progressResponse = await fetch(
+            `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}`
+          );
+          if (progressResponse.ok) {
+            const progressResult = await progressResponse.json();
+            progressResult.data.forEach((progress: CourseProgress) => {
+              saveCourseProgressToStorage(progress);
+            });
+          }
+        }
 
-        return result.data.data; // Return the TinyBase store data
+        return undefined; // We handle storage ourselves
       } catch (error) {
         console.warn("Failed to load from Firebase:", error);
-        return null; // Return null to use local data
+        return undefined;
       }
     },
-    // setPersisted: Save data to Firebase
-    async (getContent) => {
+    // setPersisted: Save data to Firebase based on change type
+    async (_getContent, _changes?: Changes | undefined) => {
       const activeAccount = getActiveAccount();
       if (!activeAccount) {
-        return; // No account, no remote save
+        return;
       }
 
-      try {
-        const content = getContent();
-        await fetch("/api/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accountId: activeAccount.id,
-            email: activeAccount.email,
-            data: content,
-          }),
-        });
-      } catch (error) {
-        console.warn("Failed to save to Firebase:", error);
-        // Don't throw - let local persistence continue
+      const activeProfile = getActiveProfile();
+      if (!activeProfile) {
+        return;
       }
+
+      // We'll throttle the sync to avoid too many API calls
+      throttledSync(activeAccount, activeProfile);
     },
-    // addPersisterListener: No external change detection needed
-    () => null,
-    // delPersisterListener: Cleanup function (not needed)
-    () => {}
+    () => null, // addPersisterListener
+    () => {} // delPersisterListener
   );
 
   // Start persistence
@@ -100,106 +108,334 @@ if (typeof window !== "undefined") {
     .then(() => {
       persister.startAutoSave();
       ensureDefaultProfile();
-
-      // Initialize Firebase persister after local data is loaded
       initializeFirebasePersister();
     })
     .catch((error: any) => {
-      console.warn(
-        "Failed to load from localStorage, creating default profile:",
-        error
-      );
+      console.warn("Failed to load from localStorage:", error);
       ensureDefaultProfile();
     });
 } else {
-  // Server-side: just ensure default profile (no persistence)
   ensureDefaultProfile();
 }
 
-// Initialize Firebase persister when user signs in
-async function initializeFirebasePersister(
-  isNewAccount: boolean = false
+
+// Throttle sync to avoid too many API calls
+let syncTimeout: NodeJS.Timeout | null = null;
+let pendingChanges = new Set<string>();
+
+function throttledSync(activeAccount: Account, activeProfile: UserProfile) {
+  // Clear existing timeout
+  if (syncTimeout) {
+    clearTimeout(syncTimeout);
+  }
+  
+  // Set new timeout to batch changes
+  syncTimeout = setTimeout(async () => {
+    try {
+      await processPendingChanges(activeAccount, activeProfile);
+    } catch (error) {
+      console.warn("Failed to process pending changes:", error);
+    }
+  }, 1000); // 1 second debounce
+}
+
+// Track last synced state to detect actual changes
+let lastSyncedState = {
+  profiles: {} as Record<string, any>,
+  accounts: {} as Record<string, any>,
+  values: {} as Record<string, any>,
+  tutorialCode: {} as Record<string, any>,
+};
+
+async function processPendingChanges(activeAccount: Account, activeProfile: UserProfile) {
+  // Get current state
+  const currentProfiles = store.getTable("profiles");
+  const currentAccounts = store.getTable("accounts");
+  const currentValues = store.getValues();
+  
+  // Sync profiles - only sync the currently active profile (since only it can change)
+  const activeProfileData = currentProfiles[activeProfile.id];
+  const lastActiveProfile = lastSyncedState.profiles[activeProfile.id];
+  
+  if (activeProfileData && JSON.stringify(activeProfileData) !== JSON.stringify(lastActiveProfile)) {
+    const profile = activeProfileData as unknown as UserProfile;
+    const profileWithAccount: UserProfile = {
+      ...profile,
+      accountId: activeAccount.id,
+    };
+    
+    try {
+      await fetch("/api/profiles", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileWithAccount),
+      });
+      saveProfileToStorage(profileWithAccount);
+      lastSyncedState.profiles[activeProfile.id] = { ...profile };
+    } catch (error) {
+      console.warn(`Failed to sync profile ${activeProfile.id}:`, error);
+    }
+  }
+
+  // Sync accounts - only sync the currently active account (since only it can change)
+  const currentAccountData = currentAccounts[activeAccount.id];
+  const lastAccountData = lastSyncedState.accounts[activeAccount.id];
+  
+  if (currentAccountData && JSON.stringify(currentAccountData) !== JSON.stringify(lastAccountData)) {
+    const account = currentAccountData as unknown as Account;
+    const accountForApi: AccountData = {
+      id: account.id,
+      email: account.email,
+      lastUpdated: new Date().toISOString(),
+      version: Date.now(),
+    };
+    
+    try {
+      await fetch("/api/accounts", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(accountForApi),
+      });
+      saveAccountToStorage(accountForApi);
+      lastSyncedState.accounts[activeAccount.id] = { ...account };
+    } catch (error) {
+      console.warn(`Failed to sync active account ${activeAccount.id}:`, error);
+    }
+  }
+
+  // Sync tutorial code - only for the active profile (since only it can have changes)
+  const currentTutorialCode = store.getTable("tutorialCode");
+  const activeProfileTutorialCode = Object.entries(currentTutorialCode)
+    .filter(([_, tutorialData]) => {
+      const tutorial = tutorialData as unknown as TutorialCode;
+      return tutorial.profileId === activeProfile.id;
+    });
+  
+  // Check if any tutorial code changed for the active profile
+  const changedTutorialCode = activeProfileTutorialCode.filter(([tutorialId, tutorialData]) => 
+    JSON.stringify(tutorialData) !== JSON.stringify(lastSyncedState.tutorialCode[tutorialId])
+  );
+  
+  if (changedTutorialCode.length > 0) {
+    try {
+      // Group changed tutorial code by course and sync only affected courses
+      const courseGroups = new Map<number, TutorialCode[]>();
+      
+      changedTutorialCode.forEach(([_, tutorialData]) => {
+        const tutorial = tutorialData as unknown as TutorialCode;
+        if (!courseGroups.has(tutorial.courseId)) {
+          courseGroups.set(tutorial.courseId, []);
+        }
+        courseGroups.get(tutorial.courseId)!.push(tutorial);
+      });
+      
+      // Sync each affected course's tutorial code for the active profile
+      for (const [courseId, tutorials] of courseGroups) {
+        await syncTutorialCodeForCourse(activeAccount.id, activeProfile.id, courseId, tutorials);
+      }
+      
+      // Update last synced state for changed tutorial code
+      changedTutorialCode.forEach(([tutorialId, tutorialData]) => {
+        lastSyncedState.tutorialCode[tutorialId] = JSON.parse(JSON.stringify(tutorialData));
+      });
+    } catch (error) {
+      console.warn("Failed to sync tutorial code for active profile:", error);
+    }
+  }
+  
+  // Sync other course progress values (completed courses, current tutorial, etc.)
+  const activeProfilePrefix = `${activeProfile.id}_`;
+  const relevantValues = Object.entries(currentValues).filter(([key]) => 
+    key.startsWith(activeProfilePrefix)
+  );
+  
+  // Check if any course progress values changed for the active profile
+  const changedValues = relevantValues.filter(([key, value]) => 
+    JSON.stringify(value) !== JSON.stringify(lastSyncedState.values[key])
+  );
+  
+  if (changedValues.length > 0) {
+    try {
+      // Group changed values by course and sync only affected courses
+      const courseGroups = new Map<string, Record<string, any>>();
+      
+      changedValues.forEach(([key, value]) => {
+        const courseId = extractCourseId(key);
+        if (courseId) {
+          if (!courseGroups.has(courseId)) {
+            courseGroups.set(courseId, {});
+          }
+          const cleanKey = key.replace(activeProfilePrefix, "");
+          courseGroups.get(courseId)![cleanKey] = value;
+        }
+      });
+      
+      // Sync each affected course's progress for the active profile
+      for (const [courseId, courseData] of courseGroups) {
+        await syncCourseProgressForCourse(activeAccount.id, activeProfile.id, courseId, courseData);
+      }
+      
+      // Update last synced state for changed values
+      changedValues.forEach(([key, value]) => {
+        lastSyncedState.values[key] = JSON.parse(JSON.stringify(value));
+      });
+    } catch (error) {
+      console.warn("Failed to sync course progress for active profile:", error);
+    }
+  }
+  
+  // Clear pending changes
+  pendingChanges.clear();
+}
+
+// Extract course ID from a profile-scoped key
+function extractCourseId(key: string): string | null {
+  if (key.includes("_course_")) {
+    const match = key.match(/_course_(\d+)/);
+    return match ? match[1] : null;
+  } else if (key.includes("_tutorial_")) {
+    // For tutorial data, we need to map to course - simplified approach
+    return "1"; // Default to course 1
+  } else if (key.includes("completedCourses")) {
+    return "general";
+  }
+  return null;
+}
+
+// Sync tutorial code for a specific course
+async function syncTutorialCodeForCourse(
+  accountId: string,
+  profileId: string,
+  courseId: number,
+  tutorials: TutorialCode[]
 ): Promise<void> {
+  // Get or create course progress
+  let courseProgress = getCourseProgressByAccountAndProfileFromStorage(accountId, profileId).find(
+    cp => cp.courseId === courseId.toString()
+  );
+
+  if (!courseProgress) {
+    courseProgress = {
+      accountId,
+      profileId,
+      courseId: courseId.toString(),
+      tutorialCode: {},
+      lastUpdated: new Date().toISOString(),
+    };
+  }
+
+  // Build tutorial code object from the TutorialCode table data
+  const tutorialCode: Record<string, any> = { ...courseProgress.tutorialCode };
+  
+  tutorials.forEach(tutorial => {
+    tutorialCode[tutorial.tutorialId.toString()] = {
+      code: tutorial.code,
+      completed: tutorial.completed,
+      lastAccessed: tutorial.lastAccessed,
+    };
+  });
+
+  // Update course progress
+  courseProgress.tutorialCode = tutorialCode;
+  courseProgress.lastUpdated = new Date().toISOString();
+
+  // Save to Firebase and local storage
+  await fetch("/api/course-progress", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(courseProgress),
+  });
+
+  saveCourseProgressToStorage(courseProgress);
+}
+
+// Sync course progress for a specific course (non-tutorial data)
+async function syncCourseProgressForCourse(
+  accountId: string,
+  profileId: string,
+  courseId: string,
+  courseData: Record<string, any>
+): Promise<void> {
+  // Get or create course progress
+  let courseProgress = getCourseProgressByAccountAndProfileFromStorage(accountId, profileId).find(
+    cp => cp.courseId === courseId
+  );
+
+  if (!courseProgress) {
+    courseProgress = {
+      accountId,
+      profileId,
+      courseId,
+      tutorialCode: {},
+      lastUpdated: new Date().toISOString(),
+    };
+  }
+
+  // Handle completed tutorials from the legacy values
+  Object.entries(courseData).forEach(([key, value]) => {
+    if (key.startsWith("completedTutorials_course_")) {
+      const completedTutorials = Array.isArray(value) ? value : JSON.parse(value || "[]");
+      completedTutorials.forEach((tutorialId: number) => {
+        if (!courseProgress!.tutorialCode[tutorialId.toString()]) {
+          courseProgress!.tutorialCode[tutorialId.toString()] = {
+            code: "",
+            completed: false,
+            lastAccessed: new Date().toISOString(),
+          };
+        }
+        courseProgress!.tutorialCode[tutorialId.toString()].completed = true;
+        courseProgress!.tutorialCode[tutorialId.toString()].lastAccessed = new Date().toISOString();
+      });
+    }
+  });
+
+  // Update course progress
+  courseProgress.lastUpdated = new Date().toISOString();
+
+  // Save to Firebase and local storage
+  await fetch("/api/course-progress", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(courseProgress),
+  });
+
+  saveCourseProgressToStorage(courseProgress);
+}
+
+// Initialize Firebase persister
+async function initializeFirebasePersister(isNewAccount: boolean = false): Promise<void> {
   if (typeof window === "undefined" || !firebasePersister) {
     return;
   }
 
   const activeAccount = getActiveAccount();
-  if (!activeAccount || !activeAccount.id) {
-    return; // No account or no account ID, no Firebase sync
+  if (!activeAccount) {
+    return;
   }
 
   try {
     if (isNewAccount) {
-      // For new accounts: immediately enable auto-save to post initial data
       firebasePersister.startAutoSave();
-      console.log("Auto-save enabled for new account:", activeAccount.email);
     } else {
-      // For existing accounts: load data but don't enable auto-save yet
-      try {
-        // Get the remote data to check timestamp
-        const response = await fetch(`/api/sync?accountId=${activeAccount.id}`);
-        if (response.ok) {
-          const result = await response.json();
-
-          // Load the data using the persister
-          await firebasePersister.load();
-
-          // Update sync timestamp after successful load
-          setLastSyncTimestamp(result.data.lastUpdated);
-
-          // Force save to localStorage to persist the fetched data and timestamp
-          if (persister) {
-            await persister.save();
-          }
-
-          console.log(
-            "Data loaded for existing account:",
-            activeAccount.email,
-            "timestamp:",
-            result.data.lastUpdated
-          );
-        } else {
-          console.log("No remote data found for account:", activeAccount.email);
-        }
-      } catch (error) {
-        console.warn("Failed to load remote data for existing account:", error);
+      await firebasePersister.load();
+      if (persister) {
+        await persister.save();
       }
     }
-
-    console.log(
-      "Firebase persister initialized for account:",
-      activeAccount.email,
-      isNewAccount ? "(new account)" : "(existing account)"
-    );
   } catch (error) {
     console.warn("Failed to initialize Firebase persister:", error);
   }
 }
 
-// Table schemas in TinyBase:
-// - 'profiles': stores user profiles
-// - 'accounts': stores account information for cross-device sync
-// - 'settings': stores app settings like activeProfileId
-// - 'userData': stores user data scoped by profile
-
-// Internal function to get profiles without triggering default profile creation
-function getProfilesInternal(): UserProfile[] {
-  const profilesTable = store.getTable("profiles");
-  return Object.values(profilesTable).map(
-    (row) => row as unknown as UserProfile
-  );
-}
-
-// Initialize default profile if none exists
+// Profile management functions
 function ensureDefaultProfile(): void {
-  // Only initialize on client side
   if (typeof window === "undefined") return;
 
   const profiles = getProfilesInternal();
   if (profiles.length === 0) {
     const defaultProfile: UserProfile = {
       id: DEFAULT_PROFILE_ID,
+      accountId: "", // Will be set when account is created
       name: "No Name",
       icon: "short_brown",
       createdAt: new Date().toISOString(),
@@ -209,16 +445,19 @@ function ensureDefaultProfile(): void {
     store.setRow("profiles", DEFAULT_PROFILE_ID, defaultProfile as any);
     store.setValue("activeProfileId", DEFAULT_PROFILE_ID);
 
-    // Force save to localStorage immediately after creating default profile
     if (persister) {
       persister.save().catch((error: any) => {
-        console.warn("Failed to save default profile to localStorage:", error);
+        console.warn("Failed to save default profile:", error);
       });
     }
   }
 }
 
-// Profile management functions
+function getProfilesInternal(): UserProfile[] {
+  const profilesTable = store.getTable("profiles");
+  return Object.values(profilesTable).map(row => row as unknown as UserProfile);
+}
+
 export function getAllProfiles(): UserProfile[] {
   ensureDefaultProfile();
   return getProfilesInternal();
@@ -227,23 +466,16 @@ export function getAllProfiles(): UserProfile[] {
 export function getActiveProfile(): UserProfile {
   ensureDefaultProfile();
 
-  const activeProfileId =
-    (store.getValue("activeProfileId") as string) || DEFAULT_PROFILE_ID;
-  const profile = store.getRow(
-    "profiles",
-    activeProfileId
-  ) as unknown as UserProfile;
+  const activeProfileId = (store.getValue("activeProfileId") as string) || DEFAULT_PROFILE_ID;
+  const profile = store.getRow("profiles", activeProfileId) as unknown as UserProfile;
 
   if (!profile) {
-    // Fallback to first profile if active profile not found
     const profiles = getAllProfiles();
     const firstProfile = profiles[0];
     if (firstProfile) {
       setActiveProfile(firstProfile.id);
       return firstProfile;
     }
-
-    // Create default profile if none exist
     ensureDefaultProfile();
     return getAllProfiles()[0];
   }
@@ -253,29 +485,23 @@ export function getActiveProfile(): UserProfile {
 
 export function setActiveProfile(profileId: string): boolean {
   const profile = store.getRow("profiles", profileId) as unknown as UserProfile;
-
   if (!profile) {
     return false;
   }
 
-  // Update last active time
   const updatedProfile = { ...profile, lastActive: new Date().toISOString() };
   store.setRow("profiles", profileId, updatedProfile as any);
-
   store.setValue("activeProfileId", profileId);
 
-  // Enable auto-save for existing accounts when they make changes
   enableFirebaseAutoSave();
-
   return true;
 }
 
-export function createProfile(
-  name: string,
-  icon: string = "short_brown"
-): UserProfile {
+export function createProfile(name: string, icon: string = "short_brown"): UserProfile {
+  const activeAccount = getActiveAccount();
   const newProfile: UserProfile = {
     id: `profile_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+    accountId: activeAccount?.id || "",
     name: name.trim() || "Unnamed Profile",
     icon: icon,
     createdAt: new Date().toISOString(),
@@ -283,16 +509,12 @@ export function createProfile(
   };
 
   store.setRow("profiles", newProfile.id, newProfile as any);
-
-  // Enable auto-save for existing accounts when they make changes
   enableFirebaseAutoSave();
-
   return newProfile;
 }
 
 export function updateProfile(updatedProfile: UserProfile): boolean {
   const existingProfile = store.getRow("profiles", updatedProfile.id);
-
   if (!existingProfile) {
     return false;
   }
@@ -302,29 +524,18 @@ export function updateProfile(updatedProfile: UserProfile): boolean {
     lastActive: new Date().toISOString(),
   };
   store.setRow("profiles", updatedProfile.id, profileWithTimestamp as any);
-
-  // Enable auto-save for existing accounts when they make changes
   enableFirebaseAutoSave();
-
   return true;
 }
 
 export function deleteProfile(profileId: string): boolean {
   const profiles = getAllProfiles();
-
-  // Cannot delete if it's the only profile
   if (profiles.length <= 1) {
-    return false;
-  }
-
-  // Cannot delete the default profile if it's the only one
-  if (profileId === DEFAULT_PROFILE_ID && profiles.length <= 1) {
     return false;
   }
 
   store.delRow("profiles", profileId);
 
-  // If we deleted the active profile, switch to the first remaining profile
   const activeProfileId = store.getValue("activeProfileId") as string;
   if (activeProfileId === profileId) {
     const remainingProfiles = getAllProfiles();
@@ -333,7 +544,7 @@ export function deleteProfile(profileId: string): boolean {
     }
   }
 
-  // Also clear all user data for this profile
+  // Clear profile data
   const allValues = store.getValues();
   Object.keys(allValues).forEach((valueId) => {
     if (valueId.startsWith(`${profileId}_`)) {
@@ -341,10 +552,21 @@ export function deleteProfile(profileId: string): boolean {
     }
   });
 
+  // Clear tutorial code for this profile
+  const tutorialCodeTable = store.getTable("tutorialCode");
+  Object.keys(tutorialCodeTable).forEach((tutorialCodeId) => {
+    if (tutorialCodeId.startsWith(`${profileId}_`)) {
+      store.delRow("tutorialCode", tutorialCodeId);
+    }
+  });
+
+  // Remove from local storage
+  removeProfileFromStorage(profileId);
+
   return true;
 }
 
-// Profile-aware TinyBase functions
+// Profile-aware storage functions
 function getProfileKey(key: string): string {
   const activeProfile = getActiveProfile();
   return `${activeProfile.id}_${key}`;
@@ -371,7 +593,7 @@ export function getProfileItemAsArray(key: string): any[] {
     const item = getProfileItem(key);
     return item ? JSON.parse(item) : [];
   } catch (error) {
-    console.error(`Error parsing array from TinyBase key ${key}:`, error);
+    console.error(`Error parsing array from key ${key}:`, error);
     return [];
   }
 }
@@ -380,15 +602,12 @@ export function setProfileItemAsArray(key: string, value: any[]): void {
   setProfileItem(key, JSON.stringify(value));
 }
 
-export function getProfileItemAsObject(
-  key: string,
-  defaultValue: any = {}
-): any {
+export function getProfileItemAsObject(key: string, defaultValue: any = {}): any {
   try {
     const item = getProfileItem(key);
     return item ? JSON.parse(item) : defaultValue;
   } catch (error) {
-    console.error(`Error parsing object from TinyBase key ${key}:`, error);
+    console.error(`Error parsing object from key ${key}:`, error);
     return defaultValue;
   }
 }
@@ -397,15 +616,13 @@ export function setProfileItemAsObject(key: string, value: any): void {
   setProfileItem(key, JSON.stringify(value));
 }
 
-// Convenience functions for common tutorial/course data
+
+// Tutorial/course convenience functions
 export function getCompletedTutorials(courseId: number): number[] {
   return getProfileItemAsArray(`completedTutorials_course_${courseId}`);
 }
 
-export function setCompletedTutorials(
-  courseId: number,
-  tutorialIds: number[]
-): void {
+export function setCompletedTutorials(courseId: number, tutorialIds: number[]): void {
   setProfileItemAsArray(`completedTutorials_course_${courseId}`, tutorialIds);
 }
 
@@ -414,22 +631,87 @@ export function getCurrentTutorial(courseId: number): number | null {
   return item ? parseInt(item) : null;
 }
 
-export function setCurrentTutorial(
-  courseId: number,
-  tutorialOrder: number
-): void {
-  setProfileItem(
-    `currentTutorial_course_${courseId}`,
-    tutorialOrder.toString()
-  );
+export function setCurrentTutorial(courseId: number, tutorialOrder: number): void {
+  setProfileItem(`currentTutorial_course_${courseId}`, tutorialOrder.toString());
 }
 
+// Updated tutorial code functions using TinyBase table
 export function getUserCode(tutorialId: number): string | null {
-  return getProfileItem(`userCode_tutorial_${tutorialId}`);
+  const activeProfile = getActiveProfile();
+  const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
+  const tutorialCode = store.getRow("tutorialCode", tutorialCodeId) as unknown as TutorialCode;
+  return tutorialCode?.code || null;
 }
 
-export function setUserCode(tutorialId: number, code: string): void {
-  setProfileItem(`userCode_tutorial_${tutorialId}`, code);
+export function setUserCode(tutorialId: number, code: string, courseId: number = 1): void {
+  const activeProfile = getActiveProfile();
+  const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
+  
+  const tutorialCode: TutorialCode = {
+    id: tutorialCodeId,
+    profileId: activeProfile.id,
+    tutorialId,
+    courseId,
+    code,
+    completed: false, // Will be updated separately
+    lastAccessed: new Date().toISOString(),
+  };
+  
+  store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
+  
+  // Force the Firebase persister to sync
+  if (firebasePersister) {
+    firebasePersister.save?.();
+  }
+}
+
+export function getTutorialCode(tutorialId: number): TutorialCode | null {
+  const activeProfile = getActiveProfile();
+  const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
+  const tutorialCode = store.getRow("tutorialCode", tutorialCodeId) as unknown as TutorialCode;
+  return tutorialCode || null;
+}
+
+export function setTutorialCompleted(tutorialId: number, completed: boolean, courseId: number = 1): void {
+  const activeProfile = getActiveProfile();
+  const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
+  
+  let tutorialCode = store.getRow("tutorialCode", tutorialCodeId) as unknown as TutorialCode;
+  
+  if (!tutorialCode) {
+    tutorialCode = {
+      id: tutorialCodeId,
+      profileId: activeProfile.id,
+      tutorialId,
+      courseId,
+      code: "",
+      completed,
+      lastAccessed: new Date().toISOString(),
+    };
+  } else {
+    tutorialCode = {
+      ...tutorialCode,
+      completed,
+      lastAccessed: new Date().toISOString(),
+    };
+  }
+  
+  store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
+}
+
+export function getTutorialCodesForProfile(profileId: string): TutorialCode[] {
+  const tutorialCodeTable = store.getTable("tutorialCode");
+  return Object.values(tutorialCodeTable)
+    .map(row => row as unknown as TutorialCode)
+    .filter(tutorialCode => tutorialCode.profileId === profileId);
+}
+
+export function getTutorialCodesForCourse(courseId: number): TutorialCode[] {
+  const activeProfile = getActiveProfile();
+  const tutorialCodeTable = store.getTable("tutorialCode");
+  return Object.values(tutorialCodeTable)
+    .map(row => row as unknown as TutorialCode)
+    .filter(tutorialCode => tutorialCode.profileId === activeProfile.id && tutorialCode.courseId === courseId);
 }
 
 export function getCompletedCourses(): number[] {
@@ -440,180 +722,8 @@ export function setCompletedCourses(courseIds: number[]): void {
   setProfileItemAsArray("completedCourses", courseIds);
 }
 
-// Get the store instance for advanced usage
-export function getStore(): Store {
-  return store;
-}
-
-// Export the persister for advanced usage
-export function getPersister() {
-  return persister;
-}
-
-// Export the Firebase persister
-export function getFirebasePersister() {
-  return firebasePersister;
-}
-
-// Initialize Firebase sync for an account
-export async function initializeFirebaseSync(
-  isNewAccount: boolean = false
-): Promise<void> {
-  await initializeFirebasePersister(isNewAccount);
-}
-
-// Enable auto-save for existing accounts (call this when user makes first change)
-export function enableFirebaseAutoSave(): void {
-  if (firebasePersister && getActiveAccount()) {
-    firebasePersister.startAutoSave();
-    console.log("Auto-save enabled for existing account");
-  }
-}
-
-// Get the last sync timestamp for the active account
-export function getLastSyncTimestamp(): string | null {
-  const activeAccount = getActiveAccount();
-  if (!activeAccount) {
-    return null;
-  }
-
-  // Store sync timestamp per account
-  const syncKey = `_lastSync_${activeAccount.id}`;
-  const timestamp = store.getValue(syncKey);
-  return timestamp ? String(timestamp) : null;
-}
-
-// Set the last sync timestamp for the active account
-export function setLastSyncTimestamp(timestamp: string): void {
-  const activeAccount = getActiveAccount();
-  if (!activeAccount) {
-    return;
-  }
-
-  const syncKey = `_lastSync_${activeAccount.id}`;
-  store.setValue(syncKey, timestamp);
-}
-
-// Check if remote data is newer without downloading it
-export async function isRemoteDataNewer(): Promise<boolean> {
-  const activeAccount = getActiveAccount();
-  if (!activeAccount || !activeAccount.id) {
-    return false;
-  }
-
-  try {
-    const response = await fetch(
-      `/api/sync/timestamp?accountId=${activeAccount.id}`
-    );
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return false; // No remote data
-      }
-      throw new Error(
-        `Failed to check remote timestamp: ${response.statusText}`
-      );
-    }
-
-    const remoteInfo = await response.json();
-    const remoteTimestamp = new Date(remoteInfo.lastUpdated).getTime();
-
-    const localTimestamp = getLastSyncTimestamp();
-    const localTime = localTimestamp ? new Date(localTimestamp).getTime() : 0;
-
-    return remoteTimestamp > localTime;
-  } catch (error) {
-    console.warn("Failed to check if remote data is newer:", error);
-    return false;
-  }
-}
-
-// Sync from remote if newer data is available
-export async function syncIfNewer(): Promise<boolean> {
-  const activeAccount = getActiveAccount();
-  if (!activeAccount) {
-    return false;
-  }
-
-  try {
-    const isNewer = await isRemoteDataNewer();
-    if (isNewer) {
-      console.log("Remote data is newer, syncing...");
-
-      // Directly fetch and apply the data without using the persister
-      const response = await fetch(`/api/sync?accountId=${activeAccount.id}`);
-      if (!response.ok) {
-        if (response.status === 404) {
-          return false; // Account not found
-        }
-        throw new Error(`Failed to load: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-
-      // Apply the data to the store
-      const remoteData = result.data.data;
-      if (remoteData && Array.isArray(remoteData) && remoteData.length >= 2) {
-        const currentActiveAccount = getActiveAccount();
-        if (
-          !currentActiveAccount ||
-          currentActiveAccount.id !== activeAccount.id
-        ) {
-          console.warn(
-            "Active account has changed during sync, aborting to prevent data loss."
-          );
-          return false;
-        }
-
-        // Temporarily stop auto-save to prevent POST requests during sync
-        if (firebasePersister) {
-          firebasePersister.stopAutoSave();
-        }
-
-        try {
-          // Clear and rebuild the store with remote data
-          store.delTables();
-          store.delValues();
-
-          // Set tables - remoteData[0] contains the tables
-          const tables = remoteData[0];
-          if (tables) {
-            Object.entries(tables).forEach(([tableId, table]) => {
-              Object.entries(table as any).forEach(([rowId, row]) => {
-                store.setRow(tableId, rowId, row as any);
-              });
-            });
-          }
-
-          // Set values - remoteData[1] contains the values
-          const values = remoteData[1];
-          if (values) {
-            Object.entries(values).forEach(([valueId, value]) => {
-              store.setValue(valueId, value as any);
-            });
-          }
-        } finally {
-          // Don't restart auto-save immediately after sync to prevent unnecessary POST
-          // Auto-save will be re-enabled when user makes changes via enableFirebaseAutoSave()
-        }
-      }
-
-      // Update sync timestamp
-      setLastSyncTimestamp(result.data.lastUpdated);
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.warn("Failed to sync newer data:", error);
-    return false;
-  }
-}
-
 // Account management functions
-export function createAccount(
-  email: string,
-  provider: "google" = "google"
-): Account {
+export function createAccount(email: string, provider: "google" = "google"): Account {
   const newAccount: Account = {
     id: `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
     email: email,
@@ -622,7 +732,7 @@ export function createAccount(
     lastSignIn: new Date().toISOString(),
   };
 
-  store.setRow(FIREBASE_ACCOUNTS_COLLECTION, newAccount.id, newAccount as any);
+  store.setRow("accounts", newAccount.id, newAccount as any);
   store.setValue("activeAccountId", newAccount.id);
   return newAccount;
 }
@@ -631,53 +741,37 @@ export function getActiveAccount(): Account | null {
   const activeAccountId = store.getValue("activeAccountId") as string;
   if (!activeAccountId) return null;
 
-  const account = store.getRow(
-    FIREBASE_ACCOUNTS_COLLECTION,
-    activeAccountId
-  ) as unknown as Account;
+  const account = store.getRow("accounts", activeAccountId) as unknown as Account;
   return account || null;
 }
 
 export function getAllAccounts(): Account[] {
-  const accountsTable = store.getTable(FIREBASE_ACCOUNTS_COLLECTION);
-  return Object.values(accountsTable).map((row) => row as unknown as Account);
+  const accountsTable = store.getTable("accounts");
+  return Object.values(accountsTable).map(row => row as unknown as Account);
 }
 
 export function updateAccountLastSignIn(accountId: string): void {
-  const account = store.getRow(
-    FIREBASE_ACCOUNTS_COLLECTION,
-    accountId
-  ) as unknown as Account;
+  const account = store.getRow("accounts", accountId) as unknown as Account;
   if (account) {
     const updatedAccount = { ...account, lastSignIn: new Date().toISOString() };
-    store.setRow(
-      FIREBASE_ACCOUNTS_COLLECTION,
-      accountId,
-      updatedAccount as any
-    );
+    store.setRow("accounts", accountId, updatedAccount as any);
   }
 }
 
 export function removeAccount(accountId: string): boolean {
-  console.log("Removing account:", accountId);
-  const account = accountId
-    ? store.getRow(FIREBASE_ACCOUNTS_COLLECTION, accountId)
-    : null;
-  if (!account) {
-    return false;
-  }
-  store.delRow(FIREBASE_ACCOUNTS_COLLECTION, accountId);
+  const account = store.getRow("accounts", accountId);
+  if (!account) return false;
 
-  // If this was the active account, clear it
+  store.delRow("accounts", accountId);
+  
   const activeAccountId = store.getValue("activeAccountId") as string;
   if (activeAccountId === accountId) {
     store.delValue("activeAccountId");
   }
 
-  // Force save to localStorage to persist the sign-out changes
   if (persister) {
     persister.save().catch((error: any) => {
-      console.warn("Failed to save sign-out changes to localStorage:", error);
+      console.warn("Failed to save account removal:", error);
     });
   }
 
@@ -685,10 +779,7 @@ export function removeAccount(accountId: string): boolean {
 }
 
 export function setActiveAccount(accountId: string): boolean {
-  const account = store.getRow(
-    FIREBASE_ACCOUNTS_COLLECTION,
-    accountId
-  ) as unknown as Account;
+  const account = store.getRow("accounts", accountId) as unknown as Account;
   if (!account) return false;
 
   store.setValue("activeAccountId", accountId);
@@ -696,37 +787,128 @@ export function setActiveAccount(accountId: string): boolean {
   return true;
 }
 
-// Firebase sync using TinyBase custom persister
-// The sync is handled automatically by the persister
+// Utility functions
+export function getStore(): Store {
+  return store;
+}
 
-// Initialize profile system explicitly (useful for components that need to ensure profiles exist)
+export function getPersister() {
+  return persister;
+}
+
+export function getFirebasePersister() {
+  return firebasePersister;
+}
+
+export async function initializeFirebaseSync(isNewAccount: boolean = false): Promise<void> {
+  await initializeFirebasePersister(isNewAccount);
+}
+
+export function enableFirebaseAutoSave(): void {
+  if (firebasePersister && getActiveAccount()) {
+    firebasePersister.startAutoSave();
+  }
+}
+
+// Migrate existing tutorial code from values to tutorialCode table
+function migrateTutorialCodeToTable(): void {
+  const allValues = store.getValues();
+  const profiles = store.getTable("profiles");
+  
+  Object.keys(profiles).forEach(profileId => {
+    Object.entries(allValues).forEach(([key, value]) => {
+      if (key.startsWith(`${profileId}_userCode_tutorial_`)) {
+        const tutorialId = parseInt(key.replace(`${profileId}_userCode_tutorial_`, ""));
+        const tutorialCodeId = `${profileId}_${tutorialId}`;
+        
+        // Check if already exists in table
+        const existingTutorialCode = store.getRow("tutorialCode", tutorialCodeId);
+        if (!existingTutorialCode) {
+          const tutorialCode: TutorialCode = {
+            id: tutorialCodeId,
+            profileId,
+            tutorialId,
+            courseId: 1, // Default to course 1 for migrated data
+            code: value as string,
+            completed: false,
+            lastAccessed: new Date().toISOString(),
+          };
+          
+          store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
+        }
+      }
+    });
+  });
+}
+
 export async function initializeProfileSystem(): Promise<void> {
   if (typeof window === "undefined") return;
 
   try {
     if (persister) {
-      // Ensure persister is started
       await persister.startAutoLoad();
-      // Always try to start auto-save (it's safe to call multiple times)
       persister.startAutoSave();
     }
-
-    // Ensure default profile exists
+    
     ensureDefaultProfile();
-
-    // Check if user has an account and initialize Firebase sync if needed
+    
+    // Migrate existing tutorial code to the new table structure
+    migrateTutorialCodeToTable();
+    
     const activeAccount = getActiveAccount();
     if (activeAccount) {
       await initializeFirebasePersister();
     }
-
-    // Force save if we created the default profile
-    // if (persister) {
-    //   await persister.save();
-    // }
   } catch (error) {
     console.error("Failed to initialize profile system:", error);
-    // Fallback: create default profile without persistence
     ensureDefaultProfile();
   }
+}
+
+// Legacy compatibility functions (simplified)
+export function getLastSyncTimestamp(): string | null {
+  const activeAccount = getActiveAccount();
+  if (!activeAccount) return null;
+  
+  const accountData = getAccountFromStorage(activeAccount.id);
+  return accountData?.lastUpdated || null;
+}
+
+export function setLastSyncTimestamp(timestamp: string): void {
+  const activeAccount = getActiveAccount();
+  if (!activeAccount) return;
+  
+  const accountData = getAccountFromStorage(activeAccount.id);
+  if (accountData) {
+    accountData.lastUpdated = timestamp;
+    saveAccountToStorage(accountData);
+  }
+}
+
+export async function isRemoteDataNewer(): Promise<boolean> {
+  const activeAccount = getActiveAccount();
+  if (!activeAccount) return false;
+
+  try {
+    const response = await fetch(`/api/accounts?accountId=${activeAccount.id}`);
+    if (!response.ok) return false;
+    
+    const result = await response.json();
+    const remoteTime = new Date(result.data.lastUpdated).getTime();
+    const localTime = new Date(getLastSyncTimestamp() || "1970-01-01").getTime();
+    
+    return remoteTime > localTime;
+  } catch (error) {
+    console.warn("Failed to check remote data:", error);
+    return false;
+  }
+}
+
+export async function syncIfNewer(): Promise<boolean> {
+  const isNewer = await isRemoteDataNewer();
+  if (isNewer && firebasePersister) {
+    await firebasePersister.load();
+    return true;
+  }
+  return false;
 }
