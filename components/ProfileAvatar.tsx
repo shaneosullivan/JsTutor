@@ -17,6 +17,7 @@ export default function ProfileAvatar({
 }: ProfileAvatarProps) {
   const [profileIcon, setProfileIcon] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  const [profileName, setProfileName] = useState("");
 
   // Track client-side mounting to prevent hydration mismatches
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function ProfileAvatar({
     try {
       const activeProfile = getActiveProfile();
       setProfileIcon(activeProfile?.icon || "short_brown");
+      setProfileName(activeProfile?.name || "");
     } catch (error) {
       console.warn("Failed to get active profile for avatar:", error);
       setProfileIcon("short_brown");
@@ -79,7 +81,9 @@ export default function ProfileAvatar({
     <Link
       href="/profiles"
       className={`block hover:scale-110 transition-transform duration-200 ${className}`}
-      title="Manage Profiles"
+      title={
+        profileName ? `${profileName}: Manage Profiles` : "Manage Profiles"
+      }
     >
       {renderIcon()}
     </Link>
