@@ -10,6 +10,7 @@ import {
   User,
   Calendar,
   Clock,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,18 +59,19 @@ export default function ProfilesPageClient({
   const router = useRouter();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [activeProfile, setActiveProfileState] = useState<UserProfile | null>(
-    null,
+    null
   );
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [editingProfile, setEditingProfile] = useState<UserProfile | null>(
-    null,
+    null
   );
   const [deletingProfile, setDeletingProfile] = useState<UserProfile | null>(
-    null,
+    null
   );
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState("short_brown");
   const [isProfilesLoaded, setIsProfilesLoaded] = useState(false);
   const [isGoogleReady, setIsGoogleReady] = useState(false);
@@ -168,15 +170,27 @@ export default function ProfilesPageClient({
     setSelectedIcon("short_brown");
   };
 
-  const handleDeleteProfile = () => {
-    if (!deletingProfile) return;
+  const handleDeleteProfile = async () => {
+    if (!deletingProfile) {
+      return;
+    }
 
-    const wasDeleted = deleteProfile(deletingProfile.id);
-    if (wasDeleted) {
-      const updatedProfiles = getAllProfiles();
-      const currentActive = getActiveProfile();
-      setProfiles(updatedProfiles);
-      setActiveProfileState(currentActive);
+    setIsDeleting(true);
+    try {
+      const wasDeleted = await deleteProfile(deletingProfile.id);
+      if (wasDeleted) {
+        const updatedProfiles = getAllProfiles();
+        const currentActive = getActiveProfile();
+        setProfiles(updatedProfiles);
+        setActiveProfileState(currentActive);
+      } else {
+        // Handle deletion failure - could show an error message
+        console.error("Failed to delete profile");
+      }
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+    } finally {
+      setIsDeleting(false);
     }
 
     setIsDeleteDialogOpen(false);
@@ -244,7 +258,7 @@ export default function ProfilesPageClient({
                     <div className="w-12 h-12 rounded-full flex items-center justify-center p-1 bg-white shadow-md">
                       {(() => {
                         const iconData = getProfileIcon(
-                          profile.icon || "short_brown",
+                          profile.icon || "short_brown"
                         );
                         if (iconData) {
                           const IconComponent = iconData.component;
@@ -503,9 +517,17 @@ export default function ProfilesPageClient({
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteProfile}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold"
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold disabled:opacity-50"
             >
-              🗑️ Delete Profile
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>🗑️ Delete Profile</>
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

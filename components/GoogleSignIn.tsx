@@ -95,6 +95,8 @@ export default function GoogleSignIn({
         client_id: clientId,
         callback: handleCredentialResponse,
         auto_select: false,
+        // Add callback for when user dismisses or cancels the prompt
+        cancel_on_tap_outside: true,
       });
       setIsConfigured(true);
       // Notify parent that Google is ready
@@ -108,6 +110,12 @@ export default function GoogleSignIn({
   };
 
   const handleCredentialResponse = async (response: any) => {
+    // Clear the timeout since sign-in is proceeding
+    if ((window as any).googleSignInTimeout) {
+      clearTimeout((window as any).googleSignInTimeout);
+      (window as any).googleSignInTimeout = null;
+    }
+    
     setIsLoading(true);
     try {
       // Send credential to our OAuth callback API
@@ -188,11 +196,31 @@ export default function GoogleSignIn({
     if (!window.google?.accounts || !isConfigured) return;
 
     setIsLoading(true);
+    
+    // Store timeout reference to clear it if needed
+    let timeoutRef: NodeJS.Timeout | null = null;
+    
     try {
       window.google.accounts.id.prompt();
+      
+      // Set a timeout to reset loading state if user dismisses the prompt
+      // This handles the case where the user dismisses the modal without completing sign-in
+      timeoutRef = setTimeout(() => {
+        // Only reset loading if we're still in loading state and no account was created
+        if (isLoading && !getActiveAccount()) {
+          console.log("Sign-in prompt timeout - assuming user dismissed or cancelled");
+          setIsLoading(false);
+        }
+      }, 10000); // 10 second timeout - reasonable time for user to interact with prompt
+      
+      // Store the timeout reference so we can clear it if sign-in succeeds
+      (window as any).googleSignInTimeout = timeoutRef;
     } catch (error) {
       console.error("Failed to show Google sign-in prompt:", error);
       setIsLoading(false);
+      if (timeoutRef) {
+        clearTimeout(timeoutRef);
+      }
     }
   };
 

@@ -36,6 +36,7 @@ const DEFAULT_PROFILE_ID = "default";
 const store: Store = createStore();
 let persister: any = null;
 let firebasePersister: any = null;
+let isLoadingFromFirebase = false;
 
 // Initialize persistence only on client side
 if (typeof window !== "undefined") {
@@ -52,6 +53,7 @@ if (typeof window !== "undefined") {
       }
 
       try {
+        isLoadingFromFirebase = true;
         // Load account data
         const accountResponse = await fetch(
           `/api/accounts?accountId=${activeAccount.id}`,
@@ -67,9 +69,142 @@ if (typeof window !== "undefined") {
         );
         if (profilesResponse.ok) {
           const profilesResult = await profilesResponse.json();
-          profilesResult.data.forEach((profile: UserProfile) => {
-            saveProfileToStorage(profile);
+          
+          // Check if existing local profiles have progress that should be preserved
+          const existingProfiles = store.getTable("profiles");
+          const existingTutorialCode = store.getTable("tutorialCode");
+          const existingValues = store.getValues();
+          
+          // Find profiles with progress (tutorial code or completed tutorials)
+          const profilesWithProgress = Object.entries(existingProfiles).filter(([profileId, _profileData]) => {
+            // Check if this profile has tutorial code
+            const hasTutorialCode = Object.keys(existingTutorialCode).some(codeId => 
+              codeId.startsWith(`${profileId}_`)
+            );
+            
+            // Check if this profile has completed tutorials or other progress
+            const hasProgressValues = Object.keys(existingValues).some(key => 
+              key.startsWith(`${profileId}_`) && 
+              (key.includes("completedTutorials") || key.includes("currentTutorial"))
+            );
+            
+            return hasTutorialCode || hasProgressValues;
           });
+          
+          // Load server profiles into TinyBase store
+          if (profilesResult.data && profilesResult.data.length > 0) {
+            profilesResult.data.forEach((profile: UserProfile) => {
+              // Save to both localStorage and TinyBase store
+              saveProfileToStorage(profile);
+              store.setRow("profiles", profile.id, profile as any);
+            });
+          }
+          
+          // Handle local profiles with progress
+          if (profilesWithProgress.length > 0) {
+            for (const [profileId, profileData] of profilesWithProgress) {
+              const profile = profileData as unknown as UserProfile;
+              
+              // Skip if this profile already exists on the server
+              const existsOnServer = profilesResult.data?.some((serverProfile: UserProfile) => 
+                serverProfile.id === profileId
+              );
+              
+              if (!existsOnServer) {
+                // Create a new profile ID to avoid conflicts
+                const newProfileId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+                
+                // Update the profile with the new ID and account ID
+                const updatedProfile: UserProfile = {
+                  ...profile,
+                  id: newProfileId,
+                  accountId: activeAccount.id,
+                  name: profile.name + " (Local Progress)",
+                  lastActive: new Date().toISOString(),
+                };
+                
+                // Save the updated profile to TinyBase store
+                store.setRow("profiles", newProfileId, updatedProfile as any);
+                
+                // Migrate tutorial code to use the new profile ID
+                Object.keys(existingTutorialCode).forEach(codeId => {
+                  if (codeId.startsWith(`${profileId}_`)) {
+                    const tutorialCode = existingTutorialCode[codeId] as unknown as TutorialCode;
+                    const newCodeId = codeId.replace(`${profileId}_`, `${newProfileId}_`);
+                    
+                    const updatedTutorialCode: TutorialCode = {
+                      ...tutorialCode,
+                      id: newCodeId,
+                      profileId: newProfileId,
+                    };
+                    
+                    store.setRow("tutorialCode", newCodeId, updatedTutorialCode as any);
+                  }
+                });
+                
+                // Migrate progress values to use the new profile ID
+                Object.keys(existingValues).forEach(key => {
+                  if (key.startsWith(`${profileId}_`)) {
+                    const newKey = key.replace(`${profileId}_`, `${newProfileId}_`);
+                    const value = existingValues[key];
+                    store.setValue(newKey, value);
+                  }
+                });
+                
+                // Upload the new profile to the server
+                try {
+                  await fetch("/api/profiles", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(updatedProfile),
+                  });
+                  
+                  // Save to localStorage as well
+                  saveProfileToStorage(updatedProfile);
+                  
+                  // Sync tutorial code and progress to server
+                  await syncLocalProgressToServer(activeAccount.id, newProfileId);
+                } catch (error) {
+                  console.warn("Failed to upload local profile to server:", error);
+                }
+              }
+            }
+          }
+          
+          // Clean up old local profiles
+          Object.keys(existingProfiles).forEach(profileId => {
+            const existsOnServer = profilesResult.data?.some((serverProfile: UserProfile) => 
+              serverProfile.id === profileId
+            );
+            
+            if (!existsOnServer) {
+              // Remove the original local profile (either it was migrated or had no progress)
+              store.delRow("profiles", profileId);
+              
+              // Clean up original tutorial code and values
+              Object.keys(existingTutorialCode).forEach(codeId => {
+                if (codeId.startsWith(`${profileId}_`)) {
+                  store.delRow("tutorialCode", codeId);
+                }
+              });
+              
+              Object.keys(existingValues).forEach(key => {
+                if (key.startsWith(`${profileId}_`)) {
+                  store.delValue(key);
+                }
+              });
+            }
+          });
+          
+          // Set the first profile as active if no active profile is set
+          const currentActiveProfileId = store.getValue("activeProfileId");
+          if (!currentActiveProfileId) {
+            const allProfiles = store.getTable("profiles");
+            const profileIds = Object.keys(allProfiles);
+            if (profileIds.length > 0) {
+              store.setValue("activeProfileId", profileIds[0]);
+            }
+          }
         }
 
         // Load course progress for active profile
@@ -90,6 +225,8 @@ if (typeof window !== "undefined") {
       } catch (error) {
         console.warn("Failed to load from Firebase:", error);
         return undefined;
+      } finally {
+        isLoadingFromFirebase = false;
       }
     },
     // setPersisted: Save data to Firebase based on change type
@@ -116,7 +253,7 @@ if (typeof window !== "undefined") {
     .startAutoLoad()
     .then(() => {
       persister.startAutoSave();
-      ensureDefaultProfile();
+      // Don't call ensureDefaultProfile here - let initializeFirebasePersister handle it
       initializeFirebasePersister();
     })
     .catch((error: any) => {
@@ -322,6 +459,61 @@ async function processPendingChanges(
   pendingChanges.clear();
 }
 
+// Sync local progress to server for a migrated profile
+async function syncLocalProgressToServer(accountId: string, profileId: string): Promise<void> {
+  try {
+    // Get tutorial code for this profile
+    const tutorialCodeTable = store.getTable("tutorialCode");
+    const profileTutorialCode = Object.entries(tutorialCodeTable).filter(([codeId]) => 
+      codeId.startsWith(`${profileId}_`)
+    );
+    
+    // Group tutorial code by course
+    const courseGroups = new Map<number, TutorialCode[]>();
+    profileTutorialCode.forEach(([_, tutorialData]) => {
+      const tutorial = tutorialData as unknown as TutorialCode;
+      if (!courseGroups.has(tutorial.courseId)) {
+        courseGroups.set(tutorial.courseId, []);
+      }
+      courseGroups.get(tutorial.courseId)!.push(tutorial);
+    });
+    
+    // Sync each course's tutorial code
+    for (const [courseId, tutorials] of courseGroups) {
+      await syncTutorialCodeForCourse(accountId, profileId, courseId, tutorials);
+    }
+    
+    // Sync other progress values
+    const values = store.getValues();
+    const profileValues = Object.entries(values).filter(([key]) => 
+      key.startsWith(`${profileId}_`)
+    );
+    
+    if (profileValues.length > 0) {
+      // Group values by course
+      const courseGroups = new Map<string, Record<string, any>>();
+      
+      profileValues.forEach(([key, value]) => {
+        const courseId = extractCourseId(key);
+        if (courseId) {
+          if (!courseGroups.has(courseId)) {
+            courseGroups.set(courseId, {});
+          }
+          const cleanKey = key.replace(`${profileId}_`, "");
+          courseGroups.get(courseId)![cleanKey] = value;
+        }
+      });
+      
+      // Sync each course's progress
+      for (const [courseId, courseData] of courseGroups) {
+        await syncCourseProgressForCourse(accountId, profileId, courseId, courseData);
+      }
+    }
+  } catch (error) {
+    console.warn("Failed to sync local progress to server:", error);
+  }
+}
+
 // Extract course ID from a profile-scoped key
 function extractCourseId(key: string): string | null {
   if (key.includes("_course_")) {
@@ -456,21 +648,35 @@ async function initializeFirebasePersister(
 
   try {
     if (isNewAccount) {
+      // For new accounts, ensure we have a default profile and start auto-save
+      ensureDefaultProfile();
       firebasePersister.startAutoSave();
     } else {
+      // For existing accounts, load profiles from server first
       await firebasePersister.load();
       if (persister) {
         await persister.save();
       }
+      
+      // Only create default profile if no profiles were loaded from server
+      const profiles = store.getTable("profiles");
+      if (Object.keys(profiles).length === 0) {
+        ensureDefaultProfile();
+      }
     }
   } catch (error) {
     console.warn("Failed to initialize Firebase persister:", error);
+    // If Firebase loading fails, ensure we have a default profile
+    ensureDefaultProfile();
   }
 }
 
 // Profile management functions
 function ensureDefaultProfile(): void {
   if (typeof window === "undefined") return;
+  
+  // Don't create default profile if we're currently loading from Firebase
+  if (isLoadingFromFirebase) return;
 
   const profiles = getProfilesInternal();
   if (profiles.length === 0) {
@@ -596,42 +802,60 @@ export function updateProfile(updatedProfile: UserProfile): boolean {
   return true;
 }
 
-export function deleteProfile(profileId: string): boolean {
+export async function deleteProfile(profileId: string): Promise<boolean> {
   const profiles = getAllProfiles();
   if (profiles.length <= 1) {
     return false;
   }
 
-  store.delRow("profiles", profileId);
-
-  const activeProfileId = store.getValue("activeProfileId") as string;
-  if (activeProfileId === profileId) {
-    const remainingProfiles = getAllProfiles();
-    if (remainingProfiles.length > 0) {
-      setActiveProfile(remainingProfiles[0].id);
-    }
+  const activeAccount = getActiveAccount();
+  if (!activeAccount) {
+    return false;
   }
 
-  // Clear profile data
-  const allValues = store.getValues();
-  Object.keys(allValues).forEach((valueId) => {
-    if (valueId.startsWith(`${profileId}_`)) {
-      store.delValue(valueId);
+  try {
+    // Delete from server first - this will also delete all course progress in a batch
+    await fetch(`/api/profiles?profileId=${profileId}`, {
+      method: "DELETE",
+    });
+
+    // Now delete from local storage
+    store.delRow("profiles", profileId);
+
+    const activeProfileId = store.getValue("activeProfileId") as string;
+    if (activeProfileId === profileId) {
+      const remainingProfiles = getAllProfiles();
+      if (remainingProfiles.length > 0) {
+        setActiveProfile(remainingProfiles[0].id);
+      }
     }
-  });
 
-  // Clear tutorial code for this profile
-  const tutorialCodeTable = store.getTable("tutorialCode");
-  Object.keys(tutorialCodeTable).forEach((tutorialCodeId) => {
-    if (tutorialCodeId.startsWith(`${profileId}_`)) {
-      store.delRow("tutorialCode", tutorialCodeId);
-    }
-  });
+    // Clear profile data
+    const allValues = store.getValues();
+    Object.keys(allValues).forEach((valueId) => {
+      if (valueId.startsWith(`${profileId}_`)) {
+        store.delValue(valueId);
+      }
+    });
 
-  // Remove from local storage
-  removeProfileFromStorage(profileId);
+    // Clear tutorial code for this profile
+    const tutorialCodeTable = store.getTable("tutorialCode");
+    Object.keys(tutorialCodeTable).forEach((tutorialCodeId) => {
+      if (tutorialCodeId.startsWith(`${profileId}_`)) {
+        store.delRow("tutorialCode", tutorialCodeId);
+      }
+    });
 
-  return true;
+    // Remove from local storage
+    removeProfileFromStorage(profileId);
+
+    return true;
+  } catch (error) {
+    console.error("Failed to delete profile from server:", error);
+    // Even if server deletion fails, we might want to still delete locally
+    // But in this case, let's return false to indicate failure
+    return false;
+  }
 }
 
 // Profile-aware storage functions
