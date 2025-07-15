@@ -43,9 +43,9 @@ import {
   updateProfile,
   deleteProfile,
   getStore,
-  type UserProfile,
   type Account,
 } from "@/lib/profile-storage";
+import { type UserProfile } from "@/lib/types";
 import GoogleSignIn from "@/components/GoogleSignIn";
 
 interface ProfilesPageClientProps {
