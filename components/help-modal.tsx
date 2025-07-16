@@ -113,7 +113,9 @@ export default function HelpModal({
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded p-1 mr-2">
               <CircleHelp className="h-4 w-4" />
             </div>
-            Need Help?
+            {currentTutorial
+              ? "Help for: " + currentTutorial.title
+              : "Need Help?"}
           </DialogTitle>
           <DialogDescription className="text-slate-600">
             Get help with your current tutorial, drawing commands, and
@@ -125,12 +127,6 @@ export default function HelpModal({
           {/* Current Tutorial Help */}
           {currentTutorial && (
             <Card className="border-yellow-200 bg-yellow-50">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <span className="mr-2">💡</span>
-                  Help for: {currentTutorial.title}
-                </CardTitle>
-              </CardHeader>
               <CardContent>
                 <div className="help-prose prose prose-sm max-w-none mb-4">
                   <div className="text-slate-700 leading-relaxed">

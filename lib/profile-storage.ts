@@ -48,7 +48,7 @@ if (typeof window !== "undefined") {
     // getPersisted: Load data from Firebase (load all data on startup)
     async (): Promise<undefined> => {
       const activeAccount = getActiveAccount();
-      if (!activeAccount) {
+      if (!activeAccount || !isValidRecord(activeAccount)) {
         return undefined;
       }
 
@@ -56,7 +56,7 @@ if (typeof window !== "undefined") {
         isLoadingFromFirebase = true;
         // Load account data
         const accountResponse = await fetch(
-          `/api/accounts?accountId=${activeAccount.id}`,
+          `/api/accounts?accountId=${activeAccount.id}`
         );
         if (accountResponse.ok) {
           const accountResult = await accountResponse.json();
@@ -65,32 +65,36 @@ if (typeof window !== "undefined") {
 
         // Load profiles
         const profilesResponse = await fetch(
-          `/api/profiles?accountId=${activeAccount.id}`,
+          `/api/profiles?accountId=${activeAccount.id}`
         );
         if (profilesResponse.ok) {
           const profilesResult = await profilesResponse.json();
-          
+
           // Check if existing local profiles have progress that should be preserved
           const existingProfiles = store.getTable("profiles");
           const existingTutorialCode = store.getTable("tutorialCode");
           const existingValues = store.getValues();
-          
+
           // Find profiles with progress (tutorial code or completed tutorials)
-          const profilesWithProgress = Object.entries(existingProfiles).filter(([profileId, _profileData]) => {
-            // Check if this profile has tutorial code
-            const hasTutorialCode = Object.keys(existingTutorialCode).some(codeId => 
-              codeId.startsWith(`${profileId}_`)
-            );
-            
-            // Check if this profile has completed tutorials or other progress
-            const hasProgressValues = Object.keys(existingValues).some(key => 
-              key.startsWith(`${profileId}_`) && 
-              (key.includes("completedTutorials") || key.includes("currentTutorial"))
-            );
-            
-            return hasTutorialCode || hasProgressValues;
-          });
-          
+          const profilesWithProgress = Object.entries(existingProfiles).filter(
+            ([profileId, _profileData]) => {
+              // Check if this profile has tutorial code
+              const hasTutorialCode = Object.keys(existingTutorialCode).some(
+                (codeId) => codeId.startsWith(`${profileId}_`)
+              );
+
+              // Check if this profile has completed tutorials or other progress
+              const hasProgressValues = Object.keys(existingValues).some(
+                (key) =>
+                  key.startsWith(`${profileId}_`) &&
+                  (key.includes("completedTutorials") ||
+                    key.includes("currentTutorial"))
+              );
+
+              return hasTutorialCode || hasProgressValues;
+            }
+          );
+
           // Load server profiles into TinyBase store
           if (profilesResult.data && profilesResult.data.length > 0) {
             profilesResult.data.forEach((profile: UserProfile) => {
@@ -99,21 +103,21 @@ if (typeof window !== "undefined") {
               store.setRow("profiles", profile.id, profile as any);
             });
           }
-          
+
           // Handle local profiles with progress
           if (profilesWithProgress.length > 0) {
             for (const [profileId, profileData] of profilesWithProgress) {
               const profile = profileData as unknown as UserProfile;
-              
+
               // Skip if this profile already exists on the server
-              const existsOnServer = profilesResult.data?.some((serverProfile: UserProfile) => 
-                serverProfile.id === profileId
+              const existsOnServer = profilesResult.data?.some(
+                (serverProfile: UserProfile) => serverProfile.id === profileId
               );
-              
+
               if (!existsOnServer) {
                 // Create a new profile ID to avoid conflicts
                 const newProfileId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-                
+
                 // Update the profile with the new ID and account ID
                 const updatedProfile: UserProfile = {
                   ...profile,
@@ -122,35 +126,47 @@ if (typeof window !== "undefined") {
                   name: profile.name + " (Local Progress)",
                   lastActive: new Date().toISOString(),
                 };
-                
+
                 // Save the updated profile to TinyBase store
                 store.setRow("profiles", newProfileId, updatedProfile as any);
-                
+
                 // Migrate tutorial code to use the new profile ID
-                Object.keys(existingTutorialCode).forEach(codeId => {
+                Object.keys(existingTutorialCode).forEach((codeId) => {
                   if (codeId.startsWith(`${profileId}_`)) {
-                    const tutorialCode = existingTutorialCode[codeId] as unknown as TutorialCode;
-                    const newCodeId = codeId.replace(`${profileId}_`, `${newProfileId}_`);
-                    
+                    const tutorialCode = existingTutorialCode[
+                      codeId
+                    ] as unknown as TutorialCode;
+                    const newCodeId = codeId.replace(
+                      `${profileId}_`,
+                      `${newProfileId}_`
+                    );
+
                     const updatedTutorialCode: TutorialCode = {
                       ...tutorialCode,
                       id: newCodeId,
                       profileId: newProfileId,
                     };
-                    
-                    store.setRow("tutorialCode", newCodeId, updatedTutorialCode as any);
+
+                    store.setRow(
+                      "tutorialCode",
+                      newCodeId,
+                      updatedTutorialCode as any
+                    );
                   }
                 });
-                
+
                 // Migrate progress values to use the new profile ID
-                Object.keys(existingValues).forEach(key => {
+                Object.keys(existingValues).forEach((key) => {
                   if (key.startsWith(`${profileId}_`)) {
-                    const newKey = key.replace(`${profileId}_`, `${newProfileId}_`);
+                    const newKey = key.replace(
+                      `${profileId}_`,
+                      `${newProfileId}_`
+                    );
                     const value = existingValues[key];
                     store.setValue(newKey, value);
                   }
                 });
-                
+
                 // Upload the new profile to the server
                 try {
                   await fetch("/api/profiles", {
@@ -158,44 +174,50 @@ if (typeof window !== "undefined") {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(updatedProfile),
                   });
-                  
+
                   // Save to localStorage as well
                   saveProfileToStorage(updatedProfile);
-                  
+
                   // Sync tutorial code and progress to server
-                  await syncLocalProgressToServer(activeAccount.id, newProfileId);
+                  await syncLocalProgressToServer(
+                    activeAccount.id,
+                    newProfileId
+                  );
                 } catch (error) {
-                  console.warn("Failed to upload local profile to server:", error);
+                  console.warn(
+                    "Failed to upload local profile to server:",
+                    error
+                  );
                 }
               }
             }
           }
-          
+
           // Clean up old local profiles
-          Object.keys(existingProfiles).forEach(profileId => {
-            const existsOnServer = profilesResult.data?.some((serverProfile: UserProfile) => 
-              serverProfile.id === profileId
+          Object.keys(existingProfiles).forEach((profileId) => {
+            const existsOnServer = profilesResult.data?.some(
+              (serverProfile: UserProfile) => serverProfile.id === profileId
             );
-            
+
             if (!existsOnServer) {
               // Remove the original local profile (either it was migrated or had no progress)
               store.delRow("profiles", profileId);
-              
+
               // Clean up original tutorial code and values
-              Object.keys(existingTutorialCode).forEach(codeId => {
+              Object.keys(existingTutorialCode).forEach((codeId) => {
                 if (codeId.startsWith(`${profileId}_`)) {
                   store.delRow("tutorialCode", codeId);
                 }
               });
-              
-              Object.keys(existingValues).forEach(key => {
+
+              Object.keys(existingValues).forEach((key) => {
                 if (key.startsWith(`${profileId}_`)) {
                   store.delValue(key);
                 }
               });
             }
           });
-          
+
           // Set the first profile as active if no active profile is set
           const currentActiveProfileId = store.getValue("activeProfileId");
           if (!currentActiveProfileId) {
@@ -211,7 +233,7 @@ if (typeof window !== "undefined") {
         const activeProfile = getActiveProfile();
         if (activeProfile) {
           const progressResponse = await fetch(
-            `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}`,
+            `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}`
           );
           if (progressResponse.ok) {
             const progressResult = await progressResponse.json();
@@ -245,7 +267,7 @@ if (typeof window !== "undefined") {
       throttledSync(activeAccount, activeProfile);
     },
     () => null, // addPersisterListener
-    () => {}, // delPersisterListener
+    () => {} // delPersisterListener
   );
 
   // Start persistence
@@ -294,7 +316,7 @@ let lastSyncedState = {
 
 async function processPendingChanges(
   activeAccount: Account,
-  activeProfile: UserProfile,
+  activeProfile: UserProfile
 ) {
   // Get current state
   const currentProfiles = store.getTable("profiles");
@@ -364,14 +386,14 @@ async function processPendingChanges(
     ([_, tutorialData]) => {
       const tutorial = tutorialData as unknown as TutorialCode;
       return tutorial.profileId === activeProfile.id;
-    },
+    }
   );
 
   // Check if any tutorial code changed for the active profile
   const changedTutorialCode = activeProfileTutorialCode.filter(
     ([tutorialId, tutorialData]) =>
       JSON.stringify(tutorialData) !==
-      JSON.stringify(lastSyncedState.tutorialCode[tutorialId]),
+      JSON.stringify(lastSyncedState.tutorialCode[tutorialId])
   );
 
   if (changedTutorialCode.length > 0) {
@@ -393,14 +415,14 @@ async function processPendingChanges(
           activeAccount.id,
           activeProfile.id,
           courseId,
-          tutorials,
+          tutorials
         );
       }
 
       // Update last synced state for changed tutorial code
       changedTutorialCode.forEach(([tutorialId, tutorialData]) => {
         lastSyncedState.tutorialCode[tutorialId] = JSON.parse(
-          JSON.stringify(tutorialData),
+          JSON.stringify(tutorialData)
         );
       });
     } catch (error) {
@@ -411,13 +433,13 @@ async function processPendingChanges(
   // Sync other course progress values (completed courses, current tutorial, etc.)
   const activeProfilePrefix = `${activeProfile.id}_`;
   const relevantValues = Object.entries(currentValues).filter(([key]) =>
-    key.startsWith(activeProfilePrefix),
+    key.startsWith(activeProfilePrefix)
   );
 
   // Check if any course progress values changed for the active profile
   const changedValues = relevantValues.filter(
     ([key, value]) =>
-      JSON.stringify(value) !== JSON.stringify(lastSyncedState.values[key]),
+      JSON.stringify(value) !== JSON.stringify(lastSyncedState.values[key])
   );
 
   if (changedValues.length > 0) {
@@ -442,7 +464,7 @@ async function processPendingChanges(
           activeAccount.id,
           activeProfile.id,
           courseId,
-          courseData,
+          courseData
         );
       }
 
@@ -460,14 +482,17 @@ async function processPendingChanges(
 }
 
 // Sync local progress to server for a migrated profile
-async function syncLocalProgressToServer(accountId: string, profileId: string): Promise<void> {
+async function syncLocalProgressToServer(
+  accountId: string,
+  profileId: string
+): Promise<void> {
   try {
     // Get tutorial code for this profile
     const tutorialCodeTable = store.getTable("tutorialCode");
-    const profileTutorialCode = Object.entries(tutorialCodeTable).filter(([codeId]) => 
-      codeId.startsWith(`${profileId}_`)
+    const profileTutorialCode = Object.entries(tutorialCodeTable).filter(
+      ([codeId]) => codeId.startsWith(`${profileId}_`)
     );
-    
+
     // Group tutorial code by course
     const courseGroups = new Map<number, TutorialCode[]>();
     profileTutorialCode.forEach(([_, tutorialData]) => {
@@ -477,22 +502,27 @@ async function syncLocalProgressToServer(accountId: string, profileId: string): 
       }
       courseGroups.get(tutorial.courseId)!.push(tutorial);
     });
-    
+
     // Sync each course's tutorial code
     for (const [courseId, tutorials] of courseGroups) {
-      await syncTutorialCodeForCourse(accountId, profileId, courseId, tutorials);
+      await syncTutorialCodeForCourse(
+        accountId,
+        profileId,
+        courseId,
+        tutorials
+      );
     }
-    
+
     // Sync other progress values
     const values = store.getValues();
-    const profileValues = Object.entries(values).filter(([key]) => 
+    const profileValues = Object.entries(values).filter(([key]) =>
       key.startsWith(`${profileId}_`)
     );
-    
+
     if (profileValues.length > 0) {
       // Group values by course
       const courseGroups = new Map<string, Record<string, any>>();
-      
+
       profileValues.forEach(([key, value]) => {
         const courseId = extractCourseId(key);
         if (courseId) {
@@ -503,10 +533,15 @@ async function syncLocalProgressToServer(accountId: string, profileId: string): 
           courseGroups.get(courseId)![cleanKey] = value;
         }
       });
-      
+
       // Sync each course's progress
       for (const [courseId, courseData] of courseGroups) {
-        await syncCourseProgressForCourse(accountId, profileId, courseId, courseData);
+        await syncCourseProgressForCourse(
+          accountId,
+          profileId,
+          courseId,
+          courseData
+        );
       }
     }
   } catch (error) {
@@ -533,12 +568,12 @@ async function syncTutorialCodeForCourse(
   accountId: string,
   profileId: string,
   courseId: number,
-  tutorials: TutorialCode[],
+  tutorials: TutorialCode[]
 ): Promise<void> {
   // Get or create course progress
   let courseProgress = getCourseProgressByAccountAndProfileFromStorage(
     accountId,
-    profileId,
+    profileId
   ).find((cp) => cp.courseId === courseId.toString());
 
   if (!courseProgress) {
@@ -581,12 +616,12 @@ async function syncCourseProgressForCourse(
   accountId: string,
   profileId: string,
   courseId: string,
-  courseData: Record<string, any>,
+  courseData: Record<string, any>
 ): Promise<void> {
   // Get or create course progress
   let courseProgress = getCourseProgressByAccountAndProfileFromStorage(
     accountId,
-    profileId,
+    profileId
   ).find((cp) => cp.courseId === courseId);
 
   if (!courseProgress) {
@@ -635,7 +670,7 @@ async function syncCourseProgressForCourse(
 
 // Initialize Firebase persister
 async function initializeFirebasePersister(
-  isNewAccount: boolean = false,
+  isNewAccount: boolean = false
 ): Promise<void> {
   if (typeof window === "undefined" || !firebasePersister) {
     return;
@@ -657,12 +692,17 @@ async function initializeFirebasePersister(
       if (persister) {
         await persister.save();
       }
-      
+
       // Only create default profile if no profiles were loaded from server
       const profiles = store.getTable("profiles");
       if (Object.keys(profiles).length === 0) {
         ensureDefaultProfile();
       }
+
+      // After loading profiles, sync course data if newer versions exist
+      setTimeout(() => {
+        syncAllCoursesIfNewer();
+      }, 1000); // Small delay to ensure profile loading is complete
     }
   } catch (error) {
     console.warn("Failed to initialize Firebase persister:", error);
@@ -674,7 +714,7 @@ async function initializeFirebasePersister(
 // Profile management functions
 function ensureDefaultProfile(): void {
   if (typeof window === "undefined") return;
-  
+
   // Don't create default profile if we're currently loading from Firebase
   if (isLoadingFromFirebase) return;
 
@@ -703,7 +743,7 @@ function ensureDefaultProfile(): void {
 function getProfilesInternal(): UserProfile[] {
   const profilesTable = store.getTable("profiles");
   return Object.values(profilesTable).map(
-    (row) => row as unknown as UserProfile,
+    (row) => row as unknown as UserProfile
   );
 }
 
@@ -719,7 +759,7 @@ export function getActiveProfile(): UserProfile {
     (store.getValue("activeProfileId") as string) || DEFAULT_PROFILE_ID;
   const profile = store.getRow(
     "profiles",
-    activeProfileId,
+    activeProfileId
   ) as unknown as UserProfile;
 
   if (!profile) {
@@ -758,7 +798,7 @@ export function setActiveProfile(profileId: string): boolean {
 
 export function createProfile(
   name: string,
-  icon: string = "short_brown",
+  icon: string = "short_brown"
 ): UserProfile {
   const activeAccount = getActiveAccount();
   const newProfile: UserProfile = {
@@ -896,7 +936,7 @@ export function setProfileItemAsArray(key: string, value: any[]): void {
 
 export function getProfileItemAsObject(
   key: string,
-  defaultValue: any = {},
+  defaultValue: any = {}
 ): any {
   try {
     const item = getProfileItem(key);
@@ -918,7 +958,7 @@ export function getCompletedTutorials(courseId: number): number[] {
 
 export function setCompletedTutorials(
   courseId: number,
-  tutorialIds: number[],
+  tutorialIds: number[]
 ): void {
   setProfileItemAsArray(`completedTutorials_course_${courseId}`, tutorialIds);
 }
@@ -930,11 +970,11 @@ export function getCurrentTutorial(courseId: number): number | null {
 
 export function setCurrentTutorial(
   courseId: number,
-  tutorialOrder: number,
+  tutorialOrder: number
 ): void {
   setProfileItem(
     `currentTutorial_course_${courseId}`,
-    tutorialOrder.toString(),
+    tutorialOrder.toString()
   );
 }
 
@@ -944,7 +984,7 @@ export function getUserCode(tutorialId: number): string | null {
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
   const tutorialCode = store.getRow(
     "tutorialCode",
-    tutorialCodeId,
+    tutorialCodeId
   ) as unknown as TutorialCode;
   return tutorialCode?.code || null;
 }
@@ -952,22 +992,33 @@ export function getUserCode(tutorialId: number): string | null {
 export function setUserCode(
   tutorialId: number,
   code: string,
-  courseId: number = 1,
+  courseId: number = 1
 ): void {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
 
-  const tutorialCode: TutorialCode = {
-    id: tutorialCodeId,
-    profileId: activeProfile.id,
-    tutorialId,
-    courseId,
-    code,
-    completed: false, // Will be updated separately
-    lastAccessed: new Date().toISOString(),
-  };
+  const existingTutorialCode = getTutorialCode(tutorialId);
 
-  store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
+  const newTutorialRecord: TutorialCode =
+    existingTutorialCode && isValidRecord(existingTutorialCode)
+      ? {
+          ...existingTutorialCode,
+          code,
+          lastAccessed: new Date().toISOString(),
+        }
+      : {
+          id: tutorialCodeId,
+          profileId: activeProfile.id,
+          tutorialId,
+          courseId,
+          code,
+          completed: false,
+          lastAccessed: new Date().toISOString(),
+        };
+
+  console.log("setUserCode", newTutorialRecord);
+
+  store.setRow("tutorialCode", tutorialCodeId, newTutorialRecord as any);
 
   // Force the Firebase persister to sync
   if (firebasePersister) {
@@ -980,7 +1031,7 @@ export function getTutorialCode(tutorialId: number): TutorialCode | null {
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
   const tutorialCode = store.getRow(
     "tutorialCode",
-    tutorialCodeId,
+    tutorialCodeId
   ) as unknown as TutorialCode;
   return tutorialCode || null;
 }
@@ -988,17 +1039,19 @@ export function getTutorialCode(tutorialId: number): TutorialCode | null {
 export function setTutorialCompleted(
   tutorialId: number,
   completed: boolean,
-  courseId: number = 1,
+  courseId: number = 1
 ): void {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
 
+  console.log("setTutorialCompleted ", tutorialId, completed);
+
   let tutorialCode = store.getRow(
     "tutorialCode",
-    tutorialCodeId,
+    tutorialCodeId
   ) as unknown as TutorialCode;
 
-  if (!tutorialCode) {
+  if (!isValidRecord(tutorialCode)) {
     tutorialCode = {
       id: tutorialCodeId,
       profileId: activeProfile.id,
@@ -1039,7 +1092,7 @@ export function getTutorialCodesForCourse(courseId: number): TutorialCode[] {
     .filter(
       (tutorialCode) =>
         tutorialCode.profileId === activeProfile.id &&
-        tutorialCode.courseId === courseId,
+        tutorialCode.courseId === courseId
     );
 }
 
@@ -1054,7 +1107,7 @@ export function setCompletedCourses(courseIds: number[]): void {
 // Account management functions
 export function createAccount(
   email: string,
-  provider: "google" = "google",
+  provider: "google" = "google"
 ): Account {
   const newAccount: Account = {
     id: `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
@@ -1071,13 +1124,15 @@ export function createAccount(
 
 export function getActiveAccount(): Account | null {
   const activeAccountId = store.getValue("activeAccountId") as string;
-  if (!activeAccountId) return null;
+  if (!activeAccountId) {
+    return null;
+  }
 
   const account = store.getRow(
     "accounts",
-    activeAccountId,
+    activeAccountId
   ) as unknown as Account;
-  return account || null;
+  return isValidRecord(account) ? account || null : null;
 }
 
 export function getAllAccounts(): Account[] {
@@ -1095,7 +1150,9 @@ export function updateAccountLastSignIn(accountId: string): void {
 
 export function removeAccount(accountId: string): boolean {
   const account = store.getRow("accounts", accountId);
-  if (!account) return false;
+  if (!isValidRecord(account)) {
+    return false;
+  }
 
   store.delRow("accounts", accountId);
 
@@ -1115,7 +1172,9 @@ export function removeAccount(accountId: string): boolean {
 
 export function setActiveAccount(accountId: string): boolean {
   const account = store.getRow("accounts", accountId) as unknown as Account;
-  if (!account) return false;
+  if (!isValidRecord(account)) {
+    return false;
+  }
 
   store.setValue("activeAccountId", accountId);
   updateAccountLastSignIn(accountId);
@@ -1136,7 +1195,7 @@ export function getFirebasePersister() {
 }
 
 export async function initializeFirebaseSync(
-  isNewAccount: boolean = false,
+  isNewAccount: boolean = false
 ): Promise<void> {
   await initializeFirebasePersister(isNewAccount);
 }
@@ -1145,42 +1204,6 @@ export function enableFirebaseAutoSave(): void {
   if (firebasePersister && getActiveAccount()) {
     firebasePersister.startAutoSave();
   }
-}
-
-// Migrate existing tutorial code from values to tutorialCode table
-function migrateTutorialCodeToTable(): void {
-  const allValues = store.getValues();
-  const profiles = store.getTable("profiles");
-
-  Object.keys(profiles).forEach((profileId) => {
-    Object.entries(allValues).forEach(([key, value]) => {
-      if (key.startsWith(`${profileId}_userCode_tutorial_`)) {
-        const tutorialId = parseInt(
-          key.replace(`${profileId}_userCode_tutorial_`, ""),
-        );
-        const tutorialCodeId = `${profileId}_${tutorialId}`;
-
-        // Check if already exists in table
-        const existingTutorialCode = store.getRow(
-          "tutorialCode",
-          tutorialCodeId,
-        );
-        if (!existingTutorialCode) {
-          const tutorialCode: TutorialCode = {
-            id: tutorialCodeId,
-            profileId,
-            tutorialId,
-            courseId: 1, // Default to course 1 for migrated data
-            code: value as string,
-            completed: false,
-            lastAccessed: new Date().toISOString(),
-          };
-
-          store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
-        }
-      }
-    });
-  });
 }
 
 export async function initializeProfileSystem(): Promise<void> {
@@ -1195,7 +1218,7 @@ export async function initializeProfileSystem(): Promise<void> {
     ensureDefaultProfile();
 
     // Migrate existing tutorial code to the new table structure
-    migrateTutorialCodeToTable();
+    // migrateTutorialCodeToTable();
 
     const activeAccount = getActiveAccount();
     if (activeAccount) {
@@ -1210,7 +1233,9 @@ export async function initializeProfileSystem(): Promise<void> {
 // Legacy compatibility functions (simplified)
 export function getLastSyncTimestamp(): string | null {
   const activeAccount = getActiveAccount();
-  if (!activeAccount) return null;
+  if (!activeAccount || !isValidRecord(activeAccount)) {
+    return null;
+  }
 
   const accountData = getAccountFromStorage(activeAccount.id);
   return accountData?.lastUpdated || null;
@@ -1218,8 +1243,9 @@ export function getLastSyncTimestamp(): string | null {
 
 export function setLastSyncTimestamp(timestamp: string): void {
   const activeAccount = getActiveAccount();
-  if (!activeAccount) return;
-
+  if (!activeAccount || !isValidRecord(activeAccount)) {
+    return;
+  }
   const accountData = getAccountFromStorage(activeAccount.id);
   if (accountData) {
     accountData.lastUpdated = timestamp;
@@ -1229,16 +1255,20 @@ export function setLastSyncTimestamp(timestamp: string): void {
 
 export async function isRemoteDataNewer(): Promise<boolean> {
   const activeAccount = getActiveAccount();
-  if (!activeAccount) return false;
+  if (!activeAccount || !isValidRecord(activeAccount)) {
+    return false;
+  }
 
   try {
     const response = await fetch(`/api/accounts?accountId=${activeAccount.id}`);
-    if (!response.ok) return false;
+    if (!response.ok) {
+      return false;
+    }
 
     const result = await response.json();
     const remoteTime = new Date(result.data.lastUpdated).getTime();
     const localTime = new Date(
-      getLastSyncTimestamp() || "1970-01-01",
+      getLastSyncTimestamp() || "1970-01-01"
     ).getTime();
 
     return remoteTime > localTime;
@@ -1255,4 +1285,189 @@ export async function syncIfNewer(): Promise<boolean> {
     return true;
   }
   return false;
+}
+
+// Check if remote course data is newer than local for a specific course
+export async function isRemoteCourseDataNewer(
+  courseId: string
+): Promise<boolean> {
+  const activeAccount = getActiveAccount();
+  const activeProfile = getActiveProfile();
+
+  if (!activeAccount || !activeProfile) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}&courseId=${courseId}`
+    );
+    if (!response.ok) {
+      return false;
+    }
+
+    const result = await response.json();
+    const remoteCourseProgress = result.data;
+
+    if (!remoteCourseProgress) {
+      return false;
+    }
+
+    // Get local course progress
+    const localCourseProgress = getCourseProgressByAccountAndProfileFromStorage(
+      activeAccount.id,
+      activeProfile.id
+    ).find((cp) => cp.courseId === courseId);
+
+    if (!localCourseProgress) {
+      return true; // Remote data exists, local doesn't
+    }
+
+    // Compare timestamps
+    const remoteTime = new Date(remoteCourseProgress.lastUpdated).getTime();
+    const localTime = new Date(localCourseProgress.lastUpdated).getTime();
+
+    return remoteTime > localTime;
+  } catch (error) {
+    console.warn("Failed to check remote course data:", error);
+    return false;
+  }
+}
+
+// Sync specific course data from server
+export async function syncCourseFromServer(courseId: string): Promise<boolean> {
+  const activeAccount = getActiveAccount();
+  const activeProfile = getActiveProfile();
+
+  if (!activeAccount || !activeProfile) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(
+      `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}&courseId=${courseId}`
+    );
+    if (!response.ok) {
+      return false;
+    }
+
+    console.log("syncCourseFromServer");
+
+    const result = await response.json();
+    const remoteCourseProgress = result.data;
+
+    if (!remoteCourseProgress) {
+      return false;
+    }
+
+    // Save the remote course progress to local storage
+    saveCourseProgressToStorage(remoteCourseProgress);
+
+    // Update TinyBase store with tutorial code from remote data
+    Object.entries(remoteCourseProgress.tutorialCode).forEach(
+      ([tutorialId, tutorialData]) => {
+        const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
+        const tutorialCode: TutorialCode = {
+          id: tutorialCodeId,
+          profileId: activeProfile.id,
+          tutorialId: parseInt(tutorialId),
+          courseId: parseInt(courseId),
+          code: (tutorialData as any).code || "",
+          completed: (tutorialData as any).completed || false,
+          lastAccessed:
+            (tutorialData as any).lastAccessed || new Date().toISOString(),
+        };
+        store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
+      }
+    );
+
+    console.log(`✅ Synced course ${courseId} from server`);
+    return true;
+  } catch (error) {
+    console.warn(`Failed to sync course ${courseId} from server:`, error);
+    return false;
+  }
+}
+
+// Check and sync all courses for current profile
+export async function syncAllCoursesIfNewer(): Promise<void> {
+  const activeAccount = getActiveAccount();
+  const activeProfile = getActiveProfile();
+
+  if (!activeAccount || !activeProfile) {
+    return;
+  }
+
+  try {
+    // Get all course progress for this profile
+    const response = await fetch(
+      `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}`
+    );
+    if (!response.ok) return;
+
+    const result = await response.json();
+    const remoteCourseProgressList = result.data;
+
+    if (!remoteCourseProgressList || remoteCourseProgressList.length === 0)
+      return;
+
+    // Get local course progress
+    const localCourseProgressList =
+      getCourseProgressByAccountAndProfileFromStorage(
+        activeAccount.id,
+        activeProfile.id
+      );
+
+    // Check each remote course against local
+    for (const remoteCourseProgress of remoteCourseProgressList) {
+      const localCourseProgress = localCourseProgressList.find(
+        (cp) => cp.courseId === remoteCourseProgress.courseId
+      );
+
+      let shouldSync = false;
+
+      if (!localCourseProgress) {
+        // Remote data exists, local doesn't
+        shouldSync = true;
+      } else {
+        // Compare timestamps
+        const remoteTime = new Date(remoteCourseProgress.lastUpdated).getTime();
+        const localTime = new Date(localCourseProgress.lastUpdated).getTime();
+        shouldSync = remoteTime > localTime;
+      }
+
+      if (shouldSync) {
+        // Save the remote course progress to local storage
+        saveCourseProgressToStorage(remoteCourseProgress);
+
+        // Update TinyBase store with tutorial code from remote data
+        Object.entries(remoteCourseProgress.tutorialCode).forEach(
+          ([tutorialId, tutorialData]) => {
+            const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
+            const tutorialCode: TutorialCode = {
+              id: tutorialCodeId,
+              profileId: activeProfile.id,
+              tutorialId: parseInt(tutorialId),
+              courseId: parseInt(remoteCourseProgress.courseId),
+              code: (tutorialData as any).code || "",
+              completed: (tutorialData as any).completed || false,
+              lastAccessed:
+                (tutorialData as any).lastAccessed || new Date().toISOString(),
+            };
+            store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
+          }
+        );
+
+        console.log(
+          `✅ Synced course ${remoteCourseProgress.courseId} from server (newer data found)`
+        );
+      }
+    }
+  } catch (error) {
+    console.warn("Failed to sync courses from server:", error);
+  }
+}
+
+export function isValidRecord(obj: any): boolean {
+  return !!obj && Object.keys(obj).length > 0;
 }

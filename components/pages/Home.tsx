@@ -21,16 +21,13 @@ import {
 } from "@/components/ui/dialog";
 import Analytics from "@/components/Analytics";
 import {
-  getCompletedTutorials,
-  setCompletedTutorials as setCompletedTutorialsInStorage,
-  getCurrentTutorial,
-  setCurrentTutorial as setCurrentTutorialInStorage,
   getUserCode,
   setUserCode as setUserCodeInStorage,
   getCompletedCourses,
   setCompletedCourses as setCompletedCoursesInStorage,
   getProfileItem,
-  setProfileItem,
+  setTutorialCompleted,
+  getTutorialCodesForCourse,
 } from "@/lib/profile-storage";
 
 interface Course {
@@ -49,6 +46,10 @@ export default function Home() {
     queryKey: ["/api/courses"],
   });
 
+  // Determine which course to display - defaults to JavaScript Basics (course ID 1)
+  const [currentCourseId, setCurrentCourseId] = useState<number>(1);
+  const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
+
   // Check for last visited course on component mount
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -64,23 +65,33 @@ export default function Home() {
     if (lastCourseId && courses.length > 0) {
       // Verify the course still exists
       const courseExists = courses.some(
-        (course) => course.id === parseInt(lastCourseId),
+        (course) => course.id === parseInt(lastCourseId)
       );
       if (courseExists && parseInt(lastCourseId) !== 1) {
         // Redirect to the last course if it's not the Basics course (which is already on home)
         router.push(`/course/${lastCourseId}`);
         return;
       }
+      // Set current course if it's the Basics course
+      setCurrentCourseId(parseInt(lastCourseId));
     }
 
     // If the Basics course (id=1) is selected, stay on home page
   }, [courses, router]);
 
-  // Get tutorials for the Basics course (course ID 1)
+  // Update current course when courses are loaded
+  useEffect(() => {
+    if (courses.length > 0) {
+      const course = courses.find((c) => c.id === currentCourseId);
+      setCurrentCourse(course || null);
+    }
+  }, [courses, currentCourseId]);
+
+  // Get tutorials for the current course
   const { data: tutorials = [], isLoading: tutorialsLoading } = useQuery<any[]>(
     {
-      queryKey: [`/api/courses/1/tutorials`],
-    },
+      queryKey: [`/api/courses/${currentCourseId}/tutorials`],
+    }
   );
 
   const { userCode, setUserCode, sidebarCollapsed, setSidebarCollapsed } =
@@ -88,19 +99,44 @@ export default function Home() {
 
   // Local state for course-specific progress (similar to course.tsx)
   const getCompletedTutorialsFromStorage = (): number[] => {
-    if (typeof window === "undefined") return [];
-    return getCompletedTutorials(1);
+    if (typeof window === "undefined") {
+      return [];
+    }
+
+    const courseTutorials = getTutorialCodesForCourse(currentCourseId);
+
+    return courseTutorials
+      .filter((tutorial) => !!tutorial.completed)
+      .map((tutorial) => tutorial.tutorialId);
   };
 
   const getCurrentTutorialFromStorage = (): number => {
-    if (typeof window === "undefined") return 1;
-    return getCurrentTutorial(1) || 1;
+    if (typeof window === "undefined") {
+      return 1;
+    }
+
+    const tutorials = getTutorialCodesForCourse(currentCourseId);
+    let mostRecentTutorialIdx = 0;
+
+    tutorials.forEach((tutorial, idx) => {
+      if (
+        tutorial.lastAccessed > tutorials[mostRecentTutorialIdx].lastAccessed
+      ) {
+        mostRecentTutorialIdx = idx;
+      }
+    });
+
+    return mostRecentTutorialIdx + 1;
   };
 
   const getHighestTutorialReached = (): number => {
-    if (typeof window === "undefined") return 1;
-    const saved = getProfileItem(`highestTutorial_course_1`);
-    return saved ? parseInt(saved) : 1;
+    if (typeof window === "undefined") {
+      return 1;
+    }
+
+    const courseTutorials = getTutorialCodesForCourse(currentCourseId);
+
+    return courseTutorials.length || 1;
   };
 
   const [completedTutorials, setCompletedTutorials] = useState<number[]>([]);
@@ -110,6 +146,14 @@ export default function Home() {
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
   const [showReferenceDialog, setShowReferenceDialog] = useState(false);
 
+  // Reset state when course changes
+  useEffect(() => {
+    setHasRestoredFromStorage(false);
+    setCompletedTutorials([]);
+    setCurrentTutorialOrder(1);
+    setHighestTutorialReached(1);
+  }, [currentCourseId]);
+
   // Initialize state from profile storage after component mounts
   useEffect(() => {
     if (tutorials.length > 0 && !hasRestoredFromStorage) {
@@ -117,55 +161,30 @@ export default function Home() {
       const restoredCurrent = getCurrentTutorialFromStorage();
       const restoredHighest = getHighestTutorialReached();
 
-      // Mark all tutorials below the highest reached as completed
-      const tutorialsToComplete = tutorials
-        .filter((t: any) => t.order < restoredHighest)
-        .map((t: any) => t.id);
+      console.log("restoredCompleted", structuredClone(restoredCompleted));
+      console.log("tutorials", structuredClone(tutorials));
+      console.log("restoredHighest", restoredHighest);
 
-      const allCompleted = Array.from(
-        new Set([...restoredCompleted, ...tutorialsToComplete]),
-      );
-
-      setCompletedTutorials(allCompleted);
+      // Only use the actual completed tutorials, don't auto-complete based on highest reached
+      setCompletedTutorials(restoredCompleted);
       setCurrentTutorialOrder(restoredCurrent);
       setHighestTutorialReached(restoredHighest);
       setHasRestoredFromStorage(true);
     }
-  }, [tutorials.length, hasRestoredFromStorage]);
+  }, [tutorials.length, hasRestoredFromStorage, currentCourseId]);
 
   const isLoading = tutorialsLoading;
 
-  // Save progress to profile storage
-  useEffect(() => {
-    if (typeof window !== "undefined" && hasRestoredFromStorage) {
-      setCompletedTutorialsInStorage(1, completedTutorials);
-    }
-  }, [completedTutorials, hasRestoredFromStorage]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && hasRestoredFromStorage) {
-      setCurrentTutorialInStorage(1, currentTutorialOrder);
-      // Update highest tutorial reached if current is higher
-      if (currentTutorialOrder > highestTutorialReached) {
-        setHighestTutorialReached(currentTutorialOrder);
-      }
-    }
-  }, [currentTutorialOrder, hasRestoredFromStorage, highestTutorialReached]);
-
-  // Save highest tutorial reached to profile storage
-  useEffect(() => {
-    if (typeof window !== "undefined" && hasRestoredFromStorage) {
-      setProfileItem(
-        `highestTutorial_course_1`,
-        highestTutorialReached.toString(),
-      );
-    }
-  }, [highestTutorialReached, hasRestoredFromStorage]);
+  // Progress is now automatically saved through the course progress system
+  // when tutorials are completed or accessed via setTutorialCompleted and setUserCode
 
   // Tutorial completion logic
   const markTutorialComplete = (tutorialOrder: number) => {
     const tutorial = tutorials.find((t: any) => t.order === tutorialOrder);
     if (!tutorial) return;
+
+    // Mark tutorial as completed in the course progress system
+    setTutorialCompleted(tutorial.id, true, currentCourseId);
 
     if (!completedTutorials.includes(tutorial.id)) {
       setCompletedTutorials((prev) => [...prev, tutorial.id]);
@@ -179,8 +198,8 @@ export default function Home() {
     if (isLastTutorial && typeof window !== "undefined") {
       // Mark course as completed
       const completedCourses = getCompletedCourses();
-      if (!completedCourses.includes(1)) {
-        setCompletedCoursesInStorage([...completedCourses, 1]);
+      if (!completedCourses.includes(currentCourseId)) {
+        setCompletedCoursesInStorage([...completedCourses, currentCourseId]);
       }
     }
   };
@@ -195,6 +214,18 @@ export default function Home() {
 
   const selectTutorial = (tutorial: any) => {
     setCurrentTutorialOrder(tutorial.order);
+
+    // Make sure to persist the completed status
+    const tutorialCode = getTutorialCodesForCourse(currentCourseId).filter(
+      (tutorialCode) => tutorialCode.tutorialId === tutorial.id
+    )[0];
+
+    // Track that this tutorial was accessed
+    setTutorialCompleted(
+      tutorial.id,
+      tutorialCode ? tutorialCode.completed : false,
+      currentCourseId
+    );
   };
 
   // Check if tutorial is unlocked
@@ -205,13 +236,13 @@ export default function Home() {
       return true;
     }
     const prevTutorial = tutorials.find(
-      (t: any) => t.order === tutorial.order - 1,
+      (t: any) => t.order === tutorial.order - 1
     );
     return prevTutorial ? completedTutorials.includes(prevTutorial.id) : false;
   };
 
   const currentTutorial = tutorials.find(
-    (t: any) => t.order === currentTutorialOrder,
+    (t: any) => t.order === currentTutorialOrder
   );
   const isCurrentCompleted = currentTutorial
     ? completedTutorials.includes(currentTutorial.id)
@@ -362,12 +393,21 @@ export default function Home() {
           onTutorialSelect={selectTutorial}
           collapsed={sidebarCollapsed}
           onToggleCollapsed={() => setSidebarCollapsed(!sidebarCollapsed)}
-          course={{
-            id: 1,
-            title: "JavaScript Basics",
-            description: "Learn the fundamentals",
-            type: "printData",
-          }}
+          course={
+            currentCourse
+              ? {
+                  id: currentCourse.id,
+                  title: currentCourse.title,
+                  description: currentCourse.description,
+                  type: currentCourse.type,
+                }
+              : {
+                  id: 1,
+                  title: "JavaScript Basics",
+                  description: "Learn the fundamentals",
+                  type: "printData",
+                }
+          }
         />
 
         {/* Main Content */}
@@ -392,7 +432,7 @@ export default function Home() {
                 hasNext={hasNextTutorial}
                 userCode={userCode}
                 onCodeChange={setUserCode}
-                courseType="canvas"
+                courseType={currentCourse?.type || "canvas"}
                 onShowReference={() => setShowReferenceDialog(true)}
               />
             ) : (
@@ -425,7 +465,7 @@ export default function Home() {
               </DialogTitle>
             </DialogHeader>
             <div className="flex-1 overflow-hidden bg-white">
-              <ApiDocumentation courseType="canvas" />
+              <ApiDocumentation courseType={currentCourse?.type || "canvas"} />
             </div>
           </DialogContent>
         </Dialog>

@@ -29,6 +29,7 @@ import Analytics from "@/components/Analytics";
 import {
   getCompletedCourses as getCompletedCoursesFromStorage,
   setProfileItem,
+  syncAllCoursesIfNewer,
 } from "@/lib/profile-storage";
 
 interface Course {
@@ -56,6 +57,19 @@ export default function CourseSelection() {
   // Initialize state from profile storage after component mounts
   useEffect(() => {
     setCompletedCourses(getCompletedCourses());
+    
+    // Sync all courses from server if newer data exists
+    const syncCourses = async () => {
+      try {
+        await syncAllCoursesIfNewer();
+        // After syncing, refresh the completed courses state
+        setCompletedCourses(getCompletedCourses());
+      } catch (error) {
+        console.warn("Failed to sync courses:", error);
+      }
+    };
+    
+    syncCourses();
   }, []);
 
   const isCourseUnlocked = (course: Course): boolean => {
