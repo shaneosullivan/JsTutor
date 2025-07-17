@@ -29,8 +29,6 @@ import {
   setCompletedCourses as setCompletedCoursesInStorage,
   getProfileItem,
   setProfileItem,
-  syncCourseFromServer,
-  isRemoteCourseDataNewer,
 } from "@/lib/profile-storage";
 import GithubIcon from "@/components/GithubIcon";
 import ProfileAvatar from "@/components/ProfileAvatar";
@@ -106,44 +104,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     enabled: !!courseIdNum,
   });
 
-  // Check for newer course data from server and sync if needed
-  useEffect(() => {
-    const checkAndSyncCourse = async () => {
-      if (courseIdNum && course) {
-        try {
-          const hasNewerData = await isRemoteCourseDataNewer(courseIdNum.toString());
-          if (hasNewerData) {
-            console.log(`🔄 Syncing course ${courseIdNum} from server (newer data found)`);
-            await syncCourseFromServer(courseIdNum.toString());
-            
-            // After syncing, refresh the local state
-            if (tutorials.length > 0) {
-              const restoredCompleted = getCompletedTutorialsFromStorage();
-              const restoredCurrent = getCurrentTutorialFromStorage();
-              const restoredHighest = getHighestTutorialReached();
-
-              // Mark all tutorials below the highest reached as completed
-              const tutorialsToComplete = tutorials
-                .filter((t) => t.order < restoredHighest)
-                .map((t) => t.id);
-
-              const allCompleted = Array.from(
-                new Set([...restoredCompleted, ...tutorialsToComplete]),
-              );
-
-              setCompletedTutorials(allCompleted);
-              setCurrentTutorialOrder(restoredCurrent);
-              setHighestTutorialReached(restoredHighest);
-            }
-          }
-        } catch (error) {
-          console.warn(`Failed to check/sync course ${courseIdNum}:`, error);
-        }
-      }
-    };
-
-    checkAndSyncCourse();
-  }, [courseIdNum, course]);
+  // Course progress is computed from tutorial data, no sync needed
 
   // Initialize state from profile storage after component mounts
   useEffect(() => {

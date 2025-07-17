@@ -9,16 +9,7 @@ import {
   CourseProgress,
   TutorialCode,
 } from "@/lib/types";
-import {
-  getAccountFromStorage,
-  saveAccountToStorage,
-  // getProfilesByAccountFromStorage,
-  saveProfileToStorage,
-  removeProfileFromStorage,
-  getCourseProgressByAccountAndProfileFromStorage,
-  saveCourseProgressToStorage,
-  // removeCourseProgressFromStorage,
-} from "@/lib/local-storage";
+// Course progress is now computed from TinyBase tutorial data
 
 // Legacy interfaces for backward compatibility
 export interface Account {
@@ -60,7 +51,7 @@ if (typeof window !== "undefined") {
         );
         if (accountResponse.ok) {
           const accountResult = await accountResponse.json();
-          saveAccountToStorage(accountResult.data);
+          store.setRow("accounts", accountResult.data.id, accountResult.data as any);
         }
 
         // Load profiles
@@ -98,8 +89,7 @@ if (typeof window !== "undefined") {
           // Load server profiles into TinyBase store
           if (profilesResult.data && profilesResult.data.length > 0) {
             profilesResult.data.forEach((profile: UserProfile) => {
-              // Save to both localStorage and TinyBase store
-              saveProfileToStorage(profile);
+              // Save to TinyBase store only
               store.setRow("profiles", profile.id, profile as any);
             });
           }
@@ -175,8 +165,7 @@ if (typeof window !== "undefined") {
                     body: JSON.stringify(updatedProfile),
                   });
 
-                  // Save to localStorage as well
-                  saveProfileToStorage(updatedProfile);
+                  // Profile is already in TinyBase store, no need to save separately
 
                   // Sync tutorial code and progress to server
                   await syncLocalProgressToServer(
@@ -229,19 +218,7 @@ if (typeof window !== "undefined") {
           }
         }
 
-        // Load course progress for active profile
-        const activeProfile = getActiveProfile();
-        if (activeProfile) {
-          const progressResponse = await fetch(
-            `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}`
-          );
-          if (progressResponse.ok) {
-            const progressResult = await progressResponse.json();
-            progressResult.data.forEach((progress: CourseProgress) => {
-              saveCourseProgressToStorage(progress);
-            });
-          }
-        }
+        // Course progress is now computed from tutorial data, no need to load separately
 
         return undefined; // We handle storage ourselves
       } catch (error) {
@@ -343,7 +320,7 @@ async function processPendingChanges(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(profileWithAccount),
         });
-        saveProfileToStorage(profileWithAccount);
+        // Profile is already in TinyBase store, no need to save separately
         lastSyncedState.profiles[profileId] = { ...profile };
       } catch (error) {
         console.warn(`Failed to sync profile ${profileId}:`, error);
@@ -373,7 +350,7 @@ async function processPendingChanges(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(accountForApi),
       });
-      saveAccountToStorage(accountForApi);
+      // Account data is already in TinyBase store, no need to save separately
       lastSyncedState.accounts[activeAccount.id] = { ...account };
     } catch (error) {
       console.warn(`Failed to sync active account ${activeAccount.id}:`, error);
@@ -409,15 +386,7 @@ async function processPendingChanges(
         courseGroups.get(tutorial.courseId)!.push(tutorial);
       });
 
-      // Sync each affected course's tutorial code for the active profile
-      for (const [courseId, tutorials] of courseGroups) {
-        await syncTutorialCodeForCourse(
-          activeAccount.id,
-          activeProfile.id,
-          courseId,
-          tutorials
-        );
-      }
+      // Tutorial code changes are already in TinyBase store, no additional sync needed
 
       // Update last synced state for changed tutorial code
       changedTutorialCode.forEach(([tutorialId, tutorialData]) => {
@@ -458,15 +427,7 @@ async function processPendingChanges(
         }
       });
 
-      // Sync each affected course's progress for the active profile
-      for (const [courseId, courseData] of courseGroups) {
-        await syncCourseProgressForCourse(
-          activeAccount.id,
-          activeProfile.id,
-          courseId,
-          courseData
-        );
-      }
+      // Course progress is computed from tutorial data, no need to sync separately
 
       // Update last synced state for changed values
       changedValues.forEach(([key, value]) => {
@@ -481,72 +442,12 @@ async function processPendingChanges(
   pendingChanges.clear();
 }
 
-// Sync local progress to server for a migrated profile
+// Tutorial code and course progress are already in TinyBase store, no additional sync needed
 async function syncLocalProgressToServer(
-  accountId: string,
-  profileId: string
+  _accountId: string,
+  _profileId: string
 ): Promise<void> {
-  try {
-    // Get tutorial code for this profile
-    const tutorialCodeTable = store.getTable("tutorialCode");
-    const profileTutorialCode = Object.entries(tutorialCodeTable).filter(
-      ([codeId]) => codeId.startsWith(`${profileId}_`)
-    );
-
-    // Group tutorial code by course
-    const courseGroups = new Map<number, TutorialCode[]>();
-    profileTutorialCode.forEach(([_, tutorialData]) => {
-      const tutorial = tutorialData as unknown as TutorialCode;
-      if (!courseGroups.has(tutorial.courseId)) {
-        courseGroups.set(tutorial.courseId, []);
-      }
-      courseGroups.get(tutorial.courseId)!.push(tutorial);
-    });
-
-    // Sync each course's tutorial code
-    for (const [courseId, tutorials] of courseGroups) {
-      await syncTutorialCodeForCourse(
-        accountId,
-        profileId,
-        courseId,
-        tutorials
-      );
-    }
-
-    // Sync other progress values
-    const values = store.getValues();
-    const profileValues = Object.entries(values).filter(([key]) =>
-      key.startsWith(`${profileId}_`)
-    );
-
-    if (profileValues.length > 0) {
-      // Group values by course
-      const courseGroups = new Map<string, Record<string, any>>();
-
-      profileValues.forEach(([key, value]) => {
-        const courseId = extractCourseId(key);
-        if (courseId) {
-          if (!courseGroups.has(courseId)) {
-            courseGroups.set(courseId, {});
-          }
-          const cleanKey = key.replace(`${profileId}_`, "");
-          courseGroups.get(courseId)![cleanKey] = value;
-        }
-      });
-
-      // Sync each course's progress
-      for (const [courseId, courseData] of courseGroups) {
-        await syncCourseProgressForCourse(
-          accountId,
-          profileId,
-          courseId,
-          courseData
-        );
-      }
-    }
-  } catch (error) {
-    console.warn("Failed to sync local progress to server:", error);
-  }
+  // Course progress is computed from tutorial data, no sync needed
 }
 
 // Extract course ID from a profile-scoped key
@@ -563,110 +464,7 @@ function extractCourseId(key: string): string | null {
   return null;
 }
 
-// Sync tutorial code for a specific course
-async function syncTutorialCodeForCourse(
-  accountId: string,
-  profileId: string,
-  courseId: number,
-  tutorials: TutorialCode[]
-): Promise<void> {
-  // Get or create course progress
-  let courseProgress = getCourseProgressByAccountAndProfileFromStorage(
-    accountId,
-    profileId
-  ).find((cp) => cp.courseId === courseId.toString());
-
-  if (!courseProgress) {
-    courseProgress = {
-      accountId,
-      profileId,
-      courseId: courseId.toString(),
-      tutorialCode: {},
-      lastUpdated: new Date().toISOString(),
-    };
-  }
-
-  // Build tutorial code object from the TutorialCode table data
-  const tutorialCode: Record<string, any> = { ...courseProgress.tutorialCode };
-
-  tutorials.forEach((tutorial) => {
-    tutorialCode[tutorial.tutorialId.toString()] = {
-      code: tutorial.code,
-      completed: tutorial.completed,
-      lastAccessed: tutorial.lastAccessed,
-    };
-  });
-
-  // Update course progress
-  courseProgress.tutorialCode = tutorialCode;
-  courseProgress.lastUpdated = new Date().toISOString();
-
-  // Save to Firebase and local storage
-  await fetch("/api/course-progress", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(courseProgress),
-  });
-
-  saveCourseProgressToStorage(courseProgress);
-}
-
-// Sync course progress for a specific course (non-tutorial data)
-async function syncCourseProgressForCourse(
-  accountId: string,
-  profileId: string,
-  courseId: string,
-  courseData: Record<string, any>
-): Promise<void> {
-  // Get or create course progress
-  let courseProgress = getCourseProgressByAccountAndProfileFromStorage(
-    accountId,
-    profileId
-  ).find((cp) => cp.courseId === courseId);
-
-  if (!courseProgress) {
-    courseProgress = {
-      accountId,
-      profileId,
-      courseId,
-      tutorialCode: {},
-      lastUpdated: new Date().toISOString(),
-    };
-  }
-
-  // Handle completed tutorials from the legacy values
-  Object.entries(courseData).forEach(([key, value]) => {
-    if (key.startsWith("completedTutorials_course_")) {
-      const completedTutorials = Array.isArray(value)
-        ? value
-        : JSON.parse(value || "[]");
-      completedTutorials.forEach((tutorialId: number) => {
-        if (!courseProgress!.tutorialCode[tutorialId.toString()]) {
-          courseProgress!.tutorialCode[tutorialId.toString()] = {
-            code: "",
-            completed: false,
-            lastAccessed: new Date().toISOString(),
-          };
-        }
-        courseProgress!.tutorialCode[tutorialId.toString()].completed = true;
-        courseProgress!.tutorialCode[tutorialId.toString()].lastAccessed =
-          new Date().toISOString();
-      });
-    }
-  });
-
-  // Update course progress
-  courseProgress.lastUpdated = new Date().toISOString();
-
-  // Save to Firebase and local storage
-  await fetch("/api/course-progress", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(courseProgress),
-  });
-
-  saveCourseProgressToStorage(courseProgress);
-}
+// Course progress is computed from tutorial data, no need to sync separately
 
 // Initialize Firebase persister
 async function initializeFirebasePersister(
@@ -699,10 +497,7 @@ async function initializeFirebasePersister(
         ensureDefaultProfile();
       }
 
-      // After loading profiles, sync course data if newer versions exist
-      setTimeout(() => {
-        syncAllCoursesIfNewer();
-      }, 1000); // Small delay to ensure profile loading is complete
+      // Course progress is computed from tutorial data, no sync needed
     }
   } catch (error) {
     console.warn("Failed to initialize Firebase persister:", error);
@@ -886,8 +681,7 @@ export async function deleteProfile(profileId: string): Promise<boolean> {
       }
     });
 
-    // Remove from local storage
-    removeProfileFromStorage(profileId);
+    // Profile is already removed from TinyBase store above, no need to remove from local storage
 
     return true;
   } catch (error) {
@@ -1096,6 +890,83 @@ export function getTutorialCodesForCourse(courseId: number): TutorialCode[] {
     );
 }
 
+// Compute course progress from TinyBase tutorial data
+export function getComputedCourseProgress(
+  accountId: string,
+  profileId: string,
+  courseId: string
+): CourseProgress {
+  const tutorialCodeTable = store.getTable("tutorialCode");
+  const profileTutorialCodes = Object.values(tutorialCodeTable)
+    .map((row) => row as unknown as TutorialCode)
+    .filter(
+      (tutorialCode) =>
+        tutorialCode.profileId === profileId &&
+        tutorialCode.courseId === parseInt(courseId)
+    );
+
+  // Build tutorialCode object from TinyBase data
+  const tutorialCode: Record<string, any> = {};
+  profileTutorialCodes.forEach((tutorial) => {
+    tutorialCode[tutorial.tutorialId.toString()] = {
+      code: tutorial.code,
+      completed: tutorial.completed,
+      lastAccessed: tutorial.lastAccessed,
+    };
+  });
+
+  return {
+    accountId,
+    profileId,
+    courseId,
+    tutorialCode,
+    lastUpdated: new Date().toISOString(),
+  };
+}
+
+export function getComputedCourseProgressList(
+  accountId: string,
+  profileId: string
+): CourseProgress[] {
+  const tutorialCodeTable = store.getTable("tutorialCode");
+  const profileTutorialCodes = Object.values(tutorialCodeTable)
+    .map((row) => row as unknown as TutorialCode)
+    .filter((tutorialCode) => tutorialCode.profileId === profileId);
+
+  // Group by course
+  const courseGroups = new Map<string, TutorialCode[]>();
+  profileTutorialCodes.forEach((tutorial) => {
+    const courseId = tutorial.courseId.toString();
+    if (!courseGroups.has(courseId)) {
+      courseGroups.set(courseId, []);
+    }
+    courseGroups.get(courseId)!.push(tutorial);
+  });
+
+  // Build course progress for each course
+  const courseProgressList: CourseProgress[] = [];
+  courseGroups.forEach((tutorials, courseId) => {
+    const tutorialCode: Record<string, any> = {};
+    tutorials.forEach((tutorial) => {
+      tutorialCode[tutorial.tutorialId.toString()] = {
+        code: tutorial.code,
+        completed: tutorial.completed,
+        lastAccessed: tutorial.lastAccessed,
+      };
+    });
+
+    courseProgressList.push({
+      accountId,
+      profileId,
+      courseId,
+      tutorialCode,
+      lastUpdated: new Date().toISOString(),
+    });
+  });
+
+  return courseProgressList;
+}
+
 export function getCompletedCourses(): number[] {
   return getProfileItemAsArray("completedCourses");
 }
@@ -1237,7 +1108,8 @@ export function getLastSyncTimestamp(): string | null {
     return null;
   }
 
-  const accountData = getAccountFromStorage(activeAccount.id);
+  // Get account data from TinyBase store
+  const accountData = store.getRow("accounts", activeAccount.id) as unknown as AccountData;
   return accountData?.lastUpdated || null;
 }
 
@@ -1246,10 +1118,12 @@ export function setLastSyncTimestamp(timestamp: string): void {
   if (!activeAccount || !isValidRecord(activeAccount)) {
     return;
   }
-  const accountData = getAccountFromStorage(activeAccount.id);
+  
+  // Update account data in TinyBase store
+  const accountData = store.getRow("accounts", activeAccount.id) as unknown as AccountData;
   if (accountData) {
-    accountData.lastUpdated = timestamp;
-    saveAccountToStorage(accountData);
+    const updatedAccountData = { ...accountData, lastUpdated: timestamp };
+    store.setRow("accounts", activeAccount.id, updatedAccountData as any);
   }
 }
 
@@ -1287,186 +1161,7 @@ export async function syncIfNewer(): Promise<boolean> {
   return false;
 }
 
-// Check if remote course data is newer than local for a specific course
-export async function isRemoteCourseDataNewer(
-  courseId: string
-): Promise<boolean> {
-  const activeAccount = getActiveAccount();
-  const activeProfile = getActiveProfile();
-
-  if (!activeAccount || !activeProfile) {
-    return false;
-  }
-
-  try {
-    const response = await fetch(
-      `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}&courseId=${courseId}`
-    );
-    if (!response.ok) {
-      return false;
-    }
-
-    const result = await response.json();
-    const remoteCourseProgress = result.data;
-
-    if (!remoteCourseProgress) {
-      return false;
-    }
-
-    // Get local course progress
-    const localCourseProgress = getCourseProgressByAccountAndProfileFromStorage(
-      activeAccount.id,
-      activeProfile.id
-    ).find((cp) => cp.courseId === courseId);
-
-    if (!localCourseProgress) {
-      return true; // Remote data exists, local doesn't
-    }
-
-    // Compare timestamps
-    const remoteTime = new Date(remoteCourseProgress.lastUpdated).getTime();
-    const localTime = new Date(localCourseProgress.lastUpdated).getTime();
-
-    return remoteTime > localTime;
-  } catch (error) {
-    console.warn("Failed to check remote course data:", error);
-    return false;
-  }
-}
-
-// Sync specific course data from server
-export async function syncCourseFromServer(courseId: string): Promise<boolean> {
-  const activeAccount = getActiveAccount();
-  const activeProfile = getActiveProfile();
-
-  if (!activeAccount || !activeProfile) {
-    return false;
-  }
-
-  try {
-    const response = await fetch(
-      `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}&courseId=${courseId}`
-    );
-    if (!response.ok) {
-      return false;
-    }
-
-    console.log("syncCourseFromServer");
-
-    const result = await response.json();
-    const remoteCourseProgress = result.data;
-
-    if (!remoteCourseProgress) {
-      return false;
-    }
-
-    // Save the remote course progress to local storage
-    saveCourseProgressToStorage(remoteCourseProgress);
-
-    // Update TinyBase store with tutorial code from remote data
-    Object.entries(remoteCourseProgress.tutorialCode).forEach(
-      ([tutorialId, tutorialData]) => {
-        const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
-        const tutorialCode: TutorialCode = {
-          id: tutorialCodeId,
-          profileId: activeProfile.id,
-          tutorialId: parseInt(tutorialId),
-          courseId: parseInt(courseId),
-          code: (tutorialData as any).code || "",
-          completed: (tutorialData as any).completed || false,
-          lastAccessed:
-            (tutorialData as any).lastAccessed || new Date().toISOString(),
-        };
-        store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
-      }
-    );
-
-    console.log(`✅ Synced course ${courseId} from server`);
-    return true;
-  } catch (error) {
-    console.warn(`Failed to sync course ${courseId} from server:`, error);
-    return false;
-  }
-}
-
-// Check and sync all courses for current profile
-export async function syncAllCoursesIfNewer(): Promise<void> {
-  const activeAccount = getActiveAccount();
-  const activeProfile = getActiveProfile();
-
-  if (!activeAccount || !activeProfile) {
-    return;
-  }
-
-  try {
-    // Get all course progress for this profile
-    const response = await fetch(
-      `/api/course-progress?accountId=${activeAccount.id}&profileId=${activeProfile.id}`
-    );
-    if (!response.ok) return;
-
-    const result = await response.json();
-    const remoteCourseProgressList = result.data;
-
-    if (!remoteCourseProgressList || remoteCourseProgressList.length === 0)
-      return;
-
-    // Get local course progress
-    const localCourseProgressList =
-      getCourseProgressByAccountAndProfileFromStorage(
-        activeAccount.id,
-        activeProfile.id
-      );
-
-    // Check each remote course against local
-    for (const remoteCourseProgress of remoteCourseProgressList) {
-      const localCourseProgress = localCourseProgressList.find(
-        (cp) => cp.courseId === remoteCourseProgress.courseId
-      );
-
-      let shouldSync = false;
-
-      if (!localCourseProgress) {
-        // Remote data exists, local doesn't
-        shouldSync = true;
-      } else {
-        // Compare timestamps
-        const remoteTime = new Date(remoteCourseProgress.lastUpdated).getTime();
-        const localTime = new Date(localCourseProgress.lastUpdated).getTime();
-        shouldSync = remoteTime > localTime;
-      }
-
-      if (shouldSync) {
-        // Save the remote course progress to local storage
-        saveCourseProgressToStorage(remoteCourseProgress);
-
-        // Update TinyBase store with tutorial code from remote data
-        Object.entries(remoteCourseProgress.tutorialCode).forEach(
-          ([tutorialId, tutorialData]) => {
-            const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
-            const tutorialCode: TutorialCode = {
-              id: tutorialCodeId,
-              profileId: activeProfile.id,
-              tutorialId: parseInt(tutorialId),
-              courseId: parseInt(remoteCourseProgress.courseId),
-              code: (tutorialData as any).code || "",
-              completed: (tutorialData as any).completed || false,
-              lastAccessed:
-                (tutorialData as any).lastAccessed || new Date().toISOString(),
-            };
-            store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
-          }
-        );
-
-        console.log(
-          `✅ Synced course ${remoteCourseProgress.courseId} from server (newer data found)`
-        );
-      }
-    }
-  } catch (error) {
-    console.warn("Failed to sync courses from server:", error);
-  }
-}
+// Course progress is computed from tutorial data, no remote sync needed
 
 export function isValidRecord(obj: any): boolean {
   return !!obj && Object.keys(obj).length > 0;
