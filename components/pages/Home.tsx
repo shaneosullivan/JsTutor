@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { useTutorial } from "@/hooks/use-course-tutorial";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import TutorialContent from "@/components/tutorial-content";
@@ -29,6 +28,13 @@ import {
   setTutorialCompleted,
   getTutorialCodesForCourse,
 } from "@/lib/profile-storage";
+import {
+  getCoursesForLocale,
+  getTutorialsForCourse,
+  transformTutorial,
+  transformTutorials,
+  LocalizedTutorial,
+} from "@/lib/dataUtils";
 
 interface Course {
   id: number;
@@ -42,9 +48,8 @@ interface Course {
 export default function Home() {
   const router = useRouter();
   const keyboard = useKeyboard();
-  const { data: courses = [] } = useQuery<Course[]>({
-    queryKey: ["/api/courses"],
-  });
+
+  const courses = useMemo(() => getCoursesForLocale("en"), []);
 
   // Determine which course to display - defaults to JavaScript Basics (course ID 1)
   const [currentCourseId, setCurrentCourseId] = useState<number>(1);
@@ -87,12 +92,12 @@ export default function Home() {
     }
   }, [courses, currentCourseId]);
 
-  // Get tutorials for the current course
-  const { data: tutorials = [], isLoading: tutorialsLoading } = useQuery<any[]>(
-    {
-      queryKey: [`/api/courses/${currentCourseId}/tutorials`],
-    }
+  const tutorials = useMemo(
+    () => getTutorialsForCourse(currentCourseId),
+    [currentCourseId]
   );
+
+  // Get tutorials for the current course
 
   const { userCode, setUserCode, sidebarCollapsed, setSidebarCollapsed } =
     useTutorial();
@@ -173,14 +178,12 @@ export default function Home() {
     }
   }, [tutorials.length, hasRestoredFromStorage, currentCourseId]);
 
-  const isLoading = tutorialsLoading;
-
   // Progress is now automatically saved through the course progress system
   // when tutorials are completed or accessed via setTutorialCompleted and setUserCode
 
   // Tutorial completion logic
   const markTutorialComplete = (tutorialOrder: number) => {
-    const tutorial = tutorials.find((t: any) => t.order === tutorialOrder);
+    const tutorial = tutorials.find((t) => t.order === tutorialOrder);
     if (!tutorial) return;
 
     // Mark tutorial as completed in the course progress system
@@ -193,7 +196,7 @@ export default function Home() {
     // Check if this is the last tutorial in the course
     const isLastTutorial =
       tutorials.length > 0
-        ? tutorialOrder === Math.max(...tutorials.map((t: any) => t.order))
+        ? tutorialOrder === Math.max(...tutorials.map((t) => t.order))
         : false;
     if (isLastTutorial && typeof window !== "undefined") {
       // Mark course as completed
@@ -206,13 +209,13 @@ export default function Home() {
 
   const goToNextTutorial = () => {
     const nextOrder = currentTutorialOrder + 1;
-    const nextTutorial = tutorials.find((t: any) => t.order === nextOrder);
+    const nextTutorial = tutorials.find((t) => t.order === nextOrder);
     if (nextTutorial) {
       setCurrentTutorialOrder(nextOrder);
     }
   };
 
-  const selectTutorial = (tutorial: any) => {
+  const selectTutorial = (tutorial: LocalizedTutorial) => {
     setCurrentTutorialOrder(tutorial.order);
 
     // Make sure to persist the completed status
@@ -229,28 +232,36 @@ export default function Home() {
   };
 
   // Check if tutorial is unlocked
-  const isTutorialUnlocked = (tutorial: any): boolean => {
+  const isTutorialUnlocked = (tutorial: LocalizedTutorial): boolean => {
     if (tutorial.order === 1) return true;
     // Allow access to any tutorial up to the highest ever reached
     if (tutorial.order <= highestTutorialReached) {
       return true;
     }
     const prevTutorial = tutorials.find(
-      (t: any) => t.order === tutorial.order - 1
+      (t) => t.order === tutorial.order - 1
     );
     return prevTutorial ? completedTutorials.includes(prevTutorial.id) : false;
   };
 
-  const currentTutorial = tutorials.find(
-    (t: any) => t.order === currentTutorialOrder
+  const currentTutorial = useMemo(
+    () => tutorials.find((t) => t.order === currentTutorialOrder),
+    [tutorials, currentTutorialOrder]
   );
-  const isCurrentCompleted = currentTutorial
-    ? completedTutorials.includes(currentTutorial.id)
-    : false;
-  const hasNextTutorial =
-    tutorials.length > 0
-      ? currentTutorialOrder < Math.max(...tutorials.map((t: any) => t.order))
-      : false;
+
+  const isCurrentCompleted = useMemo(
+    () =>
+      currentTutorial ? completedTutorials.includes(currentTutorial.id) : false,
+    [currentTutorial, completedTutorials]
+  );
+
+  const hasNextTutorial = useMemo(
+    () =>
+      tutorials.length > 0
+        ? currentTutorialOrder < Math.max(...tutorials.map((t) => t.order))
+        : false,
+    [tutorials, currentTutorialOrder]
+  );
 
   // Load starter code when tutorial changes
   useEffect(() => {
@@ -278,12 +289,15 @@ export default function Home() {
     }
   }, [currentTutorial, userCode]);
 
-  const progressPercentage =
-    tutorials.length > 0
-      ? (completedTutorials.length / tutorials.length) * 100
-      : 0;
+  const progressPercentage = useMemo(
+    () =>
+      tutorials.length > 0
+        ? (completedTutorials.length / tutorials.length) * 100
+        : 0,
+    [tutorials.length, completedTutorials.length]
+  );
 
-  if (isLoading || !hasRestoredFromStorage) {
+  if (!hasRestoredFromStorage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
@@ -361,32 +375,13 @@ export default function Home() {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <TutorialSidebar
-          tutorials={tutorials
-            .sort((a: any, b: any) => a.order - b.order)
-            .map((t: any) => ({
-              id: t.id,
-              courseId: t.courseId,
-              title: t.title,
-              description: t.description,
-              content: t.content,
-              starterCode: t.starterCode,
-              expectedOutput: t.expectedOutput || "",
-              order: t.order,
-              isLocked: !isTutorialUnlocked(t),
-            }))}
+          tutorials={transformTutorials(
+            tutorials.sort((a, b) => a.order - b.order),
+            (t) => ({ isLocked: !isTutorialUnlocked(t) })
+          )}
           currentTutorial={
             currentTutorial
-              ? {
-                  id: currentTutorial.id,
-                  courseId: currentTutorial.courseId,
-                  title: currentTutorial.title,
-                  description: currentTutorial.description,
-                  content: currentTutorial.content,
-                  starterCode: currentTutorial.starterCode,
-                  expectedOutput: currentTutorial.expectedOutput || "",
-                  order: currentTutorial.order,
-                  isLocked: false,
-                }
+              ? transformTutorial(currentTutorial, { isLocked: false })
               : null
           }
           completedTutorials={completedTutorials}
@@ -415,17 +410,9 @@ export default function Home() {
           <div className="h-full flex flex-col">
             {currentTutorial ? (
               <TutorialContent
-                tutorial={{
-                  id: currentTutorial.id,
-                  courseId: currentTutorial.courseId,
-                  title: currentTutorial.title,
-                  description: currentTutorial.description,
-                  content: currentTutorial.content,
-                  starterCode: currentTutorial.starterCode,
-                  expectedOutput: currentTutorial.expectedOutput || "",
-                  order: currentTutorial.order,
+                tutorial={transformTutorial(currentTutorial, {
                   isLocked: false,
-                }}
+                })}
                 onComplete={() => markTutorialComplete(currentTutorialOrder)}
                 isCompleted={isCurrentCompleted}
                 onNext={hasNextTutorial ? goToNextTutorial : undefined}

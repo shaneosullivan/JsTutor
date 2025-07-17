@@ -1,8 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+// Removed useQuery import - now using local utility functions
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { ArrowLeft, Book, CheckCircle, Lock, Code, Star } from "lucide-react";
+import { ArrowLeft, Book, Code, Star } from "lucide-react";
 import TutorialContent from "@/components/tutorial-content";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import ApiDocumentation from "@/components/api-documentation";
@@ -30,32 +29,20 @@ import {
   getProfileItem,
   setProfileItem,
 } from "@/lib/profile-storage";
+import {
+  getCoursesForLocale,
+  getTutorialsForCourse,
+  LocalizedTutorial,
+  transformTutorial,
+  transformTutorials,
+} from "@/lib/dataUtils";
 import GithubIcon from "@/components/GithubIcon";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import { useKeyboard } from "@/components/KeyboardProvider";
 import { useTutorial } from "@/hooks/use-course-tutorial";
 import Analytics from "@/components/Analytics";
 
-interface Course {
-  id: number;
-  title: string;
-  description: string;
-  type: string;
-  order: number;
-  requiredCourse: number | null;
-}
-
-interface Tutorial {
-  id: number;
-  courseId: number;
-  title: string;
-  description: string;
-  content: string;
-  starterCode: string;
-  expectedOutput?: string;
-  order: number;
-  isLocked: boolean;
-}
+// Using LocalizedTutorial from dataUtils instead of local interface
 
 interface CoursePageProps {
   courseId: string;
@@ -90,19 +77,18 @@ export default function CoursePage({ courseId }: CoursePageProps) {
   const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
   const [showReferenceDialog, setShowReferenceDialog] = useState(false);
 
-  // Query for course data
-  const { data: course, isLoading: courseLoading } = useQuery<Course>({
-    queryKey: [`/api/courses/${courseIdNum}`],
-    enabled: !!courseIdNum,
-  });
+  // Memoized course data from local utils
+  const courses = useMemo(() => getCoursesForLocale("en"), []);
+  const course = useMemo(
+    () => courses.find((c) => c.id === courseIdNum) || null,
+    [courses, courseIdNum]
+  );
+  const tutorials = useMemo(
+    () => getTutorialsForCourse(courseIdNum || 0),
+    [courseIdNum]
+  );
 
-  // Query for course tutorials
-  const { data: tutorials = [], isLoading: tutorialsLoading } = useQuery<
-    Tutorial[]
-  >({
-    queryKey: [`/api/courses/${courseIdNum}/tutorials`],
-    enabled: !!courseIdNum,
-  });
+  // Loading states no longer needed since we use local utils
 
   // Course progress is computed from tutorial data, no sync needed
 
@@ -119,7 +105,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
         .map((t) => t.id);
 
       const allCompleted = Array.from(
-        new Set([...restoredCompleted, ...tutorialsToComplete]),
+        new Set([...restoredCompleted, ...tutorialsToComplete])
       );
 
       setCompletedTutorials(allCompleted);
@@ -131,8 +117,6 @@ export default function CoursePage({ courseId }: CoursePageProps) {
 
   const { userCode, setUserCode, sidebarCollapsed, setSidebarCollapsed } =
     useTutorial();
-
-  const isLoading = courseLoading || tutorialsLoading;
 
   // Save progress to profile storage
   useEffect(() => {
@@ -161,7 +145,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     if (typeof window !== "undefined" && hasRestoredFromStorage) {
       setProfileItem(
         `highestTutorial_course_${courseIdNum}`,
-        highestTutorialReached.toString(),
+        highestTutorialReached.toString()
       );
     }
   }, [highestTutorialReached, courseIdNum, hasRestoredFromStorage]);
@@ -197,12 +181,12 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     }
   };
 
-  const selectTutorial = (tutorial: Tutorial) => {
+  const selectTutorial = (tutorial: LocalizedTutorial) => {
     setCurrentTutorialOrder(tutorial.order);
   };
 
   // Check if tutorial is unlocked
-  const isTutorialUnlocked = (tutorial: Tutorial): boolean => {
+  const isTutorialUnlocked = (tutorial: LocalizedTutorial): boolean => {
     // First tutorial in the course is always unlocked
     if (tutorial.order === 1) {
       return true;
@@ -218,16 +202,24 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     return prevTutorial ? completedTutorials.includes(prevTutorial.id) : false;
   };
 
-  const currentTutorial = tutorials.find(
-    (t) => t.order === currentTutorialOrder,
+  const currentTutorial = useMemo(
+    () => tutorials.find((t) => t.order === currentTutorialOrder),
+    [tutorials, currentTutorialOrder]
   );
-  const isCurrentCompleted = currentTutorial
-    ? completedTutorials.includes(currentTutorial.id)
-    : false;
-  const hasNextTutorial =
-    tutorials.length > 0
-      ? currentTutorialOrder < Math.max(...tutorials.map((t) => t.order))
-      : false;
+
+  const isCurrentCompleted = useMemo(
+    () =>
+      currentTutorial ? completedTutorials.includes(currentTutorial.id) : false,
+    [currentTutorial, completedTutorials]
+  );
+
+  const hasNextTutorial = useMemo(
+    () =>
+      tutorials.length > 0
+        ? currentTutorialOrder < Math.max(...tutorials.map((t) => t.order))
+        : false,
+    [tutorials, currentTutorialOrder]
+  );
 
   // Load starter code when tutorial changes
   useEffect(() => {
@@ -255,12 +247,32 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     }
   }, [currentTutorial, userCode]);
 
-  const progressPercentage =
-    tutorials.length > 0
-      ? (completedTutorials.length / tutorials.length) * 100
-      : 0;
+  const progressPercentage = useMemo(
+    () =>
+      tutorials.length > 0
+        ? (completedTutorials.length / tutorials.length) * 100
+        : 0,
+    [tutorials.length, completedTutorials.length]
+  );
 
-  if (isLoading || !hasRestoredFromStorage) {
+  const sidebarTutorials = useMemo(
+    () =>
+      transformTutorials(
+        tutorials.sort((a, b) => a.order - b.order),
+        (t) => ({ isLocked: !isTutorialUnlocked(t) })
+      ),
+    [tutorials, completedTutorials, highestTutorialReached]
+  );
+
+  const sidebarCurrentTutorial = useMemo(
+    () =>
+      currentTutorial
+        ? transformTutorial(currentTutorial, { isLocked: false })
+        : null,
+    [currentTutorial]
+  );
+
+  if (!hasRestoredFromStorage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
@@ -363,13 +375,8 @@ export default function CoursePage({ courseId }: CoursePageProps) {
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <TutorialSidebar
-          tutorials={tutorials
-            .sort((a, b) => a.order - b.order)
-            .map((t) => ({
-              ...t,
-              isLocked: !isTutorialUnlocked(t),
-            }))}
-          currentTutorial={currentTutorial || null}
+          tutorials={sidebarTutorials}
+          currentTutorial={sidebarCurrentTutorial}
           completedTutorials={completedTutorials}
           onTutorialSelect={selectTutorial}
           collapsed={sidebarCollapsed}
@@ -382,14 +389,16 @@ export default function CoursePage({ courseId }: CoursePageProps) {
           <div className="h-full flex flex-col">
             {currentTutorial ? (
               <TutorialContent
-                tutorial={currentTutorial}
+                tutorial={transformTutorial(currentTutorial, {
+                  isLocked: false,
+                })}
                 onComplete={() => markTutorialComplete(currentTutorialOrder)}
                 isCompleted={isCurrentCompleted}
                 onNext={hasNextTutorial ? goToNextTutorial : undefined}
                 hasNext={hasNextTutorial}
                 userCode={userCode}
                 onCodeChange={setUserCode}
-                courseType={course.type}
+                courseType={course?.type || "canvas"}
                 onShowReference={() => setShowReferenceDialog(true)}
               />
             ) : (

@@ -14,6 +14,28 @@ export interface TutorialText extends LocalizedText {
   expectedOutput?: string | null;
 }
 
+// Localized tutorial type (flattened from raw Tutorial data)
+export interface LocalizedTutorial {
+  id: number;
+  courseId: number;
+  title: string;
+  description: string;
+  content: string;
+  starterCode?: string;
+  expectedOutput?: string | null;
+  order: number;
+}
+
+// Localized course type (flattened from raw Course data)
+export interface LocalizedCourse {
+  id: number;
+  title: string;
+  description: string;
+  type: string;
+  order: number;
+  requiredCourse: number | null;
+}
+
 export interface Course {
   id: number;
   text: Record<string, LocalizedText>;
@@ -30,35 +52,15 @@ export interface Tutorial {
   order: number;
 }
 
-// Legacy interfaces for backward compatibility
-export interface LegacyCourse {
-  id: number;
-  title: string;
-  description: string;
-  type: string;
-  order: number;
-  requiredCourse: number | null;
-}
-
-export interface LegacyTutorial {
-  id: number;
-  courseId: number;
-  title: string;
-  description: string;
-  content: string;
-  starterCode?: string;
-  expectedOutput?: string | null;
-  order: number;
-}
 
 // Current locale (hardcoded to 'en' for now, will be configurable later)
 const DEFAULT_LOCALE = "en";
 
-// Locale-aware helper functions
+// Locale-aware helper functions that return localized types
 function getLocalizedCourse(
   course: Course,
   locale: string = DEFAULT_LOCALE,
-): LegacyCourse {
+): LocalizedCourse {
   const text =
     course.text[locale] ||
     course.text.en ||
@@ -76,7 +78,7 @@ function getLocalizedCourse(
 function getLocalizedTutorial(
   tutorial: Tutorial,
   locale: string = DEFAULT_LOCALE,
-): LegacyTutorial {
+): LocalizedTutorial {
   const text =
     tutorial.text[locale] ||
     tutorial.text.en ||
@@ -112,16 +114,50 @@ export const getTutorialsForLocale = localizedData.getTutorialsForLocale;
 export const getAvailableLocales = localizedData.getAvailableLocales;
 export const setDefaultLocale = localizedData.setDefaultLocale;
 
+// Tutorial transformation utility
+export interface TutorialTransformOptions {
+  isLocked?: boolean;
+  starterCode?: string;
+  expectedOutput?: string;
+  [key: string]: any;
+}
+
+export function transformTutorial<T extends Record<string, any>>(
+  tutorial: T,
+  overrides: TutorialTransformOptions = {}
+): T & { starterCode: string; expectedOutput: string; isLocked: boolean } {
+  return {
+    ...tutorial,
+    starterCode: overrides.starterCode ?? tutorial.starterCode ?? "",
+    expectedOutput: overrides.expectedOutput ?? tutorial.expectedOutput ?? "",
+    isLocked: overrides.isLocked ?? tutorial.isLocked ?? false,
+    ...overrides,
+  };
+}
+
+// Transform multiple tutorials with a common override or individual overrides
+export function transformTutorials<T extends Record<string, any>>(
+  tutorials: T[],
+  overrides: TutorialTransformOptions | ((tutorial: T, index: number) => TutorialTransformOptions) = {}
+): Array<T & { starterCode: string; expectedOutput: string; isLocked: boolean }> {
+  return tutorials.map((tutorial, index) => {
+    const tutorialOverrides = typeof overrides === 'function' 
+      ? overrides(tutorial, index) 
+      : overrides;
+    return transformTutorial(tutorial, tutorialOverrides);
+  });
+}
+
 // Factory function to create localized exports from raw data
 export function createLocalizedData(
   rawCourses: Course[],
   rawTutorials: Tutorial[],
 ) {
   // Exported data (localized for current locale)
-  const courses: LegacyCourse[] = rawCourses.map((course) =>
+  const courses: LocalizedCourse[] = rawCourses.map((course) =>
     getLocalizedCourse(course),
   );
-  const tutorials: LegacyTutorial[] = rawTutorials.map((tutorial) =>
+  const tutorials: LocalizedTutorial[] = rawTutorials.map((tutorial) =>
     getLocalizedTutorial(tutorial),
   );
 
@@ -129,18 +165,18 @@ export function createLocalizedData(
     courses,
     tutorials,
 
-    // Legacy helper functions (maintain backward compatibility)
-    getCourse(id: number, locale?: string): LegacyCourse | undefined {
+    // Helper functions that return localized types
+    getCourse(id: number, locale?: string): LocalizedCourse | undefined {
       const course = rawCourses.find((course) => course.id === id);
       return course ? getLocalizedCourse(course, locale) : undefined;
     },
 
-    getTutorial(id: number, locale?: string): LegacyTutorial | undefined {
+    getTutorial(id: number, locale?: string): LocalizedTutorial | undefined {
       const tutorial = rawTutorials.find((tutorial) => tutorial.id === id);
       return tutorial ? getLocalizedTutorial(tutorial, locale) : undefined;
     },
 
-    getTutorialsForCourse(courseId: number, locale?: string): LegacyTutorial[] {
+    getTutorialsForCourse(courseId: number, locale?: string): LocalizedTutorial[] {
       return rawTutorials
         .filter((tutorial) => tutorial.courseId === courseId)
         .map((tutorial) => getLocalizedTutorial(tutorial, locale));
@@ -149,7 +185,7 @@ export function createLocalizedData(
     getNextTutorial(
       currentTutorialId: number,
       locale?: string,
-    ): LegacyTutorial | null {
+    ): LocalizedTutorial | null {
       const currentTutorial = rawTutorials.find(
         (t) => t.id === currentTutorialId,
       );
@@ -188,7 +224,7 @@ export function createLocalizedData(
     getPreviousTutorial(
       currentTutorialId: number,
       locale?: string,
-    ): LegacyTutorial | null {
+    ): LocalizedTutorial | null {
       const currentTutorial = rawTutorials.find(
         (t) => t.id === currentTutorialId,
       );
@@ -227,12 +263,12 @@ export function createLocalizedData(
       return null;
     },
 
-    // New locale-aware functions
-    getCoursesForLocale(locale: string = DEFAULT_LOCALE): LegacyCourse[] {
+    // Locale-aware functions that return localized types
+    getCoursesForLocale(locale: string = DEFAULT_LOCALE): LocalizedCourse[] {
       return rawCourses.map((course) => getLocalizedCourse(course, locale));
     },
 
-    getTutorialsForLocale(locale: string = DEFAULT_LOCALE): LegacyTutorial[] {
+    getTutorialsForLocale(locale: string = DEFAULT_LOCALE): LocalizedTutorial[] {
       return rawTutorials.map((tutorial) =>
         getLocalizedTutorial(tutorial, locale),
       );

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useMemo } from "react";
+// Removed useQuery import - now using local utility functions
 import Link from "next/link";
 import {
   Card,
@@ -30,6 +30,7 @@ import {
   getCompletedCourses as getCompletedCoursesFromStorage,
   setProfileItem,
 } from "@/lib/profile-storage";
+import { getCoursesForLocale } from "@/lib/dataUtils";
 
 interface Course {
   id: number;
@@ -41,9 +42,8 @@ interface Course {
 }
 
 export default function CourseSelection() {
-  const { data: courses = [], isLoading } = useQuery<Course[]>({
-    queryKey: ["/api/courses"],
-  });
+  const courses = useMemo(() => getCoursesForLocale("en"), []);
+  const isLoading = false;
 
   // Get completion status from profile storage
   const getCompletedCourses = (): number[] => {
@@ -59,14 +59,25 @@ export default function CourseSelection() {
     // Course progress is computed from tutorial data, no sync needed
   }, []);
 
-  const isCourseUnlocked = (course: Course): boolean => {
-    if (course.requiredCourse === null) return true; // Basics course is always unlocked
-    return completedCourses.includes(course.requiredCourse);
-  };
+  const isCourseUnlocked = useMemo(
+    () =>
+      (course: Course): boolean => {
+        if (course.requiredCourse === null) {
+          // Basics course is always unlocked
+          return true;
+        }
+        return completedCourses.includes(course.requiredCourse);
+      },
+    [completedCourses]
+  );
 
-  const isCourseCompleted = (courseId: number): boolean => {
-    return completedCourses.includes(courseId);
-  };
+  const isCourseCompleted = useMemo(
+    () =>
+      (courseId: number): boolean => {
+        return completedCourses.includes(courseId);
+      },
+    [completedCourses]
+  );
 
   const getCourseIcon = (type: string) => {
     switch (type) {
