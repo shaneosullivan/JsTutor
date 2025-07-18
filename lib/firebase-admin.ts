@@ -175,6 +175,109 @@ export async function storeChange(
   return docId;
 }
 
+// Get changes made by different clients in the same account
+export async function getChangesForAccount(
+  accountId: string,
+  currentClientId: string,
+  filters?: {
+    types?: ("account" | "profile" | "course")[];
+    courseId?: number;
+  }
+): Promise<Array<{
+  type: "account" | "profile" | "course";
+  clientId: string;
+  data?: { courseId?: number; profileId?: number };
+  timestamp: string;
+}>> {
+  if (!serviceAccount) {
+    throw new Error(
+      "Firebase is not configured. Please add Firebase service account configuration."
+    );
+  }
+
+  const firestore = getFirestoreDb();
+  let query = firestore
+    .collection(FIREBASE_CHANGES_COLLECTION)
+    .where("accountId", "==", accountId)
+    .where("clientId", "!=", currentClientId);
+
+  const snapshot = await query.get();
+  let changes = snapshot.docs.map((doc) => doc.data() as {
+    type: "account" | "profile" | "course";
+    clientId: string;
+    data?: { courseId?: number; profileId?: number };
+    timestamp: string;
+  });
+
+  // Apply filters
+  if (filters?.types) {
+    changes = changes.filter(change => filters.types!.includes(change.type));
+  }
+
+  if (filters?.courseId !== undefined) {
+    changes = changes.filter(change => 
+      change.type === "course" && change.data?.courseId === filters.courseId
+    );
+  }
+
+  return changes;
+}
+
+// Get objects based on change data
+export async function getObjectsFromChanges(
+  accountId: string,
+  changes: Array<{
+    type: "account" | "profile" | "course";
+    clientId: string;
+    data?: { courseId?: number; profileId?: number };
+    timestamp: string;
+  }>
+): Promise<{
+  account: AccountData[];
+  profile: UserProfile[];
+  course: CourseProgress[];
+}> {
+  const result = {
+    account: [] as AccountData[],
+    profile: [] as UserProfile[],
+    course: [] as CourseProgress[]
+  };
+
+  for (const change of changes) {
+    try {
+      if (change.type === "account") {
+        const account = await getAccountById(accountId);
+        if (account && !result.account.find(a => a.id === account.id)) {
+          result.account.push(account);
+        }
+      } else if (change.type === "profile" && change.data?.profileId) {
+        const profiles = await getProfilesByAccountId(accountId);
+        const profile = profiles.find(p => 
+          parseInt(p.id.replace(/\D/g, '')) === change.data!.profileId
+        );
+        if (profile && !result.profile.find(p => p.id === profile.id)) {
+          result.profile.push(profile);
+        }
+      } else if (change.type === "course" && change.data?.courseId && change.data?.profileId) {
+        const profileId = change.data.profileId.toString();
+        const courseId = change.data.courseId.toString();
+        const courseProgress = await getCourseProgressById(accountId, profileId, courseId);
+        if (courseProgress && !result.course.find(c => 
+          c.accountId === courseProgress.accountId && 
+          c.profileId === courseProgress.profileId && 
+          c.courseId === courseProgress.courseId
+        )) {
+          result.course.push(courseProgress);
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to get object for change type ${change.type}:`, error);
+    }
+  }
+
+  return result;
+}
+
 export async function updateAccount(
   account: AccountData
 ): Promise<AccountData> {
