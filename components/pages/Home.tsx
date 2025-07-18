@@ -70,7 +70,7 @@ export default function Home() {
     if (lastCourseId && courses.length > 0) {
       // Verify the course still exists
       const courseExists = courses.some(
-        (course) => course.id === parseInt(lastCourseId)
+        (course) => course.id === parseInt(lastCourseId),
       );
       if (courseExists && parseInt(lastCourseId) !== 1) {
         // Redirect to the last course if it's not the Basics course (which is already on home)
@@ -94,7 +94,7 @@ export default function Home() {
 
   const tutorials = useMemo(
     () => getTutorialsForCourse(currentCourseId),
-    [currentCourseId]
+    [currentCourseId],
   );
 
   // Get tutorials for the current course
@@ -220,14 +220,14 @@ export default function Home() {
 
     // Make sure to persist the completed status
     const tutorialCode = getTutorialCodesForCourse(currentCourseId).filter(
-      (tutorialCode) => tutorialCode.tutorialId === tutorial.id
+      (tutorialCode) => tutorialCode.tutorialId === tutorial.id,
     )[0];
 
     // Track that this tutorial was accessed
     setTutorialCompleted(
       tutorial.id,
       tutorialCode ? tutorialCode.completed : false,
-      currentCourseId
+      currentCourseId,
     );
   };
 
@@ -238,21 +238,19 @@ export default function Home() {
     if (tutorial.order <= highestTutorialReached) {
       return true;
     }
-    const prevTutorial = tutorials.find(
-      (t) => t.order === tutorial.order - 1
-    );
+    const prevTutorial = tutorials.find((t) => t.order === tutorial.order - 1);
     return prevTutorial ? completedTutorials.includes(prevTutorial.id) : false;
   };
 
   const currentTutorial = useMemo(
     () => tutorials.find((t) => t.order === currentTutorialOrder),
-    [tutorials, currentTutorialOrder]
+    [tutorials, currentTutorialOrder],
   );
 
   const isCurrentCompleted = useMemo(
     () =>
       currentTutorial ? completedTutorials.includes(currentTutorial.id) : false,
-    [currentTutorial, completedTutorials]
+    [currentTutorial, completedTutorials],
   );
 
   const hasNextTutorial = useMemo(
@@ -260,7 +258,7 @@ export default function Home() {
       tutorials.length > 0
         ? currentTutorialOrder < Math.max(...tutorials.map((t) => t.order))
         : false,
-    [tutorials, currentTutorialOrder]
+    [tutorials, currentTutorialOrder],
   );
 
   // Load starter code when tutorial changes
@@ -294,7 +292,7 @@ export default function Home() {
       tutorials.length > 0
         ? (completedTutorials.length / tutorials.length) * 100
         : 0,
-    [tutorials.length, completedTutorials.length]
+    [tutorials.length, completedTutorials.length],
   );
 
   if (!hasRestoredFromStorage) {
@@ -377,7 +375,7 @@ export default function Home() {
         <TutorialSidebar
           tutorials={transformTutorials(
             tutorials.sort((a, b) => a.order - b.order),
-            (t) => ({ isLocked: !isTutorialUnlocked(t) })
+            (t) => ({ isLocked: !isTutorialUnlocked(t) }),
           )}
           currentTutorial={
             currentTutorial

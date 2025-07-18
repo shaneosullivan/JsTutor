@@ -68,7 +68,7 @@ export default function CourseSelection() {
         }
         return completedCourses.includes(course.requiredCourse);
       },
-    [completedCourses]
+    [completedCourses],
   );
 
   const isCourseCompleted = useMemo(
@@ -76,7 +76,7 @@ export default function CourseSelection() {
       (courseId: number): boolean => {
         return completedCourses.includes(courseId);
       },
-    [completedCourses]
+    [completedCourses],
   );
 
   const getCourseIcon = (type: string) => {

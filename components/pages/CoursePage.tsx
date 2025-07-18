@@ -81,11 +81,11 @@ export default function CoursePage({ courseId }: CoursePageProps) {
   const courses = useMemo(() => getCoursesForLocale("en"), []);
   const course = useMemo(
     () => courses.find((c) => c.id === courseIdNum) || null,
-    [courses, courseIdNum]
+    [courses, courseIdNum],
   );
   const tutorials = useMemo(
     () => getTutorialsForCourse(courseIdNum || 0),
-    [courseIdNum]
+    [courseIdNum],
   );
 
   // Loading states no longer needed since we use local utils
@@ -105,7 +105,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
         .map((t) => t.id);
 
       const allCompleted = Array.from(
-        new Set([...restoredCompleted, ...tutorialsToComplete])
+        new Set([...restoredCompleted, ...tutorialsToComplete]),
       );
 
       setCompletedTutorials(allCompleted);
@@ -145,7 +145,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     if (typeof window !== "undefined" && hasRestoredFromStorage) {
       setProfileItem(
         `highestTutorial_course_${courseIdNum}`,
-        highestTutorialReached.toString()
+        highestTutorialReached.toString(),
       );
     }
   }, [highestTutorialReached, courseIdNum, hasRestoredFromStorage]);
@@ -204,13 +204,13 @@ export default function CoursePage({ courseId }: CoursePageProps) {
 
   const currentTutorial = useMemo(
     () => tutorials.find((t) => t.order === currentTutorialOrder),
-    [tutorials, currentTutorialOrder]
+    [tutorials, currentTutorialOrder],
   );
 
   const isCurrentCompleted = useMemo(
     () =>
       currentTutorial ? completedTutorials.includes(currentTutorial.id) : false,
-    [currentTutorial, completedTutorials]
+    [currentTutorial, completedTutorials],
   );
 
   const hasNextTutorial = useMemo(
@@ -218,7 +218,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
       tutorials.length > 0
         ? currentTutorialOrder < Math.max(...tutorials.map((t) => t.order))
         : false,
-    [tutorials, currentTutorialOrder]
+    [tutorials, currentTutorialOrder],
   );
 
   // Load starter code when tutorial changes
@@ -252,16 +252,16 @@ export default function CoursePage({ courseId }: CoursePageProps) {
       tutorials.length > 0
         ? (completedTutorials.length / tutorials.length) * 100
         : 0,
-    [tutorials.length, completedTutorials.length]
+    [tutorials.length, completedTutorials.length],
   );
 
   const sidebarTutorials = useMemo(
     () =>
       transformTutorials(
         tutorials.sort((a, b) => a.order - b.order),
-        (t) => ({ isLocked: !isTutorialUnlocked(t) })
+        (t) => ({ isLocked: !isTutorialUnlocked(t) }),
       ),
-    [tutorials, completedTutorials, highestTutorialReached]
+    [tutorials, completedTutorials, highestTutorialReached],
   );
 
   const sidebarCurrentTutorial = useMemo(
@@ -269,7 +269,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
       currentTutorial
         ? transformTutorial(currentTutorial, { isLocked: false })
         : null,
-    [currentTutorial]
+    [currentTutorial],
   );
 
   if (!hasRestoredFromStorage) {

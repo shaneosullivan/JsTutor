@@ -59,17 +59,17 @@ export default function ProfilesPageClient({
   const router = useRouter();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [activeProfile, setActiveProfileState] = useState<UserProfile | null>(
-    null
+    null,
   );
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [editingProfile, setEditingProfile] = useState<UserProfile | null>(
-    null
+    null,
   );
   const [deletingProfile, setDeletingProfile] = useState<UserProfile | null>(
-    null
+    null,
   );
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState("short_brown");
@@ -258,7 +258,7 @@ export default function ProfilesPageClient({
                     <div className="w-12 h-12 rounded-full flex items-center justify-center p-1 bg-white shadow-md">
                       {(() => {
                         const iconData = getProfileIcon(
-                          profile.icon || "short_brown"
+                          profile.icon || "short_brown",
                         );
                         if (iconData) {
                           const IconComponent = iconData.component;

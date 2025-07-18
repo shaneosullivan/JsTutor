@@ -52,7 +52,6 @@ export interface Tutorial {
   order: number;
 }
 
-
 // Current locale (hardcoded to 'en' for now, will be configurable later)
 const DEFAULT_LOCALE = "en";
 
@@ -124,7 +123,7 @@ export interface TutorialTransformOptions {
 
 export function transformTutorial<T extends Record<string, any>>(
   tutorial: T,
-  overrides: TutorialTransformOptions = {}
+  overrides: TutorialTransformOptions = {},
 ): T & { starterCode: string; expectedOutput: string; isLocked: boolean } {
   return {
     ...tutorial,
@@ -138,12 +137,15 @@ export function transformTutorial<T extends Record<string, any>>(
 // Transform multiple tutorials with a common override or individual overrides
 export function transformTutorials<T extends Record<string, any>>(
   tutorials: T[],
-  overrides: TutorialTransformOptions | ((tutorial: T, index: number) => TutorialTransformOptions) = {}
-): Array<T & { starterCode: string; expectedOutput: string; isLocked: boolean }> {
+  overrides:
+    | TutorialTransformOptions
+    | ((tutorial: T, index: number) => TutorialTransformOptions) = {},
+): Array<
+  T & { starterCode: string; expectedOutput: string; isLocked: boolean }
+> {
   return tutorials.map((tutorial, index) => {
-    const tutorialOverrides = typeof overrides === 'function' 
-      ? overrides(tutorial, index) 
-      : overrides;
+    const tutorialOverrides =
+      typeof overrides === "function" ? overrides(tutorial, index) : overrides;
     return transformTutorial(tutorial, tutorialOverrides);
   });
 }
@@ -176,7 +178,10 @@ export function createLocalizedData(
       return tutorial ? getLocalizedTutorial(tutorial, locale) : undefined;
     },
 
-    getTutorialsForCourse(courseId: number, locale?: string): LocalizedTutorial[] {
+    getTutorialsForCourse(
+      courseId: number,
+      locale?: string,
+    ): LocalizedTutorial[] {
       return rawTutorials
         .filter((tutorial) => tutorial.courseId === courseId)
         .map((tutorial) => getLocalizedTutorial(tutorial, locale));
@@ -268,7 +273,9 @@ export function createLocalizedData(
       return rawCourses.map((course) => getLocalizedCourse(course, locale));
     },
 
-    getTutorialsForLocale(locale: string = DEFAULT_LOCALE): LocalizedTutorial[] {
+    getTutorialsForLocale(
+      locale: string = DEFAULT_LOCALE,
+    ): LocalizedTutorial[] {
       return rawTutorials.map((tutorial) =>
         getLocalizedTutorial(tutorial, locale),
       );
