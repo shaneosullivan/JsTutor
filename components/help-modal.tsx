@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ReactMarkdown from "react-markdown";
@@ -25,33 +25,33 @@ interface HelpModalProps {
 export default function HelpModal({
   isOpen,
   onClose,
-  currentTutorial,
+  currentTutorial
 }: HelpModalProps) {
   const drawingCommands = [
     {
       command: "drawPixel(x, y, color)",
-      description: "Draw a single pixel at position (x, y)",
+      description: "Draw a single pixel at position (x, y)"
     },
     {
       command: "drawCircle(x, y, radius, color)",
-      description: "Draw a circle centered at (x, y) with given radius",
+      description: "Draw a circle centered at (x, y) with given radius"
     },
     {
       command: "drawLine(x1, y1, x2, y2, color)",
-      description: "Draw a line from (x1, y1) to (x2, y2)",
+      description: "Draw a line from (x1, y1) to (x2, y2)"
     },
     {
       command: "drawRect(x, y, width, height, color)",
-      description: "Draw a rectangle starting at (x, y)",
+      description: "Draw a rectangle starting at (x, y)"
     },
     {
       command: "drawText(x, y, text, color)",
-      description: "Draw text at position (x, y)",
+      description: "Draw text at position (x, y)"
     },
     {
       command: "clearCanvas()",
-      description: "Clear the entire canvas",
-    },
+      description: "Clear the entire canvas"
+    }
   ];
 
   const troubleshootingTips = [
@@ -60,7 +60,7 @@ export default function HelpModal({
     "Don't forget semicolons ; at the end of statements",
     "Try the example code first to see how it works",
     "Colors can be words like 'red', 'blue' or hex codes like '#FF0000'",
-    "Canvas coordinates start at (0, 0) in the top-left corner",
+    "Canvas coordinates start at (0, 0) in the top-left corner"
   ];
 
   const commonErrors: Array<{
@@ -75,7 +75,7 @@ export default function HelpModal({
     {
       error: "ReferenceError: xyz is not defined",
       solution:
-        "Make sure you've spelled the variable or function name correctly",
+        "Make sure you've spelled the variable or function name correctly"
     },
     {
       error: "SyntaxError: Unexpected token",
@@ -85,24 +85,24 @@ export default function HelpModal({
         {
           name: "Parentheses",
           symbol: "( )",
-          example: "drawCircle(100, 100, 50, 'red')",
+          example: "drawCircle(100, 100, 50, 'red')"
         },
         {
           name: "Brackets",
           symbol: "{ }",
-          example: "if (x > 10) { drawCircle(x, y, 20, 'blue'); }",
+          example: "if (x > 10) { drawCircle(x, y, 20, 'blue'); }"
         },
         {
           name: "Semicolons",
           symbol: ";",
-          example: "let x = 100; let y = 200;",
-        },
-      ],
+          example: "let x = 100; let y = 200;"
+        }
+      ]
     },
     {
       error: "TypeError: Cannot read property",
-      solution: "Make sure your variable has been created before using it",
-    },
+      solution: "Make sure your variable has been created before using it"
+    }
   ];
 
   return (
@@ -207,7 +207,7 @@ export default function HelpModal({
                           <blockquote className="border-l-4 border-blue-500 pl-4 italic text-slate-600 mb-3">
                             {children}
                           </blockquote>
-                        ),
+                        )
                       }}
                     >
                       {currentTutorial.content.replace(/\\\`/g, "`")}

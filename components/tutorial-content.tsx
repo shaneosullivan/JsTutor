@@ -35,7 +35,7 @@ export default function TutorialContent({
   userCode,
   onCodeChange,
   courseType = "canvas",
-  onShowReference,
+  onShowReference
 }: TutorialContentProps) {
   const keyboard = useKeyboard();
   const [, setOutput] = useState<string[]>([]);
@@ -66,7 +66,7 @@ export default function TutorialContent({
   };
 
   const handleCanvasError = (
-    error: { message: string; line?: number } | null,
+    error: { message: string; line?: number } | null
   ) => {
     setCanvasError(error);
   };
@@ -222,14 +222,14 @@ export default function TutorialContent({
                     ? "flex flex-col"
                     : courseType === "iframe"
                       ? "flex flex-col"
-                      : "flex items-center justify-center overflow-hidden",
+                      : "flex items-center justify-center overflow-hidden"
                 )}
               >
                 {/* AI Chat - Always mounted but positioned absolutely */}
                 <div
                   className={cn(
                     "absolute inset-0 z-10",
-                    showAiChat ? "block" : "hidden",
+                    showAiChat ? "block" : "hidden"
                   )}
                   style={{ display: showAiChat ? "block" : "none" }}
                 >
@@ -248,7 +248,7 @@ export default function TutorialContent({
                 <div
                   className={cn(
                     courseType === "iframe" ? "h-full" : "",
-                    "relative z-0",
+                    "relative z-0"
                   )}
                 >
                   {courseType === "canvas" && (

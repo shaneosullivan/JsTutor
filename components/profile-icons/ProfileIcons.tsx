@@ -9,20 +9,20 @@ export interface ProfileIconProps {
 const HAIR_COLORS = {
   brown: "#8B4513",
   blonde: "#DAA520",
-  black: "#2C1810",
+  black: "#2C1810"
 };
 
 // Skin tones
 const SKIN_TONES = {
   light: "#FDBCB4",
   medium: "#E08B69",
-  dark: "#8D5524",
+  dark: "#8D5524"
 };
 
 // Short Hair - Brown
 export const ShortHairBrown: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -62,7 +62,7 @@ export const ShortHairBrown: React.FC<ProfileIconProps> = ({
 // Short Hair - Blonde
 export const ShortHairBlonde: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -102,7 +102,7 @@ export const ShortHairBlonde: React.FC<ProfileIconProps> = ({
 // Short Hair - Black
 export const ShortHairBlack: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -142,7 +142,7 @@ export const ShortHairBlack: React.FC<ProfileIconProps> = ({
 // Medium Hair - Brown
 export const MediumHairBrown: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -185,7 +185,7 @@ export const MediumHairBrown: React.FC<ProfileIconProps> = ({
 // Medium Hair - Blonde
 export const MediumHairBlonde: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -228,7 +228,7 @@ export const MediumHairBlonde: React.FC<ProfileIconProps> = ({
 // Medium Hair - Black
 export const MediumHairBlack: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -271,7 +271,7 @@ export const MediumHairBlack: React.FC<ProfileIconProps> = ({
 // Long Hair - Brown
 export const LongHairBrown: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -314,7 +314,7 @@ export const LongHairBrown: React.FC<ProfileIconProps> = ({
 // Long Hair - Blonde
 export const LongHairBlonde: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -357,7 +357,7 @@ export const LongHairBlonde: React.FC<ProfileIconProps> = ({
 // Long Hair - Black
 export const LongHairBlack: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -400,7 +400,7 @@ export const LongHairBlack: React.FC<ProfileIconProps> = ({
 // Spiky Hair - Brown
 export const SpikyHairBrown: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -441,7 +441,7 @@ export const SpikyHairBrown: React.FC<ProfileIconProps> = ({
 // Spiky Hair - Blonde
 export const SpikyHairBlonde: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -482,7 +482,7 @@ export const SpikyHairBlonde: React.FC<ProfileIconProps> = ({
 // Spiky Hair - Black
 export const SpikyHairBlack: React.FC<ProfileIconProps> = ({
   className = "",
-  size = 64,
+  size = 64
 }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" className={className}>
     <circle
@@ -528,7 +528,7 @@ export const PROFILE_ICONS = [
   {
     id: "medium_blonde",
     name: "Medium Blonde Hair",
-    component: MediumHairBlonde,
+    component: MediumHairBlonde
   },
   { id: "medium_black", name: "Medium Black Hair", component: MediumHairBlack },
   { id: "long_brown", name: "Long Brown Hair", component: LongHairBrown },
@@ -536,7 +536,7 @@ export const PROFILE_ICONS = [
   { id: "long_black", name: "Long Black Hair", component: LongHairBlack },
   { id: "spiky_brown", name: "Spiky Brown Hair", component: SpikyHairBrown },
   { id: "spiky_blonde", name: "Spiky Blonde Hair", component: SpikyHairBlonde },
-  { id: "spiky_black", name: "Spiky Black Hair", component: SpikyHairBlack },
+  { id: "spiky_black", name: "Spiky Black Hair", component: SpikyHairBlack }
 ];
 
 export const getProfileIcon = (iconId: string) => {

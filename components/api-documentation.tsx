@@ -7,7 +7,7 @@ import {
   Info,
   Gamepad2,
   Copy,
-  Check,
+  Check
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,11 +23,11 @@ const drawingFunctions = [
     parameters: [
       { name: "x", type: "number", description: "X coordinate (0-400)" },
       { name: "y", type: "number", description: "Y coordinate (0-400)" },
-      { name: "color", type: "string", description: "Color name or hex code" },
+      { name: "color", type: "string", description: "Color name or hex code" }
     ],
     example: `drawPixel(100, 100, 'red');
 drawPixel(200, 200, '#FF0000');`,
-    category: "basic",
+    category: "basic"
   },
   {
     name: "drawCircle",
@@ -37,23 +37,23 @@ drawPixel(200, 200, '#FF0000');`,
       {
         name: "centerX",
         type: "number",
-        description: "X coordinate of center",
+        description: "X coordinate of center"
       },
       {
         name: "centerY",
         type: "number",
-        description: "Y coordinate of center",
+        description: "Y coordinate of center"
       },
       {
         name: "radius",
         type: "number",
-        description: "Circle radius in pixels",
+        description: "Circle radius in pixels"
       },
-      { name: "color", type: "string", description: "Fill color" },
+      { name: "color", type: "string", description: "Fill color" }
     ],
     example: `drawCircle(200, 200, 50, 'blue');
 drawCircle(100, 100, 25, '#00FF00');`,
-    category: "shapes",
+    category: "shapes"
   },
   {
     name: "drawLine",
@@ -64,11 +64,11 @@ drawCircle(100, 100, 25, '#00FF00');`,
       { name: "y1", type: "number", description: "Starting Y coordinate" },
       { name: "x2", type: "number", description: "Ending X coordinate" },
       { name: "y2", type: "number", description: "Ending Y coordinate" },
-      { name: "color", type: "string", description: "Line color" },
+      { name: "color", type: "string", description: "Line color" }
     ],
     example: `drawLine(0, 0, 100, 100, 'black');
 drawLine(50, 200, 350, 200, 'red');`,
-    category: "shapes",
+    category: "shapes"
   },
   {
     name: "drawRect",
@@ -79,11 +79,11 @@ drawLine(50, 200, 350, 200, 'red');`,
       { name: "y", type: "number", description: "Top-left Y coordinate" },
       { name: "width", type: "number", description: "Rectangle width" },
       { name: "height", type: "number", description: "Rectangle height" },
-      { name: "color", type: "string", description: "Fill color" },
+      { name: "color", type: "string", description: "Fill color" }
     ],
     example: `drawRect(100, 100, 200, 100, 'purple');
 drawRect(0, 0, 50, 50, '#FFD700');`,
-    category: "shapes",
+    category: "shapes"
   },
   {
     name: "drawText",
@@ -94,14 +94,14 @@ drawRect(0, 0, 50, 50, '#FFD700');`,
       {
         name: "y",
         type: "number",
-        description: "Y coordinate for text baseline",
+        description: "Y coordinate for text baseline"
       },
       { name: "text", type: "string", description: "Text to display" },
-      { name: "color", type: "string", description: "Text color" },
+      { name: "color", type: "string", description: "Text color" }
     ],
     example: `drawText(100, 100, 'Hello World!', 'black');
 drawText(200, 200, 'I love coding!', 'blue');`,
-    category: "text",
+    category: "text"
   },
   {
     name: "clearCanvas",
@@ -110,7 +110,7 @@ drawText(200, 200, 'I love coding!', 'blue');`,
     parameters: [],
     example: `clearCanvas();
 // Canvas is now completely white`,
-    category: "utility",
+    category: "utility"
   },
   {
     name: "onKeyPress",
@@ -121,8 +121,8 @@ drawText(200, 200, 'I love coding!', 'blue');`,
         name: "callback",
         type: "function",
         description:
-          "Function to call when a key is pressed, receives (key, preventDefault)",
-      },
+          "Function to call when a key is pressed, receives (key, preventDefault)"
+      }
     ],
     example: `onKeyPress((key, preventDefault) => {
   if (key === 'w') {
@@ -130,7 +130,7 @@ drawText(200, 200, 'I love coding!', 'blue');`,
     preventDefault(); // Prevents default browser behavior
   }
 });`,
-    category: "events",
+    category: "events"
   },
   {
     name: "onArrowKeys",
@@ -142,8 +142,8 @@ drawText(200, 200, 'I love coding!', 'blue');`,
         name: "callback",
         type: "function",
         description:
-          "Function to call when arrow keys are pressed, receives (direction, preventDefault)",
-      },
+          "Function to call when arrow keys are pressed, receives (direction, preventDefault)"
+      }
     ],
     example: `let x = 200, y = 200;
 onArrowKeys((direction, preventDefault) => {
@@ -155,7 +155,7 @@ onArrowKeys((direction, preventDefault) => {
   drawCircle(x, y, 15, 'blue');
   preventDefault();
 });`,
-    category: "events",
+    category: "events"
   },
   {
     name: "onSpaceBar",
@@ -165,8 +165,8 @@ onArrowKeys((direction, preventDefault) => {
       {
         name: "callback",
         type: "function",
-        description: "Function to call when spacebar is pressed",
-      },
+        description: "Function to call when spacebar is pressed"
+      }
     ],
     example: `onSpaceBar(() => {
   // Draw a random circle when spacebar is pressed
@@ -174,7 +174,7 @@ onArrowKeys((direction, preventDefault) => {
   let y = Math.random() * 400;
   drawCircle(x, y, 20, 'purple');
 });`,
-    category: "events",
+    category: "events"
   },
   {
     name: "isKeyPressed",
@@ -184,8 +184,8 @@ onArrowKeys((direction, preventDefault) => {
       {
         name: "key",
         type: "string",
-        description: "The key to check (e.g., 'w', 'a', 's', 'd', 'arrowup')",
-      },
+        description: "The key to check (e.g., 'w', 'a', 's', 'd', 'arrowup')"
+      }
     ],
     example: `// Continuous movement while keys are held
 function gameLoop() {
@@ -199,8 +199,8 @@ function gameLoop() {
   drawCircle(x, y, 10, 'green');
 }
 setInterval(gameLoop, 50);`,
-    category: "events",
-  },
+    category: "events"
+  }
 ];
 
 const colorExamples = [
@@ -214,8 +214,8 @@ const colorExamples = [
       "purple",
       "orange",
       "pink",
-      "brown",
-    ],
+      "brown"
+    ]
   },
   {
     name: "Extended Colors",
@@ -227,8 +227,8 @@ const colorExamples = [
       "cyan",
       "magenta",
       "lime",
-      "navy",
-    ],
+      "navy"
+    ]
   },
   {
     name: "Hex Colors",
@@ -240,9 +240,9 @@ const colorExamples = [
       "#FF00FF",
       "#00FFFF",
       "#FFA500",
-      "#800080",
-    ],
-  },
+      "#800080"
+    ]
+  }
 ];
 
 const codeExamples = [
@@ -254,7 +254,7 @@ drawRect(180, 220, 40, 60, 'darkbrown'); // Door
 drawRect(160, 210, 20, 20, 'lightblue'); // Left window
 drawRect(220, 210, 20, 20, 'lightblue'); // Right window
 drawLine(140, 200, 200, 150, 'red');    // Left roof
-drawLine(200, 150, 260, 200, 'red');    // Right roof`,
+drawLine(200, 150, 260, 200, 'red');    // Right roof`
   },
   {
     title: "Draw a Rainbow",
@@ -262,7 +262,7 @@ drawLine(200, 150, 260, 200, 'red');    // Right roof`,
 let colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
 for (let i = 0; i < colors.length; i++) {
   drawRect(50 + i * 50, 100, 40, 200, colors[i]);
-}`,
+}`
   },
   {
     title: "Draw a Flower",
@@ -272,7 +272,7 @@ drawCircle(170, 200, 20, 'pink');    // Left petal
 drawCircle(230, 200, 20, 'pink');    // Right petal
 drawCircle(200, 170, 20, 'pink');    // Top petal
 drawCircle(200, 230, 20, 'pink');    // Bottom petal
-drawLine(200, 230, 200, 350, 'green'); // Stem`,
+drawLine(200, 230, 200, 350, 'green'); // Stem`
   },
   {
     title: "Interactive Drawing",
@@ -293,7 +293,7 @@ onArrowKeys((direction, preventDefault) => {
 // Press spacebar to clear
 onSpaceBar(() => {
   clearCanvas();
-});`,
+});`
   },
   {
     title: "Keyboard Paint",
@@ -308,7 +308,7 @@ onKeyPress((key, preventDefault) => {
   if (key === 'c') clearCanvas();
   
   preventDefault();
-});`,
+});`
   },
   {
     title: "Smooth Movement",
@@ -333,8 +333,8 @@ function gameLoop() {
 }
 
 // Run the game loop 60 times per second
-setInterval(gameLoop, 16);`,
-  },
+setInterval(gameLoop, 16);`
+  }
 ];
 
 // PrintData course functions
@@ -348,27 +348,27 @@ const printDataFunctions = [
         name: "data",
         type: "any",
         description:
-          "The data to display - can be strings, numbers, objects, arrays, etc.",
-      },
+          "The data to display - can be strings, numbers, objects, arrays, etc."
+      }
     ],
     example: `printData("Hello World!");
 printData(42);
 printData([1, 2, 3]);
 printData({ name: "Alice", age: 25 });`,
-    category: "output",
+    category: "output"
   },
   {
     name: "console.log",
     syntax: "console.log(...args)",
     description: "Log messages to the browser console",
     parameters: [
-      { name: "args", type: "any", description: "Multiple arguments to log" },
+      { name: "args", type: "any", description: "Multiple arguments to log" }
     ],
     example: `console.log("Debug message");
 console.log("Value:", 42);
 console.log("User:", { name: "Bob", age: 30 });`,
-    category: "debug",
-  },
+    category: "debug"
+  }
 ];
 
 // DOM/iframe course functions
@@ -381,13 +381,13 @@ const domFunctions = [
       {
         name: "id",
         type: "string",
-        description: "The ID of the element to find",
-      },
+        description: "The ID of the element to find"
+      }
     ],
     example: `let titleElement = document.getElementById('title');
 let button = document.getElementById('myButton');
 titleElement.textContent = 'New Title';`,
-    category: "dom",
+    category: "dom"
   },
   {
     name: "document.querySelector",
@@ -397,25 +397,25 @@ titleElement.textContent = 'New Title';`,
       {
         name: "selector",
         type: "string",
-        description: "CSS selector (e.g., '.class', '#id', 'tag')",
-      },
+        description: "CSS selector (e.g., '.class', '#id', 'tag')"
+      }
     ],
     example: `let firstParagraph = document.querySelector('p');
 let redButton = document.querySelector('.red-button');
 let titleById = document.querySelector('#title');`,
-    category: "dom",
+    category: "dom"
   },
   {
     name: "document.querySelectorAll",
     syntax: "document.querySelectorAll(selector)",
     description: "Find all elements matching a CSS selector",
     parameters: [
-      { name: "selector", type: "string", description: "CSS selector" },
+      { name: "selector", type: "string", description: "CSS selector" }
     ],
     example: `let allParagraphs = document.querySelectorAll('p');
 let allButtons = document.querySelectorAll('button');
 allParagraphs.forEach(p => p.style.color = 'blue');`,
-    category: "dom",
+    category: "dom"
   },
   {
     name: "element.addEventListener",
@@ -425,19 +425,19 @@ allParagraphs.forEach(p => p.style.color = 'blue');`,
       {
         name: "event",
         type: "string",
-        description: "Event type (e.g., 'click', 'input')",
+        description: "Event type (e.g., 'click', 'input')"
       },
       {
         name: "function",
         type: "function",
-        description: "Function to call when event occurs",
-      },
+        description: "Function to call when event occurs"
+      }
     ],
     example: `let button = document.getElementById('myButton');
 button.addEventListener('click', () => {
   alert('Button clicked!');
 });`,
-    category: "events",
+    category: "events"
   },
   {
     name: "document.createElement",
@@ -447,14 +447,14 @@ button.addEventListener('click', () => {
       {
         name: "tagName",
         type: "string",
-        description: "HTML tag name (e.g., 'div', 'p', 'button')",
-      },
+        description: "HTML tag name (e.g., 'div', 'p', 'button')"
+      }
     ],
     example: `let newParagraph = document.createElement('p');
 newParagraph.textContent = 'Hello!';
 document.body.appendChild(newParagraph);`,
-    category: "dom",
-  },
+    category: "dom"
+  }
 ];
 
 // Examples for different course types
@@ -468,7 +468,7 @@ printData(fruits);
 // Using array methods
 let uppercaseFruits = fruits.map(fruit => fruit.toUpperCase());
 printData('Uppercase fruits:');
-printData(uppercaseFruits);`,
+printData(uppercaseFruits);`
   },
   {
     title: "Object Manipulation",
@@ -484,7 +484,7 @@ printData(person);
 // Adding properties
 person.job = 'Developer';
 printData('Updated person:');
-printData(person);`,
+printData(person);`
   },
   {
     title: "Loop Through Data",
@@ -501,8 +501,8 @@ printData(squared);
 // Filter even numbers
 let evenNumbers = numbers.filter(num => num % 2 === 0);
 printData('Even numbers:');
-printData(evenNumbers);`,
-  },
+printData(evenNumbers);`
+  }
 ];
 
 const domExamples = [
@@ -528,7 +528,7 @@ const domExamples = [
         }
     </script>
 </body>
-</html>`,
+</html>`
   },
   {
     title: "Interactive Button",
@@ -555,8 +555,8 @@ const domExamples = [
         });
     </script>
 </body>
-</html>`,
-  },
+</html>`
+  }
 ];
 
 interface ApiDocumentationProps {
@@ -564,7 +564,7 @@ interface ApiDocumentationProps {
 }
 
 export default function ApiDocumentation({
-  courseType = "canvas",
+  courseType = "canvas"
 }: ApiDocumentationProps) {
   const [copiedExample, setCopiedExample] = useState<number | null>(null);
 

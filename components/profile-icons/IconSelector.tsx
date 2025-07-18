@@ -12,7 +12,7 @@ interface IconSelectorProps {
 export const IconSelector: React.FC<IconSelectorProps> = ({
   selectedIcon,
   onIconSelect,
-  className = "",
+  className = ""
 }) => {
   return (
     <div className={`space-y-3 ${className}`}>

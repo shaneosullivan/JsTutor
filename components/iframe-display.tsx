@@ -14,7 +14,7 @@ interface IframeDisplayProps {
 export default function IframeDisplay({
   code,
   onOutput,
-  onError,
+  onError
 }: IframeDisplayProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(false);

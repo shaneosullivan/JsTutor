@@ -10,7 +10,7 @@ import {
   User,
   Calendar,
   Clock,
-  Loader2,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import {
@@ -32,7 +32,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import IconSelector from "@/components/profile-icons/IconSelector";
 import { getProfileIcon } from "@/components/profile-icons/ProfileIcons";
@@ -44,7 +44,7 @@ import {
   updateProfile,
   deleteProfile,
   getStore,
-  type Account,
+  type Account
 } from "@/lib/profile-storage";
 import { type UserProfile } from "@/lib/types";
 import GoogleSignIn from "@/components/GoogleSignIn";
@@ -54,22 +54,22 @@ interface ProfilesPageClientProps {
 }
 
 export default function ProfilesPageClient({
-  googleClientId,
+  googleClientId
 }: ProfilesPageClientProps) {
   const router = useRouter();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [activeProfile, setActiveProfileState] = useState<UserProfile | null>(
-    null,
+    null
   );
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [editingProfile, setEditingProfile] = useState<UserProfile | null>(
-    null,
+    null
   );
   const [deletingProfile, setDeletingProfile] = useState<UserProfile | null>(
-    null,
+    null
   );
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedIcon, setSelectedIcon] = useState("short_brown");
@@ -152,7 +152,7 @@ export default function ProfilesPageClient({
     const updatedProfile = {
       ...editingProfile,
       name: profileName.trim(),
-      icon: selectedIcon,
+      icon: selectedIcon
     };
 
     updateProfile(updatedProfile);
@@ -258,7 +258,7 @@ export default function ProfilesPageClient({
                     <div className="w-12 h-12 rounded-full flex items-center justify-center p-1 bg-white shadow-md">
                       {(() => {
                         const iconData = getProfileIcon(
-                          profile.icon || "short_brown",
+                          profile.icon || "short_brown"
                         );
                         if (iconData) {
                           const IconComponent = iconData.component;

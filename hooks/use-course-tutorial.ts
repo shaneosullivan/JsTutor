@@ -10,6 +10,6 @@ export function useTutorial() {
     sidebarCollapsed,
     setSidebarCollapsed,
     userCode,
-    setUserCode,
+    setUserCode
   };
 }

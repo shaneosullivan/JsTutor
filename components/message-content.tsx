@@ -28,53 +28,53 @@ function CodeBlock({ code, language = "javascript" }: CodeBlockProps) {
               fontSize: "14px",
               fontFamily:
                 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
-              backgroundColor: "#1e293b",
+              backgroundColor: "#1e293b"
             },
             ".cm-content": {
               padding: "12px",
               minHeight: "60px",
-              color: "#e2e8f0",
+              color: "#e2e8f0"
             },
             ".cm-focused": {
-              outline: "none",
+              outline: "none"
             },
             ".cm-editor": {
-              borderRadius: "6px",
+              borderRadius: "6px"
             },
             ".cm-keyword": {
-              color: "#c084fc",
+              color: "#c084fc"
             },
             ".cm-string": {
-              color: "#86efac",
+              color: "#86efac"
             },
             ".cm-number": {
-              color: "#fbbf24",
+              color: "#fbbf24"
             },
             ".cm-comment": {
               color: "#6b7280",
-              fontStyle: "italic",
+              fontStyle: "italic"
             },
             ".cm-variableName": {
-              color: "#60a5fa",
+              color: "#60a5fa"
             },
             ".cm-propertyName": {
-              color: "#f472b6",
+              color: "#f472b6"
             },
             ".cm-operator": {
-              color: "#fb7185",
+              color: "#fb7185"
             },
             ".cm-punctuation": {
-              color: "#e2e8f0",
-            },
+              color: "#e2e8f0"
+            }
           }),
           EditorView.editable.of(false),
-          EditorView.lineWrapping,
-        ],
+          EditorView.lineWrapping
+        ]
       });
 
       viewRef.current = new EditorView({
         state,
-        parent: editorRef.current,
+        parent: editorRef.current
       });
     }
 
@@ -209,7 +209,7 @@ export default function MessageContent({ content }: MessageContentProps) {
           if (inlineMatch.index > lastIndex) {
             textParts.push({
               type: "text",
-              content: segment.slice(lastIndex, inlineMatch.index),
+              content: segment.slice(lastIndex, inlineMatch.index)
             });
           }
           textParts.push({ type: "inline-code", content: inlineMatch[1] });

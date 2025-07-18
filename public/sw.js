@@ -7,7 +7,7 @@ const STATIC_ASSETS = [
   "/manifest.json",
   "/icons/android-chrome-192x192.png",
   "/icons/android-chrome-512x512.png",
-  "/logo.svg",
+  "/logo.svg"
 ];
 
 // Install event - cache static assets
@@ -23,7 +23,7 @@ self.addEventListener("install", (event) => {
       .then(() => {
         console.log("Service Worker installed");
         return self.skipWaiting();
-      }),
+      })
   );
 });
 
@@ -40,13 +40,13 @@ self.addEventListener("activate", (event) => {
               console.log("Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
-          }),
+          })
         );
       })
       .then(() => {
         console.log("Service Worker activated");
         return self.clients.claim();
-      }),
+      })
   );
 });
 
@@ -120,15 +120,15 @@ self.addEventListener("fetch", (event) => {
                 </body>
                 </html>`,
               {
-                headers: { "Content-Type": "text/html" },
-              },
+                headers: { "Content-Type": "text/html" }
+              }
             );
           }
 
           // For other requests, return a simple error response
           return new Response("Offline", { status: 503 });
         });
-      }),
+      })
   );
 });
 

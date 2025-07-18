@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     if (!accountId) {
       return NextResponse.json(
         { error: "Account ID is required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -24,13 +24,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       lastUpdated: accountData.lastUpdated,
-      version: accountData.version,
+      version: accountData.version
     });
   } catch (error) {
     console.error("Error retrieving account timestamp:", error);
     return NextResponse.json(
       { error: "Failed to retrieve account timestamp" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

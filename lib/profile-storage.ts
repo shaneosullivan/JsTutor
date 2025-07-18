@@ -7,7 +7,7 @@ import {
   AccountData,
   UserProfile,
   CourseProgress,
-  TutorialCode,
+  TutorialCode
 } from "@/lib/types";
 // Course progress is now computed from TinyBase tutorial data
 
@@ -47,20 +47,20 @@ if (typeof window !== "undefined") {
         isLoadingFromFirebase = true;
         // Load account data
         const accountResponse = await fetch(
-          `/api/accounts?accountId=${activeAccount.id}`,
+          `/api/accounts?accountId=${activeAccount.id}`
         );
         if (accountResponse.ok) {
           const accountResult = await accountResponse.json();
           store.setRow(
             "accounts",
             accountResult.data.id,
-            accountResult.data as any,
+            accountResult.data as any
           );
         }
 
         // Load profiles
         const profilesResponse = await fetch(
-          `/api/profiles?accountId=${activeAccount.id}`,
+          `/api/profiles?accountId=${activeAccount.id}`
         );
         if (profilesResponse.ok) {
           const profilesResult = await profilesResponse.json();
@@ -75,7 +75,7 @@ if (typeof window !== "undefined") {
             ([profileId, _profileData]) => {
               // Check if this profile has tutorial code
               const hasTutorialCode = Object.keys(existingTutorialCode).some(
-                (codeId) => codeId.startsWith(`${profileId}_`),
+                (codeId) => codeId.startsWith(`${profileId}_`)
               );
 
               // Check if this profile has completed tutorials or other progress
@@ -83,11 +83,11 @@ if (typeof window !== "undefined") {
                 (key) =>
                   key.startsWith(`${profileId}_`) &&
                   (key.includes("completedTutorials") ||
-                    key.includes("currentTutorial")),
+                    key.includes("currentTutorial"))
               );
 
               return hasTutorialCode || hasProgressValues;
-            },
+            }
           );
 
           // Load server profiles into TinyBase store
@@ -105,7 +105,7 @@ if (typeof window !== "undefined") {
 
               // Skip if this profile already exists on the server
               const existsOnServer = profilesResult.data?.some(
-                (serverProfile: UserProfile) => serverProfile.id === profileId,
+                (serverProfile: UserProfile) => serverProfile.id === profileId
               );
 
               if (!existsOnServer) {
@@ -118,7 +118,7 @@ if (typeof window !== "undefined") {
                   id: newProfileId,
                   accountId: activeAccount.id,
                   name: profile.name + " (Local Progress)",
-                  lastActive: new Date().toISOString(),
+                  lastActive: new Date().toISOString()
                 };
 
                 // Save the updated profile to TinyBase store
@@ -132,19 +132,19 @@ if (typeof window !== "undefined") {
                     ] as unknown as TutorialCode;
                     const newCodeId = codeId.replace(
                       `${profileId}_`,
-                      `${newProfileId}_`,
+                      `${newProfileId}_`
                     );
 
                     const updatedTutorialCode: TutorialCode = {
                       ...tutorialCode,
                       id: newCodeId,
-                      profileId: newProfileId,
+                      profileId: newProfileId
                     };
 
                     store.setRow(
                       "tutorialCode",
                       newCodeId,
-                      updatedTutorialCode as any,
+                      updatedTutorialCode as any
                     );
                   }
                 });
@@ -154,7 +154,7 @@ if (typeof window !== "undefined") {
                   if (key.startsWith(`${profileId}_`)) {
                     const newKey = key.replace(
                       `${profileId}_`,
-                      `${newProfileId}_`,
+                      `${newProfileId}_`
                     );
                     const value = existingValues[key];
                     store.setValue(newKey, value);
@@ -166,7 +166,7 @@ if (typeof window !== "undefined") {
                   await fetch("/api/profiles", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(updatedProfile),
+                    body: JSON.stringify(updatedProfile)
                   });
 
                   // Profile is already in TinyBase store, no need to save separately
@@ -174,12 +174,12 @@ if (typeof window !== "undefined") {
                   // Sync tutorial code and progress to server
                   await syncLocalProgressToServer(
                     activeAccount.id,
-                    newProfileId,
+                    newProfileId
                   );
                 } catch (error) {
                   console.warn(
                     "Failed to upload local profile to server:",
-                    error,
+                    error
                   );
                 }
               }
@@ -189,7 +189,7 @@ if (typeof window !== "undefined") {
           // Clean up old local profiles
           Object.keys(existingProfiles).forEach((profileId) => {
             const existsOnServer = profilesResult.data?.some(
-              (serverProfile: UserProfile) => serverProfile.id === profileId,
+              (serverProfile: UserProfile) => serverProfile.id === profileId
             );
 
             if (!existsOnServer) {
@@ -248,7 +248,7 @@ if (typeof window !== "undefined") {
       throttledSync(activeAccount, activeProfile);
     },
     () => null, // addPersisterListener
-    () => {}, // delPersisterListener
+    () => {} // delPersisterListener
   );
 
   // Start persistence
@@ -292,12 +292,12 @@ let lastSyncedState = {
   profiles: {} as Record<string, any>,
   accounts: {} as Record<string, any>,
   values: {} as Record<string, any>,
-  tutorialCode: {} as Record<string, any>,
+  tutorialCode: {} as Record<string, any>
 };
 
 async function processPendingChanges(
   activeAccount: Account,
-  activeProfile: UserProfile,
+  activeProfile: UserProfile
 ) {
   // Get current state
   const currentProfiles = store.getTable("profiles");
@@ -315,14 +315,14 @@ async function processPendingChanges(
       const profile = profileData as unknown as UserProfile;
       const profileWithAccount: UserProfile = {
         ...profile,
-        accountId: activeAccount.id,
+        accountId: activeAccount.id
       };
 
       try {
         await fetch("/api/profiles", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(profileWithAccount),
+          body: JSON.stringify(profileWithAccount)
         });
         // Profile is already in TinyBase store, no need to save separately
         lastSyncedState.profiles[profileId] = { ...profile };
@@ -345,14 +345,14 @@ async function processPendingChanges(
       id: account.id,
       email: account.email,
       lastUpdated: new Date().toISOString(),
-      version: Date.now(),
+      version: Date.now()
     };
 
     try {
       await fetch("/api/accounts", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(accountForApi),
+        body: JSON.stringify(accountForApi)
       });
       // Account data is already in TinyBase store, no need to save separately
       lastSyncedState.accounts[activeAccount.id] = { ...account };
@@ -367,14 +367,14 @@ async function processPendingChanges(
     ([_, tutorialData]) => {
       const tutorial = tutorialData as unknown as TutorialCode;
       return tutorial.profileId === activeProfile.id;
-    },
+    }
   );
 
   // Check if any tutorial code changed for the active profile
   const changedTutorialCode = activeProfileTutorialCode.filter(
     ([tutorialId, tutorialData]) =>
       JSON.stringify(tutorialData) !==
-      JSON.stringify(lastSyncedState.tutorialCode[tutorialId]),
+      JSON.stringify(lastSyncedState.tutorialCode[tutorialId])
   );
 
   if (changedTutorialCode.length > 0) {
@@ -395,7 +395,7 @@ async function processPendingChanges(
       // Update last synced state for changed tutorial code
       changedTutorialCode.forEach(([tutorialId, tutorialData]) => {
         lastSyncedState.tutorialCode[tutorialId] = JSON.parse(
-          JSON.stringify(tutorialData),
+          JSON.stringify(tutorialData)
         );
       });
     } catch (error) {
@@ -406,13 +406,13 @@ async function processPendingChanges(
   // Sync other course progress values (completed courses, current tutorial, etc.)
   const activeProfilePrefix = `${activeProfile.id}_`;
   const relevantValues = Object.entries(currentValues).filter(([key]) =>
-    key.startsWith(activeProfilePrefix),
+    key.startsWith(activeProfilePrefix)
   );
 
   // Check if any course progress values changed for the active profile
   const changedValues = relevantValues.filter(
     ([key, value]) =>
-      JSON.stringify(value) !== JSON.stringify(lastSyncedState.values[key]),
+      JSON.stringify(value) !== JSON.stringify(lastSyncedState.values[key])
   );
 
   if (changedValues.length > 0) {
@@ -449,7 +449,7 @@ async function processPendingChanges(
 // Tutorial code and course progress are already in TinyBase store, no additional sync needed
 async function syncLocalProgressToServer(
   _accountId: string,
-  _profileId: string,
+  _profileId: string
 ): Promise<void> {
   // Course progress is computed from tutorial data, no sync needed
 }
@@ -472,7 +472,7 @@ function extractCourseId(key: string): string | null {
 
 // Initialize Firebase persister
 async function initializeFirebasePersister(
-  isNewAccount: boolean = false,
+  isNewAccount: boolean = false
 ): Promise<void> {
   if (typeof window === "undefined" || !firebasePersister) {
     return;
@@ -525,7 +525,7 @@ function ensureDefaultProfile(): void {
       name: "No Name",
       icon: "short_brown",
       createdAt: new Date().toISOString(),
-      lastActive: new Date().toISOString(),
+      lastActive: new Date().toISOString()
     };
 
     store.setRow("profiles", DEFAULT_PROFILE_ID, defaultProfile as any);
@@ -542,7 +542,7 @@ function ensureDefaultProfile(): void {
 function getProfilesInternal(): UserProfile[] {
   const profilesTable = store.getTable("profiles");
   return Object.values(profilesTable).map(
-    (row) => row as unknown as UserProfile,
+    (row) => row as unknown as UserProfile
   );
 }
 
@@ -558,7 +558,7 @@ export function getActiveProfile(): UserProfile {
     (store.getValue("activeProfileId") as string) || DEFAULT_PROFILE_ID;
   const profile = store.getRow(
     "profiles",
-    activeProfileId,
+    activeProfileId
   ) as unknown as UserProfile;
 
   if (!profile) {
@@ -597,7 +597,7 @@ export function setActiveProfile(profileId: string): boolean {
 
 export function createProfile(
   name: string,
-  icon: string = "short_brown",
+  icon: string = "short_brown"
 ): UserProfile {
   const activeAccount = getActiveAccount();
   const newProfile: UserProfile = {
@@ -606,7 +606,7 @@ export function createProfile(
     name: name.trim() || "Unnamed Profile",
     icon: icon,
     createdAt: new Date().toISOString(),
-    lastActive: new Date().toISOString(),
+    lastActive: new Date().toISOString()
   };
 
   store.setRow("profiles", newProfile.id, newProfile as any);
@@ -628,7 +628,7 @@ export function updateProfile(updatedProfile: UserProfile): boolean {
 
   const profileWithTimestamp = {
     ...updatedProfile,
-    lastActive: new Date().toISOString(),
+    lastActive: new Date().toISOString()
   };
   store.setRow("profiles", updatedProfile.id, profileWithTimestamp as any);
   enableFirebaseAutoSave();
@@ -655,7 +655,7 @@ export async function deleteProfile(profileId: string): Promise<boolean> {
   try {
     // Delete from server first - this will also delete all course progress in a batch
     await fetch(`/api/profiles?profileId=${profileId}`, {
-      method: "DELETE",
+      method: "DELETE"
     });
 
     // Now delete from local storage
@@ -734,7 +734,7 @@ export function setProfileItemAsArray(key: string, value: any[]): void {
 
 export function getProfileItemAsObject(
   key: string,
-  defaultValue: any = {},
+  defaultValue: any = {}
 ): any {
   try {
     const item = getProfileItem(key);
@@ -756,7 +756,7 @@ export function getCompletedTutorials(courseId: number): number[] {
 
 export function setCompletedTutorials(
   courseId: number,
-  tutorialIds: number[],
+  tutorialIds: number[]
 ): void {
   setProfileItemAsArray(`completedTutorials_course_${courseId}`, tutorialIds);
 }
@@ -768,11 +768,11 @@ export function getCurrentTutorial(courseId: number): number | null {
 
 export function setCurrentTutorial(
   courseId: number,
-  tutorialOrder: number,
+  tutorialOrder: number
 ): void {
   setProfileItem(
     `currentTutorial_course_${courseId}`,
-    tutorialOrder.toString(),
+    tutorialOrder.toString()
   );
 }
 
@@ -782,7 +782,7 @@ export function getUserCode(tutorialId: number): string | null {
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
   const tutorialCode = store.getRow(
     "tutorialCode",
-    tutorialCodeId,
+    tutorialCodeId
   ) as unknown as TutorialCode;
   return tutorialCode?.code || null;
 }
@@ -790,7 +790,7 @@ export function getUserCode(tutorialId: number): string | null {
 export function setUserCode(
   tutorialId: number,
   code: string,
-  courseId: number = 1,
+  courseId: number = 1
 ): void {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
@@ -802,7 +802,7 @@ export function setUserCode(
       ? {
           ...existingTutorialCode,
           code,
-          lastAccessed: new Date().toISOString(),
+          lastAccessed: new Date().toISOString()
         }
       : {
           id: tutorialCodeId,
@@ -811,7 +811,7 @@ export function setUserCode(
           courseId,
           code,
           completed: false,
-          lastAccessed: new Date().toISOString(),
+          lastAccessed: new Date().toISOString()
         };
 
   console.log("setUserCode", newTutorialRecord);
@@ -829,7 +829,7 @@ export function getTutorialCode(tutorialId: number): TutorialCode | null {
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
   const tutorialCode = store.getRow(
     "tutorialCode",
-    tutorialCodeId,
+    tutorialCodeId
   ) as unknown as TutorialCode;
   return tutorialCode || null;
 }
@@ -837,7 +837,7 @@ export function getTutorialCode(tutorialId: number): TutorialCode | null {
 export function setTutorialCompleted(
   tutorialId: number,
   completed: boolean,
-  courseId: number = 1,
+  courseId: number = 1
 ): void {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
@@ -846,7 +846,7 @@ export function setTutorialCompleted(
 
   let tutorialCode = store.getRow(
     "tutorialCode",
-    tutorialCodeId,
+    tutorialCodeId
   ) as unknown as TutorialCode;
 
   if (!isValidRecord(tutorialCode)) {
@@ -857,13 +857,13 @@ export function setTutorialCompleted(
       courseId,
       code: "",
       completed,
-      lastAccessed: new Date().toISOString(),
+      lastAccessed: new Date().toISOString()
     };
   } else {
     tutorialCode = {
       ...tutorialCode,
       completed,
-      lastAccessed: new Date().toISOString(),
+      lastAccessed: new Date().toISOString()
     };
   }
 
@@ -890,7 +890,7 @@ export function getTutorialCodesForCourse(courseId: number): TutorialCode[] {
     .filter(
       (tutorialCode) =>
         tutorialCode.profileId === activeProfile.id &&
-        tutorialCode.courseId === courseId,
+        tutorialCode.courseId === courseId
     );
 }
 
@@ -898,7 +898,7 @@ export function getTutorialCodesForCourse(courseId: number): TutorialCode[] {
 export function getComputedCourseProgress(
   accountId: string,
   profileId: string,
-  courseId: string,
+  courseId: string
 ): CourseProgress {
   const tutorialCodeTable = store.getTable("tutorialCode");
   const profileTutorialCodes = Object.values(tutorialCodeTable)
@@ -906,7 +906,7 @@ export function getComputedCourseProgress(
     .filter(
       (tutorialCode) =>
         tutorialCode.profileId === profileId &&
-        tutorialCode.courseId === parseInt(courseId),
+        tutorialCode.courseId === parseInt(courseId)
     );
 
   // Build tutorialCode object from TinyBase data
@@ -915,7 +915,7 @@ export function getComputedCourseProgress(
     tutorialCode[tutorial.tutorialId.toString()] = {
       code: tutorial.code,
       completed: tutorial.completed,
-      lastAccessed: tutorial.lastAccessed,
+      lastAccessed: tutorial.lastAccessed
     };
   });
 
@@ -924,13 +924,13 @@ export function getComputedCourseProgress(
     profileId,
     courseId,
     tutorialCode,
-    lastUpdated: new Date().toISOString(),
+    lastUpdated: new Date().toISOString()
   };
 }
 
 export function getComputedCourseProgressList(
   accountId: string,
-  profileId: string,
+  profileId: string
 ): CourseProgress[] {
   const tutorialCodeTable = store.getTable("tutorialCode");
   const profileTutorialCodes = Object.values(tutorialCodeTable)
@@ -955,7 +955,7 @@ export function getComputedCourseProgressList(
       tutorialCode[tutorial.tutorialId.toString()] = {
         code: tutorial.code,
         completed: tutorial.completed,
-        lastAccessed: tutorial.lastAccessed,
+        lastAccessed: tutorial.lastAccessed
       };
     });
 
@@ -964,7 +964,7 @@ export function getComputedCourseProgressList(
       profileId,
       courseId,
       tutorialCode,
-      lastUpdated: new Date().toISOString(),
+      lastUpdated: new Date().toISOString()
     });
   });
 
@@ -982,14 +982,14 @@ export function setCompletedCourses(courseIds: number[]): void {
 // Account management functions
 export function createAccount(
   email: string,
-  provider: "google" = "google",
+  provider: "google" = "google"
 ): Account {
   const newAccount: Account = {
     id: `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
     email: email,
     provider: provider,
     createdAt: new Date().toISOString(),
-    lastSignIn: new Date().toISOString(),
+    lastSignIn: new Date().toISOString()
   };
 
   store.setRow("accounts", newAccount.id, newAccount as any);
@@ -1005,7 +1005,7 @@ export function getActiveAccount(): Account | null {
 
   const account = store.getRow(
     "accounts",
-    activeAccountId,
+    activeAccountId
   ) as unknown as Account;
   return isValidRecord(account) ? account || null : null;
 }
@@ -1070,7 +1070,7 @@ export function getFirebasePersister() {
 }
 
 export async function initializeFirebaseSync(
-  isNewAccount: boolean = false,
+  isNewAccount: boolean = false
 ): Promise<void> {
   await initializeFirebasePersister(isNewAccount);
 }
@@ -1115,7 +1115,7 @@ export function getLastSyncTimestamp(): string | null {
   // Get account data from TinyBase store
   const accountData = store.getRow(
     "accounts",
-    activeAccount.id,
+    activeAccount.id
   ) as unknown as AccountData;
   return accountData?.lastUpdated || null;
 }
@@ -1129,7 +1129,7 @@ export function setLastSyncTimestamp(timestamp: string): void {
   // Update account data in TinyBase store
   const accountData = store.getRow(
     "accounts",
-    activeAccount.id,
+    activeAccount.id
   ) as unknown as AccountData;
   if (accountData) {
     const updatedAccountData = { ...accountData, lastUpdated: timestamp };
@@ -1152,7 +1152,7 @@ export async function isRemoteDataNewer(): Promise<boolean> {
     const result = await response.json();
     const remoteTime = new Date(result.data.lastUpdated).getTime();
     const localTime = new Date(
-      getLastSyncTimestamp() || "1970-01-01",
+      getLastSyncTimestamp() || "1970-01-01"
     ).getTime();
 
     return remoteTime > localTime;

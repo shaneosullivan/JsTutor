@@ -14,7 +14,7 @@ interface ApiKeySetupProps {
 
 export default function ApiKeySetup({
   onKeyValidated,
-  onCancel,
+  onCancel
 }: ApiKeySetupProps) {
   const [apiKey, setApiKey] = useState("");
   const [isValidating, setIsValidating] = useState(false);
@@ -28,14 +28,14 @@ export default function ApiKeySetup({
 
       const openai = new OpenAI({
         apiKey: key,
-        dangerouslyAllowBrowser: true,
+        dangerouslyAllowBrowser: true
       });
 
       // Test the API key by making a simple request
       await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: "Hello, this is a test." }],
-        max_tokens: 5,
+        max_tokens: 5
       });
 
       // If we get here, the API key is valid
@@ -75,7 +75,7 @@ export default function ApiKeySetup({
       onKeyValidated(apiKey);
     } else {
       setError(
-        "Hmm, that API key doesn't seem to work. Double-check that you copied it correctly, or ask your parent to help verify it's the right one!",
+        "Hmm, that API key doesn't seem to work. Double-check that you copied it correctly, or ask your parent to help verify it's the right one!"
       );
     }
 

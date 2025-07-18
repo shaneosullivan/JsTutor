@@ -20,7 +20,7 @@ interface CodeEditorProps {
 
 // Error line decoration
 const errorLineMark = Decoration.line({
-  attributes: { class: "cm-error-line" },
+  attributes: { class: "cm-error-line" }
 });
 
 // State effect for setting error line
@@ -50,7 +50,7 @@ const errorLineField = StateField.define<DecorationSet>({
     }
     return decorations;
   },
-  provide: (f) => EditorView.decorations.from(f),
+  provide: (f) => EditorView.decorations.from(f)
 });
 
 export default function CodeEditor({
@@ -59,7 +59,7 @@ export default function CodeEditor({
   language = "javascript",
   className = "",
   errorLine,
-  originalCode,
+  originalCode
 }: CodeEditorProps) {
   const keyboard = useKeyboard();
   const editorRef = useRef<HTMLDivElement>(null);
@@ -90,29 +90,29 @@ export default function CodeEditor({
         EditorView.theme({
           "&": {
             fontSize: "14px",
-            height: "100%",
+            height: "100%"
           },
           ".cm-focused": {
-            outline: "none",
+            outline: "none"
           },
           ".cm-editor": {
-            height: "100%",
+            height: "100%"
           },
           ".cm-scroller": {
             fontFamily: "'Fira Code', 'Monaco', 'Menlo', monospace",
-            lineHeight: "1.5",
+            lineHeight: "1.5"
           },
           ".cm-error-line": {
             backgroundColor: "rgba(239, 68, 68, 0.1)",
-            borderLeft: "3px solid #ef4444",
-          },
-        }),
-      ],
+            borderLeft: "3px solid #ef4444"
+          }
+        })
+      ]
     });
 
     viewRef.current = new EditorView({
       state,
-      parent: editorRef.current,
+      parent: editorRef.current
     });
 
     return () => {
@@ -129,8 +129,8 @@ export default function CodeEditor({
         changes: {
           from: 0,
           to: viewRef.current.state.doc.length,
-          insert: value,
-        },
+          insert: value
+        }
       });
     }
   }, [value]);
@@ -139,7 +139,7 @@ export default function CodeEditor({
   useEffect(() => {
     if (viewRef.current) {
       viewRef.current.dispatch({
-        effects: [setErrorLineEffect.of(errorLine || null)],
+        effects: [setErrorLineEffect.of(errorLine || null)]
       });
     }
   }, [errorLine]);

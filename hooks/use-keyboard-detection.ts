@@ -12,7 +12,7 @@ export function useKeyboardDetection(): KeyboardState {
   const [keyboardState, setKeyboardState] = useState<KeyboardState>({
     isVisible: false,
     height: 0,
-    visibleHeight: typeof window !== "undefined" ? window.innerHeight : 0,
+    visibleHeight: typeof window !== "undefined" ? window.innerHeight : 0
   });
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export function useKeyboardDetection(): KeyboardState {
       setKeyboardState({
         isVisible: isKeyboardVisible,
         height: keyboardHeight,
-        visibleHeight: newHeight,
+        visibleHeight: newHeight
       });
 
       currentViewportHeight = newHeight;

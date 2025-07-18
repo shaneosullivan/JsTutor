@@ -28,7 +28,7 @@ function addVersionToMarkdownFile(filePath: string): void {
       // Remove existing version and add it to the end
       const lines = frontmatterStr.split("\n");
       const filteredLines = lines.filter(
-        (line) => !line.trim().startsWith("version:"),
+        (line) => !line.trim().startsWith("version:")
       );
       const newFrontmatter = `${filteredLines.join("\n")}\nversion: 1`;
       const newContent = `---\n${newFrontmatter}\n---\n${body}`;

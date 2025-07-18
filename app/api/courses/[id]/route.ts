@@ -3,7 +3,7 @@ import { getCourse } from "@/lib/dataUtils";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   const courseId = parseInt(id);

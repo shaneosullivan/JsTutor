@@ -8,7 +8,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,14 +21,14 @@ import {
   Globe,
   Layers,
   Database,
-  User,
+  User
 } from "lucide-react";
 import GithubIcon from "@/components/GithubIcon";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import Analytics from "@/components/Analytics";
 import {
   getCompletedCourses as getCompletedCoursesFromStorage,
-  setProfileItem,
+  setProfileItem
 } from "@/lib/profile-storage";
 import { getCoursesForLocale } from "@/lib/dataUtils";
 
@@ -68,7 +68,7 @@ export default function CourseSelection() {
         }
         return completedCourses.includes(course.requiredCourse);
       },
-    [completedCourses],
+    [completedCourses]
   );
 
   const isCourseCompleted = useMemo(
@@ -76,7 +76,7 @@ export default function CourseSelection() {
       (courseId: number): boolean => {
         return completedCourses.includes(courseId);
       },
-    [completedCourses],
+    [completedCourses]
   );
 
   const getCourseIcon = (type: string) => {
@@ -180,14 +180,14 @@ export default function CourseSelection() {
                 canvas: "from-pink-100 to-purple-100",
                 printData: "from-blue-100 to-cyan-100",
                 iframe: "from-green-100 to-emerald-100",
-                default: "from-yellow-100 to-orange-100",
+                default: "from-yellow-100 to-orange-100"
               };
 
               const cardBorders = {
                 canvas: "border-pink-200",
                 printData: "border-blue-200",
                 iframe: "border-green-200",
-                default: "border-yellow-200",
+                default: "border-yellow-200"
               };
 
               return (

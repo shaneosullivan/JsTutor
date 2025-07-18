@@ -5,7 +5,7 @@ import { queryClient } from "@/lib/queryClient";
 import { KeyboardProvider } from "@/components/KeyboardProvider";
 
 export default function ClientProvider({
-  children,
+  children
 }: {
   children: React.ReactNode;
 }) {

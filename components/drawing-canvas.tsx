@@ -20,7 +20,7 @@ export default function DrawingCanvas({
   code,
   maxHeight,
   onOutput,
-  onError,
+  onError
 }: DrawingCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -110,13 +110,13 @@ export default function DrawingCanvas({
           "wrappedSetInterval",
           "wrappedSetTimeout",
           "providedPrintData",
-          safeCode,
+          safeCode
         );
         executeCode(
           canvasAPI,
           wrappedSetInterval,
           wrappedSetTimeout,
-          printData,
+          printData
         );
 
         setError(null);
@@ -127,7 +127,7 @@ export default function DrawingCanvas({
         if (allOutput.length === 0) {
           allOutput.push(
             "✨ Code executed successfully!",
-            "🎨 Your drawing is looking great!",
+            "🎨 Your drawing is looking great!"
           );
         }
         onOutput(allOutput);
@@ -150,7 +150,7 @@ export default function DrawingCanvas({
 
         const errorInfo: ErrorInfo = {
           message: errorMessage,
-          line: lineNumber,
+          line: lineNumber
         };
 
         setError(errorMessage);
@@ -190,7 +190,7 @@ export default function DrawingCanvas({
         style={{
           imageRendering: "pixelated",
           maxHeight: `${maxHeight}px`,
-          maxWidth: `${maxHeight}px`,
+          maxWidth: `${maxHeight}px`
         }}
       />
       {error && (

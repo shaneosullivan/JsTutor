@@ -6,7 +6,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 
 interface Props {
@@ -45,46 +45,46 @@ export class BrowserCompatibilityErrorBoundary extends Component<Props, State> {
         isSupported:
           typeof window !== "undefined" &&
           "noModule" in HTMLScriptElement.prototype,
-        description: "Support for modern JavaScript modules",
+        description: "Support for modern JavaScript modules"
       },
       {
         name: "Fetch API",
         isSupported: typeof window !== "undefined" && "fetch" in window,
-        description: "Modern network request API",
+        description: "Modern network request API"
       },
       {
         name: "Web Workers",
         isSupported: typeof window !== "undefined" && "Worker" in window,
-        description: "Background script execution",
+        description: "Background script execution"
       },
       {
         name: "Local Storage",
         isSupported: typeof window !== "undefined" && "localStorage" in window,
-        description: "Client-side data storage",
+        description: "Client-side data storage"
       },
       {
         name: "Service Workers",
         isSupported:
           typeof window !== "undefined" && "serviceWorker" in navigator,
-        description: "Offline functionality and caching",
+        description: "Offline functionality and caching"
       },
       {
         name: "WebAssembly",
         isSupported: typeof window !== "undefined" && "WebAssembly" in window,
-        description: "High-performance code execution",
+        description: "High-performance code execution"
       },
       {
         name: "CSS Grid",
         isSupported:
           typeof window !== "undefined" && CSS.supports("display", "grid"),
-        description: "Modern layout system",
+        description: "Modern layout system"
       },
       {
         name: "CSS Custom Properties",
         isSupported:
           typeof window !== "undefined" && CSS.supports("--custom", "value"),
-        description: "Dynamic styling variables",
-      },
+        description: "Dynamic styling variables"
+      }
     ];
 
     return features;
@@ -94,7 +94,7 @@ export class BrowserCompatibilityErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       const browserFeatures = this.checkBrowserCompatibility();
       const unsupportedFeatures = browserFeatures.filter(
-        (feature) => !feature.isSupported,
+        (feature) => !feature.isSupported
       );
 
       return (

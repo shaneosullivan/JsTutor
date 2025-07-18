@@ -7,7 +7,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@/components/ui/card";
 import { Loader2, LogIn, LogOut, Smartphone, Cloud } from "lucide-react";
 import {
@@ -15,7 +15,7 @@ import {
   getActiveAccount,
   removeAccount,
   initializeFirebaseSync,
-  type Account,
+  type Account
 } from "@/lib/profile-storage";
 
 declare global {
@@ -44,7 +44,7 @@ export default function GoogleSignIn({
   clientId,
   onSignInSuccess,
   onSignOut,
-  onReady,
+  onReady
 }: GoogleSignInProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
@@ -84,7 +84,7 @@ export default function GoogleSignIn({
     // const clientId = process.env.GOOGLE_CLIENT_ID;
     if (!clientId || clientId === "YOUR_GOOGLE_CLIENT_ID") {
       console.warn(
-        "Google Client ID not configured. Please set GOOGLE_CLIENT_ID environment variable.",
+        "Google Client ID not configured. Please set GOOGLE_CLIENT_ID environment variable."
       );
       setIsConfigured(false);
       return;
@@ -96,7 +96,7 @@ export default function GoogleSignIn({
         callback: handleCredentialResponse,
         auto_select: false,
         // Add callback for when user dismisses or cancels the prompt
-        cancel_on_tap_outside: true,
+        cancel_on_tap_outside: true
       });
       setIsConfigured(true);
       // Notify parent that Google is ready
@@ -122,17 +122,17 @@ export default function GoogleSignIn({
       const callbackResponse = await fetch("/api/auth/google/callback", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           credential: response.credential,
-          redirectUrl: window.location.pathname,
-        }),
+          redirectUrl: window.location.pathname
+        })
       });
 
       if (!callbackResponse.ok) {
         throw new Error(
-          `OAuth callback failed: ${callbackResponse.statusText}`,
+          `OAuth callback failed: ${callbackResponse.statusText}`
         );
       }
 
@@ -153,7 +153,7 @@ export default function GoogleSignIn({
         // Create account with the server-provided ID
         const accountWithCorrectId = {
           ...result.account,
-          createdAt: result.account.createdAt || newAccount.createdAt,
+          createdAt: result.account.createdAt || newAccount.createdAt
         };
 
         // Store the account directly in TinyBase
@@ -163,7 +163,7 @@ export default function GoogleSignIn({
         store.setRow(
           FIREBASE_ACCOUNTS_COLLECTION,
           accountWithCorrectId.id,
-          accountWithCorrectId,
+          accountWithCorrectId
         );
         store.setValue("activeAccountId", accountWithCorrectId.id);
 
@@ -180,7 +180,7 @@ export default function GoogleSignIn({
       } catch (error) {
         console.warn(
           "Failed to initialize Firebase sync after sign-in:",
-          error,
+          error
         );
         // Still call success callback even if sync fails
         onSignInSuccess?.(newAccount);
@@ -209,7 +209,7 @@ export default function GoogleSignIn({
         // Only reset loading if we're still in loading state and no account was created
         if (isLoading && !getActiveAccount()) {
           console.log(
-            "Sign-in prompt timeout - assuming user dismissed or cancelled",
+            "Sign-in prompt timeout - assuming user dismissed or cancelled"
           );
           setIsLoading(false);
         }
@@ -244,7 +244,7 @@ export default function GoogleSignIn({
         persister.save().catch((error: any) => {
           console.warn(
             "Failed to save sign-out changes to localStorage:",
-            error,
+            error
           );
         });
       }

@@ -85,13 +85,13 @@ function extractCodeFromMarkdown(content: string): string {
 
 function ensureLocaleFilesExist(
   coursePath: string,
-  courseFolder: string,
+  courseFolder: string
 ): void {
   // Get the base course data from en.json (should always exist)
   const enJsonPath = path.join(coursePath, "en.json");
   if (!fs.existsSync(enJsonPath)) {
     console.warn(
-      `Warning: ${courseFolder} missing en.json - skipping locale file creation`,
+      `Warning: ${courseFolder} missing en.json - skipping locale file creation`
     );
     return;
   }
@@ -107,17 +107,17 @@ function ensureLocaleFilesExist(
         // en.json should always exist, but if not, create it with base structure
         fs.writeFileSync(
           localeFilePath,
-          JSON.stringify(baseCourseData, null, 2),
+          JSON.stringify(baseCourseData, null, 2)
         );
         console.log(`Created missing en.json for ${courseFolder}`);
       } else {
         // Copy en.json content for missing locale files (will be localized separately)
         fs.writeFileSync(
           localeFilePath,
-          JSON.stringify(baseCourseData, null, 2),
+          JSON.stringify(baseCourseData, null, 2)
         );
         console.log(
-          `Created ${locale}.json by copying en.json for ${courseFolder}`,
+          `Created ${locale}.json by copying en.json for ${courseFolder}`
         );
       }
     }
@@ -171,7 +171,7 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
       if (courseJsonData.title && courseJsonData.description) {
         text[locale] = {
           title: courseJsonData.title,
-          description: courseJsonData.description,
+          description: courseJsonData.description
         };
       }
     }
@@ -182,7 +182,7 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
       text,
       type: baseCourseData.type,
       order: baseCourseData.order,
-      requiredCourse: baseCourseData.requiredCourse,
+      requiredCourse: baseCourseData.requiredCourse
     };
 
     courses.push(courseData);
@@ -226,8 +226,8 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
           title: frontmatter.title || `Tutorial ${tutorialFolder}`,
           description: frontmatter.description || "",
           content: body.trim(),
-          expectedOutput: frontmatter.expectedOutput || null,
-        },
+          expectedOutput: frontmatter.expectedOutput || null
+        }
       };
 
       // Generate a unique global ID for the tutorial
@@ -241,7 +241,7 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
         text: tutorialText,
         starterCode:
           Object.keys(starterCode).length > 0 ? starterCode : undefined,
-        order: tutorialOrder,
+        order: tutorialOrder
       };
 
       tutorials.push(tutorial);

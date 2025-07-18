@@ -9,8 +9,8 @@ export const metadata: Metadata = {
     title: "JsTutor - Interactive JavaScript Learning Platform",
     description:
       "Learn JavaScript through interactive tutorials, code examples, and real-time practice.",
-    url: "https://jstutor.com",
-  },
+    url: "https://jstutor.com"
+  }
 };
 
 export default function HomePage() {

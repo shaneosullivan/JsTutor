@@ -32,7 +32,7 @@ export default function AiChat({
   onClose,
   isVisible,
   canvasError,
-  isKeyboardVisible = false,
+  isKeyboardVisible = false
 }: AiChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -94,7 +94,7 @@ export default function AiChat({
       const initialMessage: Message = {
         role: "user",
         content: initialContent,
-        timestamp: new Date(),
+        timestamp: new Date()
       };
 
       setMessages([initialMessage]);
@@ -108,7 +108,7 @@ export default function AiChat({
     showSetup,
     canvasError,
     isVisible,
-    code,
+    code
   ]);
 
   // Send error message when Help Me button is clicked with an error present
@@ -128,7 +128,7 @@ export default function AiChat({
       const errorMessage: Message = {
         role: "user",
         content: `I just got this error in my code: ${errorText}. Can you help me understand what's wrong and how to fix it?`,
-        timestamp: new Date(),
+        timestamp: new Date()
       };
 
       setMessages((prev) => [...prev, errorMessage]);
@@ -143,7 +143,7 @@ export default function AiChat({
     showSetup,
     isLoading,
     lastErrorSent,
-    code,
+    code
   ]);
 
   const sendMessage = async (message: Message) => {
@@ -155,12 +155,12 @@ export default function AiChat({
 
       const openai = new OpenAI({
         apiKey: apiKey!,
-        dangerouslyAllowBrowser: true,
+        dangerouslyAllowBrowser: true
       });
 
       const chatMessages = messages.concat(message).map((msg) => ({
         role: msg.role as "user" | "assistant",
-        content: msg.content,
+        content: msg.content
       }));
 
       const guidelines = ` Guidelines:
@@ -197,14 +197,14 @@ export default function AiChat({
       // Add system message for context (includes latest code)
       const systemMessage = {
         role: "system" as const,
-        content: systemMessageContent,
+        content: systemMessageContent
       };
 
       const response = await openai.chat.completions.create({
         model: "gpt-3.5-turbo",
         messages: [systemMessage, ...chatMessages],
         max_tokens: 500,
-        temperature: 0.7,
+        temperature: 0.7
       });
 
       const assistantMessage: Message = {
@@ -212,7 +212,7 @@ export default function AiChat({
         content:
           response.choices[0]?.message?.content ||
           "I'm sorry, I didn't understand that. Can you try asking again?",
-        timestamp: new Date(),
+        timestamp: new Date()
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -236,7 +236,7 @@ export default function AiChat({
       const errorMessage: Message = {
         role: "assistant",
         content: errorContent,
-        timestamp: new Date(),
+        timestamp: new Date()
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -250,7 +250,7 @@ export default function AiChat({
     const userMessage: Message = {
       role: "user",
       content: inputMessage,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
 
     setMessages((prev) => [...prev, userMessage]);

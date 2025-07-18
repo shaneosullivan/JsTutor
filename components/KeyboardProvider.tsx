@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
   useKeyboardDetection,
-  KeyboardState,
+  KeyboardState
 } from "@/hooks/use-keyboard-detection";
 
 interface KeyboardContextType extends KeyboardState {
@@ -13,7 +13,7 @@ interface KeyboardContextType extends KeyboardState {
 const KeyboardContext = createContext<KeyboardContextType>({
   isVisible: false,
   height: 0,
-  visibleHeight: 0,
+  visibleHeight: 0
 });
 
 export function useKeyboard() {
@@ -56,7 +56,7 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
       // Allow scrolling within the code editor and other scrollable elements
       const target = e.target as HTMLElement;
       const scrollableParent = target.closest(
-        '.cm-scroller, .overflow-y-auto, .overflow-auto, [data-allow-scroll="true"]',
+        '.cm-scroller, .overflow-y-auto, .overflow-auto, [data-allow-scroll="true"]'
       );
 
       if (scrollableParent) {
@@ -72,7 +72,7 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
       // Allow scrolling within the code editor and other scrollable elements
       const target = e.target as HTMLElement;
       const scrollableParent = target.closest(
-        '.cm-scroller, .overflow-y-auto, .overflow-auto, [data-allow-scroll="true"]',
+        '.cm-scroller, .overflow-y-auto, .overflow-auto, [data-allow-scroll="true"]'
       );
 
       if (scrollableParent) {
@@ -87,7 +87,7 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
     const preventTouchMove = (e: TouchEvent) => {
       const target = e.target as HTMLElement;
       const scrollableParent = target.closest(
-        '.cm-scroller, .overflow-y-auto, .overflow-auto, [data-allow-scroll="true"]',
+        '.cm-scroller, .overflow-y-auto, .overflow-auto, [data-allow-scroll="true"]'
       );
 
       if (scrollableParent) {
@@ -123,7 +123,7 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
 
       const target = e.target as HTMLElement;
       const scrollableParent = target.closest(
-        '.cm-scroller, .overflow-y-auto, .overflow-auto, [data-allow-scroll="true"]',
+        '.cm-scroller, .overflow-y-auto, .overflow-auto, [data-allow-scroll="true"]'
       );
 
       if (scrollableParent) {
@@ -162,23 +162,23 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
 
     // Add event listeners with passive: false to ensure preventDefault works
     document.addEventListener("touchstart", handleTouchStart, {
-      passive: false,
+      passive: false
     });
     document.addEventListener("touchmove", handleTouchMove, { passive: false });
     document.addEventListener("touchmove", preventTouchMove, {
-      passive: false,
+      passive: false
     });
     document.addEventListener("wheel", preventWheelScroll, { passive: false });
 
     // Additional iOS Safari specific prevention
     document.addEventListener("gesturestart", preventGestureScroll, {
-      passive: false,
+      passive: false
     });
     document.addEventListener("gesturechange", preventGestureScroll, {
-      passive: false,
+      passive: false
     });
     document.addEventListener("gestureend", preventGestureScroll, {
-      passive: false,
+      passive: false
     });
 
     return () => {
@@ -201,12 +201,12 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
       // Set CSS custom properties
       html.style.setProperty(
         "--visible-height",
-        `${keyboardState.visibleHeight}px`,
+        `${keyboardState.visibleHeight}px`
       );
       html.style.setProperty("--keyboard-height", `${keyboardState.height}px`);
       html.style.setProperty(
         "--keyboard-visible",
-        keyboardState.isVisible ? "1" : "0",
+        keyboardState.isVisible ? "1" : "0"
       );
 
       // Control document height and scrolling
@@ -224,7 +224,7 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
 
         // Also prevent scrolling on the main content containers
         const mainContainers = document.querySelectorAll(
-          '[data-main-container="true"], .min-h-screen, .h-screen',
+          '[data-main-container="true"], .min-h-screen, .h-screen'
         );
         mainContainers.forEach((container) => {
           (container as HTMLElement).style.overflow = "hidden";
@@ -247,7 +247,7 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
 
         // Restore main container styles
         const mainContainers = document.querySelectorAll(
-          '[data-main-container="true"], .min-h-screen, .h-screen',
+          '[data-main-container="true"], .min-h-screen, .h-screen'
         );
         mainContainers.forEach((container) => {
           (container as HTMLElement).style.overflow = "";
@@ -276,7 +276,7 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
 
         // Restore main container styles
         const mainContainers = document.querySelectorAll(
-          '[data-main-container="true"], .min-h-screen, .h-screen',
+          '[data-main-container="true"], .min-h-screen, .h-screen'
         );
         mainContainers.forEach((container) => {
           (container as HTMLElement).style.overflow = "";
@@ -299,7 +299,7 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
         }`}
         style={{
           height: effectiveHeight || undefined,
-          minHeight: effectiveMinHeight || undefined,
+          minHeight: effectiveMinHeight || undefined
         }}
       >
         {children}

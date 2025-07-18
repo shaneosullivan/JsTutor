@@ -12,7 +12,7 @@ try {
       process.cwd(),
       // "..",
       "config",
-      "firebase.json",
+      "firebase.json"
     );
 
     if (fs.existsSync(configPath)) {
@@ -23,20 +23,20 @@ try {
       // Check if it's a valid config (has required fields)
       if (!serviceAccount.private_key || !serviceAccount.client_email) {
         console.warn(
-          "Firebase config found but incomplete. Firebase sync will be disabled.",
+          "Firebase config found but incomplete. Firebase sync will be disabled."
         );
         serviceAccount = null;
       }
     } else {
       console.warn(
         "Firebase service account config file not found. Firebase sync will be disabled.",
-        configPath,
+        configPath
       );
     }
   }
 } catch (error) {
   console.warn(
-    "Firebase service account config not found. Firebase sync will be disabled.",
+    "Firebase service account config not found. Firebase sync will be disabled."
   );
 }
 
@@ -52,7 +52,7 @@ const initializeFirebase = () => {
   if (getApps().length === 0) {
     app = initializeApp({
       credential: cert(serviceAccount as any),
-      projectId: serviceAccount.project_id,
+      projectId: serviceAccount.project_id
     });
   } else {
     app = getApps()[0];
@@ -74,11 +74,11 @@ import { AccountData, UserProfile, CourseProgress } from "@/lib/types";
 
 // Account CRUD operations
 export async function getAccountById(
-  accountId: string,
+  accountId: string
 ): Promise<AccountData | null> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -93,11 +93,11 @@ export async function getAccountById(
 }
 
 export async function createAccount(
-  account: AccountData,
+  account: AccountData
 ): Promise<AccountData> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -105,7 +105,7 @@ export async function createAccount(
   const accountWithTimestamp = {
     ...account,
     lastUpdated: new Date().toISOString(),
-    version: Date.now(),
+    version: Date.now()
   };
 
   await firestore
@@ -116,11 +116,11 @@ export async function createAccount(
 }
 
 export async function updateAccount(
-  account: AccountData,
+  account: AccountData
 ): Promise<AccountData> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -128,7 +128,7 @@ export async function updateAccount(
   const accountWithTimestamp = {
     ...account,
     lastUpdated: new Date().toISOString(),
-    version: Date.now(),
+    version: Date.now()
   };
 
   // Use set with merge to handle cases where document doesn't exist
@@ -141,11 +141,11 @@ export async function updateAccount(
 
 // Profile CRUD operations
 export async function getProfilesByAccountId(
-  accountId: string,
+  accountId: string
 ): Promise<UserProfile[]> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -160,11 +160,11 @@ export async function getProfilesByAccountId(
 }
 
 export async function getProfileById(
-  profileId: string,
+  profileId: string
 ): Promise<UserProfile | null> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -188,11 +188,11 @@ export async function getProfileById(
 }
 
 export async function createProfile(
-  profile: UserProfile,
+  profile: UserProfile
 ): Promise<UserProfile> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -200,7 +200,7 @@ export async function createProfile(
   const profileWithTimestamp = {
     ...profile,
     createdAt: profile.createdAt || new Date().toISOString(),
-    lastActive: new Date().toISOString(),
+    lastActive: new Date().toISOString()
   };
 
   await firestore
@@ -214,18 +214,18 @@ export async function createProfile(
 }
 
 export async function updateProfile(
-  profile: UserProfile,
+  profile: UserProfile
 ): Promise<UserProfile> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
   const firestore = getFirestoreDb();
   const profileWithTimestamp = {
     ...profile,
-    lastActive: new Date().toISOString(),
+    lastActive: new Date().toISOString()
   };
 
   // Use set with merge to handle cases where document doesn't exist
@@ -242,7 +242,7 @@ export async function updateProfile(
 export async function deleteProfile(profileId: string): Promise<void> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -274,7 +274,7 @@ export async function deleteProfile(profileId: string): Promise<void> {
       .collection("accounts")
       .doc(profile.accountId)
       .collection("profiles")
-      .doc(profileId),
+      .doc(profileId)
   );
 
   await batch.commit();
@@ -283,11 +283,11 @@ export async function deleteProfile(profileId: string): Promise<void> {
 // Course Progress CRUD operations
 export async function getCourseProgressByAccountAndProfile(
   accountId: string,
-  profileId: string,
+  profileId: string
 ): Promise<CourseProgress[]> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -306,11 +306,11 @@ export async function getCourseProgressByAccountAndProfile(
 export async function getCourseProgressById(
   accountId: string,
   profileId: string,
-  courseId: string,
+  courseId: string
 ): Promise<CourseProgress | null> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -332,18 +332,18 @@ export async function getCourseProgressById(
 }
 
 export async function createCourseProgress(
-  progress: CourseProgress,
+  progress: CourseProgress
 ): Promise<CourseProgress> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
   const firestore = getFirestoreDb();
   const progressWithTimestamp = {
     ...progress,
-    lastUpdated: new Date().toISOString(),
+    lastUpdated: new Date().toISOString()
   };
 
   await firestore
@@ -359,18 +359,18 @@ export async function createCourseProgress(
 }
 
 export async function updateCourseProgress(
-  progress: CourseProgress,
+  progress: CourseProgress
 ): Promise<CourseProgress> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
   const firestore = getFirestoreDb();
   const progressWithTimestamp = {
     ...progress,
-    lastUpdated: new Date().toISOString(),
+    lastUpdated: new Date().toISOString()
   };
 
   // Use set with merge to handle cases where document doesn't exist
@@ -389,11 +389,11 @@ export async function updateCourseProgress(
 export async function deleteCourseProgress(
   accountId: string,
   profileId: string,
-  courseId: string,
+  courseId: string
 ): Promise<void> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -416,20 +416,20 @@ export async function getAccountData(accountId: string): Promise<any> {
 export async function saveAccountData(
   accountId: string,
   email: string,
-  _data: any,
+  _data: any
 ): Promise<void> {
   const account: AccountData = {
     id: accountId,
     email,
     lastUpdated: new Date().toISOString(),
-    version: Date.now(),
+    version: Date.now()
   };
   await createAccount(account);
 }
 
 export async function isRemoteDataNewer(
   accountId: string,
-  localTimestamp: string,
+  localTimestamp: string
 ): Promise<boolean> {
   const remoteData = await getAccountById(accountId);
   if (!remoteData) {
@@ -442,11 +442,11 @@ export async function isRemoteDataNewer(
 
 // Find account by email address
 export async function findAccountByEmail(
-  email: string,
+  email: string
 ): Promise<string | null> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -481,7 +481,7 @@ export async function createOrGetAccountByEmail(email: string): Promise<{
 }> {
   if (!serviceAccount) {
     throw new Error(
-      "Firebase is not configured. Please add Firebase service account configuration.",
+      "Firebase is not configured. Please add Firebase service account configuration."
     );
   }
 
@@ -504,13 +504,13 @@ export async function createOrGetAccountByEmail(email: string): Promise<{
       return {
         accountId: existingData.id,
         isNewAccount: false,
-        accountData: existingData,
+        accountData: existingData
       };
     }
 
     console.log(
       "No existing account found, creating new one for email:",
-      email,
+      email
     );
     // No existing account found, create new one
     const newAccountId = `account_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
@@ -522,7 +522,7 @@ export async function createOrGetAccountByEmail(email: string): Promise<{
       id: newAccountId,
       email: email,
       lastUpdated: now,
-      version: Date.now(),
+      version: Date.now()
     };
 
     // Create account document
@@ -532,7 +532,7 @@ export async function createOrGetAccountByEmail(email: string): Promise<{
     return {
       accountId: newAccountId,
       isNewAccount: true,
-      accountData: accountData,
+      accountData: accountData
     };
   } catch (error) {
     console.error("Error in createOrGetAccountByEmail:", error);

@@ -6,25 +6,25 @@ export interface CanvasAPI {
     y1: number,
     x2: number,
     y2: number,
-    color: string,
+    color: string
   ) => void;
   drawRect: (
     x: number,
     y: number,
     width: number,
     height: number,
-    color: string,
+    color: string
   ) => void;
   drawText: (x: number, y: number, text: string, color: string) => void;
   clearCanvas: () => void;
   onKeyPress: (
-    callback: (key: string, preventDefault: () => void) => void,
+    callback: (key: string, preventDefault: () => void) => void
   ) => void;
   onArrowKeys: (
     callback: (
       direction: "up" | "down" | "left" | "right",
-      preventDefault: () => void,
-    ) => void,
+      preventDefault: () => void
+    ) => void
   ) => void;
   onSpaceBar: (callback: () => void) => void;
   isKeyPressed: (key: string) => boolean;
@@ -34,7 +34,7 @@ export function createCanvasAPI(
   ctx: CanvasRenderingContext2D,
   cleanup: {
     eventListeners: Array<{ element: any; event: string; handler: any }>;
-  },
+  }
 ): CanvasAPI {
   const canvas = ctx.canvas;
 
@@ -55,7 +55,7 @@ export function createCanvasAPI(
 
   cleanup.eventListeners.push(
     { element: document, event: "keydown", handler: handleKeyDown },
-    { element: document, event: "keyup", handler: handleKeyUp },
+    { element: document, event: "keyup", handler: handleKeyUp }
   );
 
   return {
@@ -76,7 +76,7 @@ export function createCanvasAPI(
       y1: number,
       x2: number,
       y2: number,
-      color: string,
+      color: string
     ) => {
       ctx.beginPath();
       ctx.moveTo(x1, y1);
@@ -91,7 +91,7 @@ export function createCanvasAPI(
       y: number,
       width: number,
       height: number,
-      color: string,
+      color: string
     ) => {
       ctx.fillStyle = color;
       ctx.fillRect(x, y, width, height);
@@ -110,7 +110,7 @@ export function createCanvasAPI(
     },
 
     onKeyPress: (
-      callback: (key: string, preventDefault: () => void) => void,
+      callback: (key: string, preventDefault: () => void) => void
     ) => {
       const handler = (e: KeyboardEvent) => {
         function preventDefault() {
@@ -123,15 +123,15 @@ export function createCanvasAPI(
       cleanup.eventListeners.push({
         element: document,
         event: "keydown",
-        handler,
+        handler
       });
     },
 
     onArrowKeys: (
       callback: (
         direction: "up" | "down" | "left" | "right",
-        preventDefault: () => void,
-      ) => void,
+        preventDefault: () => void
+      ) => void
     ) => {
       const handler = (e: KeyboardEvent) => {
         // Prevent default behavior for arrow keys
@@ -159,7 +159,7 @@ export function createCanvasAPI(
       cleanup.eventListeners.push({
         element: document,
         event: "keydown",
-        handler,
+        handler
       });
     },
 
@@ -174,12 +174,12 @@ export function createCanvasAPI(
       cleanup.eventListeners.push({
         element: document,
         event: "keydown",
-        handler,
+        handler
       });
     },
 
     isKeyPressed: (key: string) => {
       return pressedKeys.has(key.toLowerCase());
-    },
+    }
   };
 }

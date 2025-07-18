@@ -18,12 +18,12 @@ export function useTutorial() {
   // Fetch tutorials
   const { data: tutorials = [], isLoading: tutorialsLoading } = useQuery({
     queryKey: ["/api/tutorials"],
-    select: (data: Tutorial[]) => data.sort((a, b) => a.order - b.order),
+    select: (data: Tutorial[]) => data.sort((a, b) => a.order - b.order)
   });
 
   // Fetch user progress (kept for server sync, but local storage takes precedence)
   const { data: progress } = useQuery({
-    queryKey: ["/api/progress"],
+    queryKey: ["/api/progress"]
   });
 
   // Update progress mutation
@@ -34,7 +34,7 @@ export function useTutorial() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/progress"] });
-    },
+    }
   });
 
   // Load from localStorage on mount
@@ -95,7 +95,7 @@ export function useTutorial() {
     if (!currentTutorial) return;
 
     const nextTutorial = tutorials.find(
-      (t: Tutorial) => t.order === currentTutorial.order + 1,
+      (t: Tutorial) => t.order === currentTutorial.order + 1
     );
     if (nextTutorial) {
       setCurrentTutorial(nextTutorial);
@@ -106,7 +106,7 @@ export function useTutorial() {
   const selectTutorial = (tutorial: Tutorial) => {
     // Check if tutorial is unlocked
     const previousTutorial = tutorials.find(
-      (t: Tutorial) => t.order === tutorial.order - 1,
+      (t: Tutorial) => t.order === tutorial.order - 1
     );
     const isUnlocked =
       tutorial.order === 1 ||
@@ -135,6 +135,6 @@ export function useTutorial() {
     completeTutorial,
     goToNextTutorial,
     setCurrentTutorial: selectTutorial,
-    updateUserCode,
+    updateUserCode
   };
 }

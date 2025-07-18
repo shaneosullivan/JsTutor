@@ -29,7 +29,7 @@ export default function TutorialSidebar({
   onTutorialSelect,
   collapsed = false,
   onToggleCollapsed,
-  course,
+  course
 }: TutorialSidebarProps) {
   const isUnlocked = (tutorial: Tutorial) => {
     // Use the isLocked property passed from parent if available
@@ -39,7 +39,7 @@ export default function TutorialSidebar({
     // Fallback to original logic for backward compatibility
     if (tutorial.order === 1) return true;
     const previousTutorial = tutorials.find(
-      (t) => t.order === tutorial.order - 1,
+      (t) => t.order === tutorial.order - 1
     );
     return previousTutorial
       ? completedTutorials.includes(previousTutorial.id)
@@ -93,7 +93,7 @@ export default function TutorialSidebar({
     if (currentTutorial?.id === tutorial.id) {
       return cn(
         baseClasses,
-        "bg-gradient-to-r from-purple-600 to-pink-600 text-white",
+        "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
       );
     }
 
@@ -108,7 +108,7 @@ export default function TutorialSidebar({
     <div
       className={cn(
         "bg-white border-r border-slate-200 flex flex-col transition-all duration-300",
-        collapsed ? "w-16" : "w-80",
+        collapsed ? "w-16" : "w-80"
       )}
     >
       {/* Header */}
@@ -150,7 +150,7 @@ export default function TutorialSidebar({
               onClick={() => isUnlocked(tutorial) && onTutorialSelect(tutorial)}
               className={cn(
                 getTutorialClassName(tutorial),
-                collapsed ? "p-3 justify-center" : "p-4 space-x-3",
+                collapsed ? "p-3 justify-center" : "p-4 space-x-3"
               )}
               disabled={!isUnlocked(tutorial)}
             >

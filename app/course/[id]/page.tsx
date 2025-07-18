@@ -15,8 +15,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `JavaScript Course: ${courseId} - JsTutor`,
       description: `Learn JavaScript through interactive tutorials and hands-on practice in course ${courseId}.`,
-      url: `https://jstutor.com/course/${courseId}`,
-    },
+      url: `https://jstutor.com/course/${courseId}`
+    }
   };
 }
 

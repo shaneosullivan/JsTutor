@@ -20,7 +20,7 @@ export default function ServiceWorkerRegistration() {
                   navigator.serviceWorker.controller
                 ) {
                   console.log(
-                    "New service worker installed, reload recommended",
+                    "New service worker installed, reload recommended"
                   );
                   // Optionally show a toast or notification here
                 }

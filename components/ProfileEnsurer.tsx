@@ -35,7 +35,7 @@ export default function ProfileEnsurer({ children }: ProfileEnsurerProps) {
         const profiles = getAllProfiles();
         if (profiles.length === 0) {
           console.warn(
-            "Profile system initialization failed - no profiles found",
+            "Profile system initialization failed - no profiles found"
           );
         }
 

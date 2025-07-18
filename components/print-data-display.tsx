@@ -22,7 +22,7 @@ interface OutputItem {
 export default function PrintDataDisplay({
   code,
   onOutput,
-  onError,
+  onError
 }: PrintDataDisplayProps) {
   const [outputItems, setOutputItems] = useState<OutputItem[]>([]);
   const outputRef = useRef<HTMLDivElement>(null);
@@ -65,7 +65,7 @@ export default function PrintDataDisplay({
       data,
       timestamp: new Date(),
       type: "log",
-      line,
+      line
     };
     setOutputItems((prev) => [...prev, newItem]);
   };
@@ -76,7 +76,7 @@ export default function PrintDataDisplay({
       data: { message, line },
       timestamp: new Date(),
       type: "error",
-      line,
+      line
     };
     setOutputItems((prev) => [...prev, newItem]);
   };
@@ -123,7 +123,7 @@ export default function PrintDataDisplay({
             log: printData,
             error: (msg: any) => addError(String(msg)),
             warn: (msg: any) => printData(`⚠️ ${msg}`),
-            info: printData,
+            info: printData
           },
           Math,
           Date,
@@ -139,7 +139,7 @@ export default function PrintDataDisplay({
           setTimeout: wrappedSetTimeout,
           setInterval: wrappedSetInterval,
           clearTimeout: window.clearTimeout.bind(window),
-          clearInterval: window.clearInterval.bind(window),
+          clearInterval: window.clearInterval.bind(window)
         };
 
         // Execute the code in a controlled environment
@@ -166,7 +166,7 @@ export default function PrintDataDisplay({
 
         const errorInfo = {
           message: error.message || "Unknown error occurred",
-          line,
+          line
         };
 
         addError(errorInfo.message, errorInfo.line);

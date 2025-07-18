@@ -13,7 +13,7 @@ interface ProfileAvatarProps {
 
 export default function ProfileAvatar({
   className = "",
-  size = 32,
+  size = 32
 }: ProfileAvatarProps) {
   const [profileIcon, setProfileIcon] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);

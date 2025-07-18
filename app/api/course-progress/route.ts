@@ -4,7 +4,7 @@ import {
   getCourseProgressById,
   createCourseProgress,
   updateCourseProgress,
-  deleteCourseProgress,
+  deleteCourseProgress
 } from "@/lib/firebase-admin";
 import { CourseProgress } from "@/lib/types";
 
@@ -21,39 +21,39 @@ export async function GET(request: NextRequest) {
       const progress = await getCourseProgressById(
         accountId,
         profileId,
-        courseId,
+        courseId
       );
       if (!progress) {
         return NextResponse.json(
           { error: "Course progress not found" },
-          { status: 404 },
+          { status: 404 }
         );
       }
       return NextResponse.json({
         success: true,
-        data: progress,
+        data: progress
       });
     } else if (accountId && profileId) {
       // Get all course progress for account/profile
       const progressList = await getCourseProgressByAccountAndProfile(
         accountId,
-        profileId,
+        profileId
       );
       return NextResponse.json({
         success: true,
-        data: progressList,
+        data: progressList
       });
     } else {
       return NextResponse.json(
         { error: "Account ID and profile ID are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
   } catch (error) {
     console.error("Error retrieving course progress:", error);
     return NextResponse.json(
       { error: "Failed to retrieve course progress" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     if (!progress.accountId || !progress.profileId || !progress.courseId) {
       return NextResponse.json(
         { error: "Account ID, profile ID, and course ID are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -76,13 +76,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: savedProgress,
-      message: "Course progress created successfully",
+      message: "Course progress created successfully"
     });
   } catch (error) {
     console.error("Error creating course progress:", error);
     return NextResponse.json(
       { error: "Failed to create course progress" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -96,7 +96,7 @@ export async function PUT(request: NextRequest) {
     if (!progress.accountId || !progress.profileId || !progress.courseId) {
       return NextResponse.json(
         { error: "Account ID, profile ID, and course ID are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -105,13 +105,13 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: updatedProgress,
-      message: "Course progress updated successfully",
+      message: "Course progress updated successfully"
     });
   } catch (error) {
     console.error("Error updating course progress:", error);
     return NextResponse.json(
       { error: "Failed to update course progress" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -127,7 +127,7 @@ export async function DELETE(request: NextRequest) {
     if (!accountId || !profileId || !courseId) {
       return NextResponse.json(
         { error: "Account ID, profile ID, and course ID are required" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -135,13 +135,13 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Course progress deleted successfully",
+      message: "Course progress deleted successfully"
     });
   } catch (error) {
     console.error("Error deleting course progress:", error);
     return NextResponse.json(
       { error: "Failed to delete course progress" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

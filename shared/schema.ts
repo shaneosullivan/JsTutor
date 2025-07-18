@@ -41,7 +41,7 @@ export interface Tutorial {
 // Zod schemas for validation
 export const insertUserSchema = z.object({
   username: z.string().min(1),
-  password: z.string().min(1),
+  password: z.string().min(1)
 });
 
 export const insertUserProgressSchema = z.object({
@@ -50,7 +50,7 @@ export const insertUserProgressSchema = z.object({
   currentTutorial: z.number().default(1),
   currentCourse: z.number().default(1),
   completedCourses: z.array(z.number()).default([]),
-  stars: z.number().default(0),
+  stars: z.number().default(0)
 });
 
 export const insertCourseSchema = z.object({
@@ -58,7 +58,7 @@ export const insertCourseSchema = z.object({
   description: z.string().min(1),
   type: z.string().min(1),
   order: z.number(),
-  requiredCourse: z.number().nullable(),
+  requiredCourse: z.number().nullable()
 });
 
 export const insertTutorialSchema = z.object({
@@ -69,7 +69,7 @@ export const insertTutorialSchema = z.object({
   starterCode: z.string().default(""),
   expectedOutput: z.string().optional(),
   order: z.number(),
-  isLocked: z.boolean().default(false),
+  isLocked: z.boolean().default(false)
 });
 
 // Inferred types

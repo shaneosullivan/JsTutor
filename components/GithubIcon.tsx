@@ -5,7 +5,7 @@ interface GithubIconProps {
 
 export default function GithubIcon({
   size = 20,
-  className = "",
+  className = ""
 }: GithubIconProps) {
   return (
     <svg

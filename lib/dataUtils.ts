@@ -58,7 +58,7 @@ const DEFAULT_LOCALE = "en";
 // Locale-aware helper functions that return localized types
 function getLocalizedCourse(
   course: Course,
-  locale: string = DEFAULT_LOCALE,
+  locale: string = DEFAULT_LOCALE
 ): LocalizedCourse {
   const text =
     course.text[locale] ||
@@ -70,13 +70,13 @@ function getLocalizedCourse(
     description: text.description,
     type: course.type,
     order: course.order,
-    requiredCourse: course.requiredCourse,
+    requiredCourse: course.requiredCourse
   };
 }
 
 function getLocalizedTutorial(
   tutorial: Tutorial,
-  locale: string = DEFAULT_LOCALE,
+  locale: string = DEFAULT_LOCALE
 ): LocalizedTutorial {
   const text =
     tutorial.text[locale] ||
@@ -95,7 +95,7 @@ function getLocalizedTutorial(
     content: text.content,
     starterCode,
     expectedOutput: text.expectedOutput,
-    order: tutorial.order,
+    order: tutorial.order
   };
 }
 
@@ -123,14 +123,14 @@ export interface TutorialTransformOptions {
 
 export function transformTutorial<T extends Record<string, any>>(
   tutorial: T,
-  overrides: TutorialTransformOptions = {},
+  overrides: TutorialTransformOptions = {}
 ): T & { starterCode: string; expectedOutput: string; isLocked: boolean } {
   return {
     ...tutorial,
     starterCode: overrides.starterCode ?? tutorial.starterCode ?? "",
     expectedOutput: overrides.expectedOutput ?? tutorial.expectedOutput ?? "",
     isLocked: overrides.isLocked ?? tutorial.isLocked ?? false,
-    ...overrides,
+    ...overrides
   };
 }
 
@@ -139,7 +139,7 @@ export function transformTutorials<T extends Record<string, any>>(
   tutorials: T[],
   overrides:
     | TutorialTransformOptions
-    | ((tutorial: T, index: number) => TutorialTransformOptions) = {},
+    | ((tutorial: T, index: number) => TutorialTransformOptions) = {}
 ): Array<
   T & { starterCode: string; expectedOutput: string; isLocked: boolean }
 > {
@@ -153,14 +153,14 @@ export function transformTutorials<T extends Record<string, any>>(
 // Factory function to create localized exports from raw data
 export function createLocalizedData(
   rawCourses: Course[],
-  rawTutorials: Tutorial[],
+  rawTutorials: Tutorial[]
 ) {
   // Exported data (localized for current locale)
   const courses: LocalizedCourse[] = rawCourses.map((course) =>
-    getLocalizedCourse(course),
+    getLocalizedCourse(course)
   );
   const tutorials: LocalizedTutorial[] = rawTutorials.map((tutorial) =>
-    getLocalizedTutorial(tutorial),
+    getLocalizedTutorial(tutorial)
   );
 
   return {
@@ -180,7 +180,7 @@ export function createLocalizedData(
 
     getTutorialsForCourse(
       courseId: number,
-      locale?: string,
+      locale?: string
     ): LocalizedTutorial[] {
       return rawTutorials
         .filter((tutorial) => tutorial.courseId === courseId)
@@ -189,18 +189,18 @@ export function createLocalizedData(
 
     getNextTutorial(
       currentTutorialId: number,
-      locale?: string,
+      locale?: string
     ): LocalizedTutorial | null {
       const currentTutorial = rawTutorials.find(
-        (t) => t.id === currentTutorialId,
+        (t) => t.id === currentTutorialId
       );
       if (!currentTutorial) return null;
 
       const courseTutorials = rawTutorials.filter(
-        (t) => t.courseId === currentTutorial.courseId,
+        (t) => t.courseId === currentTutorial.courseId
       );
       const currentIndex = courseTutorials.findIndex(
-        (t) => t.id === currentTutorialId,
+        (t) => t.id === currentTutorialId
       );
 
       if (currentIndex >= 0 && currentIndex < courseTutorials.length - 1) {
@@ -209,14 +209,14 @@ export function createLocalizedData(
 
       // Check next course
       const currentCourse = rawCourses.find(
-        (c) => c.id === currentTutorial.courseId,
+        (c) => c.id === currentTutorial.courseId
       );
       const nextCourse = rawCourses.find(
-        (c) => c.order === (currentCourse?.order || 0) + 1,
+        (c) => c.order === (currentCourse?.order || 0) + 1
       );
       if (nextCourse) {
         const nextCourseTutorials = rawTutorials.filter(
-          (t) => t.courseId === nextCourse.id,
+          (t) => t.courseId === nextCourse.id
         );
         return nextCourseTutorials.length > 0
           ? getLocalizedTutorial(nextCourseTutorials[0], locale)
@@ -228,18 +228,18 @@ export function createLocalizedData(
 
     getPreviousTutorial(
       currentTutorialId: number,
-      locale?: string,
+      locale?: string
     ): LocalizedTutorial | null {
       const currentTutorial = rawTutorials.find(
-        (t) => t.id === currentTutorialId,
+        (t) => t.id === currentTutorialId
       );
       if (!currentTutorial) return null;
 
       const courseTutorials = rawTutorials.filter(
-        (t) => t.courseId === currentTutorial.courseId,
+        (t) => t.courseId === currentTutorial.courseId
       );
       const currentIndex = courseTutorials.findIndex(
-        (t) => t.id === currentTutorialId,
+        (t) => t.id === currentTutorialId
       );
 
       if (currentIndex > 0) {
@@ -248,19 +248,19 @@ export function createLocalizedData(
 
       // Check previous course
       const currentCourse = rawCourses.find(
-        (c) => c.id === currentTutorial.courseId,
+        (c) => c.id === currentTutorial.courseId
       );
       const prevCourse = rawCourses.find(
-        (c) => c.order === (currentCourse?.order || 0) - 1,
+        (c) => c.order === (currentCourse?.order || 0) - 1
       );
       if (prevCourse) {
         const prevCourseTutorials = rawTutorials.filter(
-          (t) => t.courseId === prevCourse.id,
+          (t) => t.courseId === prevCourse.id
         );
         return prevCourseTutorials.length > 0
           ? getLocalizedTutorial(
               prevCourseTutorials[prevCourseTutorials.length - 1],
-              locale,
+              locale
             )
           : null;
       }
@@ -274,19 +274,19 @@ export function createLocalizedData(
     },
 
     getTutorialsForLocale(
-      locale: string = DEFAULT_LOCALE,
+      locale: string = DEFAULT_LOCALE
     ): LocalizedTutorial[] {
       return rawTutorials.map((tutorial) =>
-        getLocalizedTutorial(tutorial, locale),
+        getLocalizedTutorial(tutorial, locale)
       );
     },
 
     getAvailableLocales(): string[] {
       const courseLocales = rawCourses.flatMap((course) =>
-        Object.keys(course.text),
+        Object.keys(course.text)
       );
       const tutorialLocales = rawTutorials.flatMap((tutorial) =>
-        Object.keys(tutorial.text),
+        Object.keys(tutorial.text)
       );
       const allLocales = courseLocales.concat(tutorialLocales);
       return Array.from(new Set(allLocales)).sort();
@@ -296,8 +296,8 @@ export function createLocalizedData(
     setDefaultLocale(_locale: string) {
       // This will be implemented when we add full i18n support
       console.warn(
-        "setDefaultLocale not yet implemented - locale switching will be added in future update",
+        "setDefaultLocale not yet implemented - locale switching will be added in future update"
       );
-    },
+    }
   };
 }
