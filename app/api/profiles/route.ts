@@ -4,9 +4,11 @@ import {
   getProfileById,
   createProfile,
   updateProfile,
-  deleteProfile
+  deleteProfile,
+  storeChange
 } from "@/lib/firebase-admin";
 import { UserProfile } from "@/lib/types";
+import { extractClientId } from "@/lib/api-utils";
 
 // GET: Retrieve profiles by account ID or specific profile by ID
 export async function GET(request: NextRequest) {
@@ -63,7 +65,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Extract clientId and fail if not found
+    const clientId = extractClientId(request);
+    if (!clientId) {
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
+    }
+
     const savedProfile = await createProfile(profile);
+
+    // Log the change to Firebase
+    try {
+      await storeChange(profile.accountId, "profile", clientId, { 
+        profileId: parseInt(profile.id.replace(/\D/g, '')) || 0 
+      });
+    } catch (error) {
+      console.warn("Failed to log profile creation change:", error);
+    }
 
     return NextResponse.json({
       success: true,
@@ -92,7 +112,25 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Extract clientId and fail if not found
+    const clientId = extractClientId(request);
+    if (!clientId) {
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
+    }
+
     const updatedProfile = await updateProfile(profile);
+
+    // Log the change to Firebase
+    try {
+      await storeChange(profile.accountId, "profile", clientId, { 
+        profileId: parseInt(profile.id.replace(/\D/g, '')) || 0 
+      });
+    } catch (error) {
+      console.warn("Failed to log profile update change:", error);
+    }
 
     return NextResponse.json({
       success: true,
@@ -121,7 +159,30 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
+    // Extract clientId and fail if not found
+    const clientId = extractClientId(request);
+    if (!clientId) {
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Get profile info before deletion for logging
+    const profileToDelete = await getProfileById(profileId);
+    
     await deleteProfile(profileId);
+
+    // Log the change to Firebase
+    if (profileToDelete) {
+      try {
+        await storeChange(profileToDelete.accountId, "profile", clientId, { 
+          profileId: parseInt(profileToDelete.id.replace(/\D/g, '')) || 0 
+        });
+      } catch (error) {
+        console.warn("Failed to log profile deletion change:", error);
+      }
+    }
 
     return NextResponse.json({
       success: true,

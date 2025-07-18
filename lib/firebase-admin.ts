@@ -71,6 +71,7 @@ export const getFirestoreDb = (): Firestore => {
 };
 
 import { AccountData, UserProfile, CourseProgress } from "@/lib/types";
+import { FIREBASE_CHANGES_COLLECTION } from "./consts";
 
 // Account CRUD operations
 export async function getAccountById(
@@ -113,6 +114,65 @@ export async function createAccount(
     .doc(account.id)
     .set(accountWithTimestamp);
   return accountWithTimestamp;
+}
+
+type StoreChangeType = "account" | "profile" | "course";
+
+function getChangeDocId(
+  accountId: string,
+  type: StoreChangeType,
+  data?: { courseId?: number; profileId?: number }
+): string {
+  let docId = `a_${accountId}_t_${type}`;
+  if (type === "profile") {
+    if (!data || !data.profileId) {
+      throw new Error("Profile ID is required for profile changes");
+    }
+    docId += `_p_${data.profileId}`;
+  } else if (type === "course") {
+    if (!data || !data.courseId) {
+      throw new Error(
+        "Tutorial ID and Course ID are required for tutorial changes"
+      );
+    }
+    docId += `_c_${data.courseId}}`;
+  }
+  return docId;
+}
+
+export async function storeChange(
+  accountId: string,
+  type: StoreChangeType,
+  clientId: string,
+  data?: { courseId?: number; profileId?: number }
+): Promise<string> {
+  const firestore = getFirestoreDb();
+
+  let docId = getChangeDocId(accountId, type, data);
+
+  const changeData = {
+    accountId,
+    type,
+    clientId,
+    data,
+    timestamp: new Date().toISOString()
+  };
+
+  await firestore
+    .collection(FIREBASE_CHANGES_COLLECTION)
+    .doc(docId)
+    .set(changeData, { merge: true })
+    .then(() => {
+      console.log(`Change stored: ${type} for account ${accountId}`);
+    })
+    .catch((error) => {
+      console.error(
+        `Error storing change for account ${accountId}:`,
+        error.message
+      );
+    });
+
+  return docId;
 }
 
 export async function updateAccount(

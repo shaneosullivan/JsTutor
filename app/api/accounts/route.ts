@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getAccountById,
   createAccount,
-  updateAccount
+  updateAccount,
+  storeChange
 } from "@/lib/firebase-admin";
 import { AccountData } from "@/lib/types";
+import { extractClientId } from "@/lib/api-utils";
 
 // GET: Retrieve account by ID
 export async function GET(request: NextRequest) {
@@ -51,7 +53,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Extract clientId and fail if not found
+    const clientId = extractClientId(request);
+    if (!clientId) {
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
+    }
+
     const savedAccount = await createAccount(account);
+
+    // Log the change to Firebase
+    try {
+      await storeChange(account.id, "account", clientId);
+    } catch (error) {
+      console.warn("Failed to log account creation change:", error);
+    }
 
     return NextResponse.json({
       success: true,
@@ -80,7 +98,23 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Extract clientId and fail if not found
+    const clientId = extractClientId(request);
+    if (!clientId) {
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
+    }
+
     const updatedAccount = await updateAccount(account);
+
+    // Log the change to Firebase
+    try {
+      await storeChange(account.id, "account", clientId);
+    } catch (error) {
+      console.warn("Failed to log account update change:", error);
+    }
 
     return NextResponse.json({
       success: true,

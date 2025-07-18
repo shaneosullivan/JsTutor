@@ -4,9 +4,11 @@ import {
   getCourseProgressById,
   createCourseProgress,
   updateCourseProgress,
-  deleteCourseProgress
+  deleteCourseProgress,
+  storeChange
 } from "@/lib/firebase-admin";
 import { CourseProgress } from "@/lib/types";
+import { extractClientId } from "@/lib/api-utils";
 
 // GET: Retrieve course progress by account/profile or specific course progress
 export async function GET(request: NextRequest) {
@@ -71,7 +73,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Extract clientId and fail if not found
+    const clientId = extractClientId(request);
+    if (!clientId) {
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
+    }
+
     const savedProgress = await createCourseProgress(progress);
+
+    // Log the change to Firebase
+    try {
+      await storeChange(progress.accountId, "course", clientId, {
+        courseId: parseInt(progress.courseId),
+        profileId: parseInt(progress.profileId.replace(/\D/g, "")) || 0
+      });
+    } catch (error) {
+      console.warn("Failed to log course progress creation change:", error);
+    }
 
     return NextResponse.json({
       success: true,
@@ -100,7 +121,26 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Extract clientId and fail if not found
+    const clientId = extractClientId(request);
+    if (!clientId) {
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
+    }
+
     const updatedProgress = await updateCourseProgress(progress);
+
+    // Log the change to Firebase
+    try {
+      await storeChange(progress.accountId, "course", clientId, {
+        courseId: parseInt(progress.courseId),
+        profileId: parseInt(progress.profileId.replace(/\D/g, "")) || 0
+      });
+    } catch (error) {
+      console.warn("Failed to log course progress update change:", error);
+    }
 
     return NextResponse.json({
       success: true,
