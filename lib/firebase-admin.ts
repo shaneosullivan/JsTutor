@@ -121,7 +121,7 @@ type StoreChangeType = "account" | "profile" | "course";
 function getChangeDocId(
   accountId: string,
   type: StoreChangeType,
-  data?: { courseId?: number; profileId?: string }
+  data?: { courseId?: string; profileId?: string }
 ): string {
   let docId = `a_${accountId}_t_${type}`;
   if (type === "profile") {
@@ -144,7 +144,7 @@ export async function storeChange(
   accountId: string,
   type: StoreChangeType,
   clientId: string,
-  data?: { courseId?: number; profileId?: string }
+  data?: { courseId?: string; profileId?: string }
 ): Promise<string> {
   const firestore = getFirestoreDb();
 
@@ -181,14 +181,16 @@ export async function getChangesForAccount(
   currentClientId: string,
   filters?: {
     types?: ("account" | "profile" | "course")[];
-    courseId?: number;
+    courseId?: string;
   }
-): Promise<Array<{
-  type: "account" | "profile" | "course";
-  clientId: string;
-  data?: { courseId?: number; profileId?: string };
-  timestamp: string;
-}>> {
+): Promise<
+  Array<{
+    type: "account" | "profile" | "course";
+    clientId: string;
+    data?: { courseId?: string; profileId?: string };
+    timestamp: string;
+  }>
+> {
   if (!serviceAccount) {
     throw new Error(
       "Firebase is not configured. Please add Firebase service account configuration."
@@ -202,21 +204,25 @@ export async function getChangesForAccount(
     .where("clientId", "!=", currentClientId);
 
   const snapshot = await query.get();
-  let changes = snapshot.docs.map((doc) => doc.data() as {
-    type: "account" | "profile" | "course";
-    clientId: string;
-    data?: { courseId?: number; profileId?: string };
-    timestamp: string;
-  });
+  let changes = snapshot.docs.map(
+    (doc) =>
+      doc.data() as {
+        type: "account" | "profile" | "course";
+        clientId: string;
+        data?: { courseId?: string; profileId?: string };
+        timestamp: string;
+      }
+  );
 
   // Apply filters
   if (filters?.types) {
-    changes = changes.filter(change => filters.types!.includes(change.type));
+    changes = changes.filter((change) => filters.types!.includes(change.type));
   }
 
   if (filters?.courseId !== undefined) {
-    changes = changes.filter(change => 
-      change.type === "course" && change.data?.courseId === filters.courseId
+    changes = changes.filter(
+      (change) =>
+        change.type === "course" && change.data?.courseId === filters.courseId
     );
   }
 
@@ -229,7 +235,7 @@ export async function getObjectsFromChanges(
   changes: Array<{
     type: "account" | "profile" | "course";
     clientId: string;
-    data?: { courseId?: number; profileId?: string };
+    data?: { courseId?: string; profileId?: string };
     timestamp: string;
   }>
 ): Promise<{
@@ -247,29 +253,44 @@ export async function getObjectsFromChanges(
     try {
       if (change.type === "account") {
         const account = await getAccountById(accountId);
-        if (account && !result.account.find(a => a.id === account.id)) {
+        if (account && !result.account.find((a) => a.id === account.id)) {
           result.account.push(account);
         }
       } else if (change.type === "profile" && change.data?.profileId) {
         const profiles = await getProfilesByAccountId(accountId);
-        const profile = profiles.find(p => p.id === change.data!.profileId);
-        if (profile && !result.profile.find(p => p.id === profile.id)) {
+        const profile = profiles.find((p) => p.id === change.data!.profileId);
+        if (profile && !result.profile.find((p) => p.id === profile.id)) {
           result.profile.push(profile);
         }
-      } else if (change.type === "course" && change.data?.courseId && change.data?.profileId) {
+      } else if (
+        change.type === "course" &&
+        change.data?.courseId &&
+        change.data?.profileId
+      ) {
         const profileId = change.data.profileId;
-        const courseId = change.data.courseId.toString();
-        const courseProgress = await getCourseProgressById(accountId, profileId, courseId);
-        if (courseProgress && !result.course.find(c => 
-          c.accountId === courseProgress.accountId && 
-          c.profileId === courseProgress.profileId && 
-          c.courseId === courseProgress.courseId
-        )) {
+        const courseId = change.data.courseId;
+        const courseProgress = await getCourseProgressById(
+          accountId,
+          profileId,
+          courseId
+        );
+        if (
+          courseProgress &&
+          !result.course.find(
+            (c) =>
+              c.accountId === courseProgress.accountId &&
+              c.profileId === courseProgress.profileId &&
+              c.courseId === courseProgress.courseId
+          )
+        ) {
           result.course.push(courseProgress);
         }
       }
     } catch (error) {
-      console.warn(`Failed to get object for change type ${change.type}:`, error);
+      console.warn(
+        `Failed to get object for change type ${change.type}:`,
+        error
+      );
     }
   }
 

@@ -17,7 +17,7 @@ export interface TutorialText extends LocalizedText {
 // Localized tutorial type (flattened from raw Tutorial data)
 export interface LocalizedTutorial {
   id: number;
-  courseId: number;
+  courseId: string;
   title: string;
   description: string;
   content: string;
@@ -28,25 +28,25 @@ export interface LocalizedTutorial {
 
 // Localized course type (flattened from raw Course data)
 export interface LocalizedCourse {
-  id: number;
+  id: string;
   title: string;
   description: string;
   type: string;
   order: number;
-  requiredCourse: number | null;
+  requiredCourse: string | null;
 }
 
 export interface Course {
-  id: number;
+  id: string;
   text: Record<string, LocalizedText>;
   type: string;
   order: number;
-  requiredCourse: number | null;
+  requiredCourse: string | null;
 }
 
 export interface Tutorial {
   id: number;
-  courseId: number;
+  courseId: string;
   text: Record<string, TutorialText>;
   starterCode?: Record<string, string>;
   order: number;
@@ -168,7 +168,7 @@ export function createLocalizedData(
     tutorials,
 
     // Helper functions that return localized types
-    getCourse(id: number, locale?: string): LocalizedCourse | undefined {
+    getCourse(id: string, locale?: string): LocalizedCourse | undefined {
       const course = rawCourses.find((course) => course.id === id);
       return course ? getLocalizedCourse(course, locale) : undefined;
     },
@@ -179,7 +179,7 @@ export function createLocalizedData(
     },
 
     getTutorialsForCourse(
-      courseId: number,
+      courseId: string,
       locale?: string
     ): LocalizedTutorial[] {
       return rawTutorials

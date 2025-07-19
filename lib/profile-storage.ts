@@ -12,13 +12,20 @@ import {
 
 // Import clearSyncCache but only for client-side use
 let clearSyncCache: (() => void) | null = null;
-let debouncedSyncCourseProgress: ((accountId: string, profileId: string, courseId: number, delay?: number) => void) | null = null;
+let debouncedSyncCourseProgress:
+  | ((
+      accountId: string,
+      profileId: string,
+      courseId: string,
+      delay?: number
+    ) => void)
+  | null = null;
 
 if (typeof window !== "undefined") {
   import("@/lib/sync-changes").then((module) => {
     clearSyncCache = module.clearSyncCache;
   });
-  
+
   import("@/lib/course-progress-sync").then((module) => {
     debouncedSyncCourseProgress = module.debouncedSyncCourseProgress;
   });
@@ -394,7 +401,7 @@ async function processPendingChanges(
   if (changedTutorialCode.length > 0) {
     try {
       // Group changed tutorial code by course and sync only affected courses
-      const courseGroups = new Map<number, TutorialCode[]>();
+      const courseGroups = new Map<string, TutorialCode[]>();
 
       changedTutorialCode.forEach(([_, tutorialData]) => {
         const tutorial = tutorialData as unknown as TutorialCode;
@@ -624,12 +631,12 @@ export function createProfile(
   };
 
   store.setRow("profiles", newProfile.id, newProfile as any);
-  
+
   // Clear sync cache on client-side write
   if (typeof window !== "undefined" && clearSyncCache) {
     clearSyncCache();
   }
-  
+
   enableFirebaseAutoSave();
 
   // Force the Firebase persister to sync
@@ -651,12 +658,12 @@ export function updateProfile(updatedProfile: UserProfile): boolean {
     lastActive: new Date().toISOString()
   };
   store.setRow("profiles", updatedProfile.id, profileWithTimestamp as any);
-  
+
   // Clear sync cache on client-side write
   if (typeof window !== "undefined" && clearSyncCache) {
     clearSyncCache();
   }
-  
+
   enableFirebaseAutoSave();
 
   // Force the Firebase persister to sync
@@ -776,24 +783,24 @@ export function setProfileItemAsObject(key: string, value: any): void {
 }
 
 // Tutorial/course convenience functions
-export function getCompletedTutorials(courseId: number): number[] {
+export function getCompletedTutorials(courseId: string): number[] {
   return getProfileItemAsArray(`completedTutorials_course_${courseId}`);
 }
 
 export function setCompletedTutorials(
-  courseId: number,
+  courseId: string,
   tutorialIds: number[]
 ): void {
   setProfileItemAsArray(`completedTutorials_course_${courseId}`, tutorialIds);
 }
 
-export function getCurrentTutorial(courseId: number): number | null {
+export function getCurrentTutorial(courseId: string): number | null {
   const item = getProfileItem(`currentTutorial_course_${courseId}`);
   return item ? parseInt(item) : null;
 }
 
 export function setCurrentTutorial(
-  courseId: number,
+  courseId: string,
   tutorialOrder: number
 ): void {
   setProfileItem(
@@ -816,7 +823,7 @@ export function getUserCode(tutorialId: number): string | null {
 export function setUserCode(
   tutorialId: number,
   code: string,
-  courseId: number = 1
+  courseId: string
 ): void {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
@@ -868,7 +875,7 @@ export function getTutorialCode(tutorialId: number): TutorialCode | null {
 export function setTutorialCompleted(
   tutorialId: number,
   completed: boolean,
-  courseId: number = 1
+  courseId: string
 ): void {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
@@ -918,7 +925,7 @@ export function getTutorialCodesForProfile(profileId: string): TutorialCode[] {
     .filter((tutorialCode) => tutorialCode.profileId === profileId);
 }
 
-export function getTutorialCodesForCourse(courseId: number): TutorialCode[] {
+export function getTutorialCodesForCourse(courseId: string): TutorialCode[] {
   const activeProfile = getActiveProfile();
   const tutorialCodeTable = store.getTable("tutorialCode");
   return Object.values(tutorialCodeTable)
@@ -942,7 +949,7 @@ export function getComputedCourseProgress(
     .filter(
       (tutorialCode) =>
         tutorialCode.profileId === profileId &&
-        tutorialCode.courseId === parseInt(courseId)
+        tutorialCode.courseId === courseId
     );
 
   // Build tutorialCode object from TinyBase data
@@ -1013,7 +1020,7 @@ export function getCompletedCourses(): number[] {
 
 export function setCompletedCourses(courseIds: number[]): void {
   setProfileItemAsArray("completedCourses", courseIds);
-  
+
   // Clear sync cache on client-side write
   if (typeof window !== "undefined" && clearSyncCache) {
     clearSyncCache();
@@ -1113,10 +1120,15 @@ function setupCourseProgressListeners(): void {
       const activeAccount = getActiveAccount();
       if (!activeAccount) return;
 
-      const tutorialCode = store.getRow("tutorialCode", rowId) as unknown as TutorialCode;
+      const tutorialCode = store.getRow(
+        "tutorialCode",
+        rowId
+      ) as unknown as TutorialCode;
       if (!tutorialCode) return;
 
-      console.log(`Tutorial code changed for tutorial ${tutorialCode.tutorialId}, course ${tutorialCode.courseId}`);
+      console.log(
+        `Tutorial code changed for tutorial ${tutorialCode.tutorialId}, course ${tutorialCode.courseId}`
+      );
 
       // Debounced sync to server
       debouncedSyncCourseProgress(
@@ -1140,10 +1152,15 @@ function setupCourseProgressListeners(): void {
       const activeAccount = getActiveAccount();
       if (!activeAccount) return;
 
-      const tutorialCode = store.getRow("tutorialCode", rowId) as unknown as TutorialCode;
+      const tutorialCode = store.getRow(
+        "tutorialCode",
+        rowId
+      ) as unknown as TutorialCode;
       if (!tutorialCode) return;
 
-      console.log(`Tutorial completion changed for tutorial ${tutorialCode.tutorialId}, course ${tutorialCode.courseId}, completed: ${newCell}`);
+      console.log(
+        `Tutorial completion changed for tutorial ${tutorialCode.tutorialId}, course ${tutorialCode.courseId}, completed: ${newCell}`
+      );
 
       // Debounced sync to server
       debouncedSyncCourseProgress(

@@ -65,7 +65,7 @@ function cleanExpiredCache(): void {
 
 export interface SyncChangesOptions {
   types?: ("account" | "profile" | "course")[];
-  courseId?: number;
+  courseId?: string;
 }
 
 export interface SyncChangesResult {
@@ -154,7 +154,7 @@ async function performFetchRequest(
     }
 
     if (options.courseId !== undefined) {
-      params.append("courseId", options.courseId.toString());
+      params.append("courseId", options.courseId);
     }
 
     const response = await fetch(`/api/changes?${params.toString()}`, {
@@ -247,7 +247,7 @@ export async function syncChangesToLocalStore(changes: {
                   id: tutorialCodeId,
                   profileId: courseProgress.profileId,
                   tutorialId: tutorialId,
-                  courseId: parseInt(courseProgress.courseId),
+                  courseId: courseProgress.courseId,
                   code: tutorialData.code || "",
                   completed: tutorialData.completed || false,
                   lastAccessed:
@@ -307,7 +307,7 @@ export async function fetchAndSyncChanges(
 
 // Convenience function to sync only course-related changes
 export async function syncCourseChanges(
-  courseId?: number
+  courseId?: string
 ): Promise<SyncChangesResult> {
   return fetchAndSyncChanges({
     types: ["course"],

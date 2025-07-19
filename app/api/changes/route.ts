@@ -33,31 +33,31 @@ export async function GET(request: NextRequest) {
     // Verify the account exists
     const account = await getAccountById(accountId);
     if (!account) {
-      return NextResponse.json(
-        { error: "Account not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Account not found" }, { status: 404 });
     }
 
     // Parse filters
     const filters: {
       types?: ("account" | "profile" | "course")[];
-      courseId?: number;
+      courseId?: string;
     } = {};
 
     if (types) {
-      const typeArray = types.split(",").map(t => t.trim()) as ("account" | "profile" | "course")[];
-      const validTypes = typeArray.filter(t => ["account", "profile", "course"].includes(t));
+      const typeArray = types.split(",").map((t) => t.trim()) as (
+        | "account"
+        | "profile"
+        | "course"
+      )[];
+      const validTypes = typeArray.filter((t) =>
+        ["account", "profile", "course"].includes(t)
+      );
       if (validTypes.length > 0) {
         filters.types = validTypes;
       }
     }
 
     if (courseId) {
-      const courseIdNum = parseInt(courseId);
-      if (!isNaN(courseIdNum)) {
-        filters.courseId = courseIdNum;
-      }
+      filters.courseId = courseId;
     }
 
     // Get changes made by other clients

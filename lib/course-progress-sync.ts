@@ -24,7 +24,7 @@ export function clearRemoteCheckCache(): void {
 export async function syncCourseProgressToServer(
   accountId: string,
   profileId: string,
-  courseId: number
+  courseId: string
 ): Promise<boolean> {
   try {
     if (typeof window === "undefined") return false;
@@ -32,24 +32,33 @@ export async function syncCourseProgressToServer(
     // Check for remote changes first (only once per session/course)
     const courseKey = `${accountId}_${profileId}_${courseId}`;
     if (!remoteCheckedCourses.has(courseKey)) {
-      console.log(`Checking for remote changes for course ${courseId} before syncing local changes...`);
-      
+      console.log(
+        `Checking for remote changes for course ${courseId} before syncing local changes...`
+      );
+
       try {
         const syncResult = await syncCourseChanges(courseId);
         if (syncResult.success && syncResult.synced.courses > 0) {
-          console.log(`Synced ${syncResult.synced.courses} remote course changes before local sync`);
+          console.log(
+            `Synced ${syncResult.synced.courses} remote course changes before local sync`
+          );
         }
       } catch (error) {
-        console.warn("Failed to check for remote changes, proceeding with local sync:", error);
+        console.warn(
+          "Failed to check for remote changes, proceeding with local sync:",
+          error
+        );
       }
-      
+
       // Mark this course as checked for this session
       remoteCheckedCourses.add(courseKey);
     }
 
     // Get all tutorial codes for the course and profile
     const tutorialCodes = getTutorialCodesForCourse(courseId);
-    const profileTutorialCodes = tutorialCodes.filter(tc => tc.profileId === profileId);
+    const profileTutorialCodes = tutorialCodes.filter(
+      (tc) => tc.profileId === profileId
+    );
 
     // Build tutorialCode object from TinyBase data
     const tutorialCode: Record<string, any> = {};
@@ -64,7 +73,7 @@ export async function syncCourseProgressToServer(
     const courseProgress: CourseProgress = {
       accountId,
       profileId,
-      courseId: courseId.toString(),
+      courseId: courseId,
       tutorialCode,
       lastUpdated: new Date().toISOString()
     };
@@ -84,7 +93,9 @@ export async function syncCourseProgressToServer(
       return false;
     }
 
-    console.log(`Course progress synced for course ${courseId}, profile ${profileId}`);
+    console.log(
+      `Course progress synced for course ${courseId}, profile ${profileId}`
+    );
     return true;
   } catch (error) {
     console.error("Error syncing course progress to server:", error);
@@ -98,11 +109,11 @@ const syncTimeouts = new Map<string, NodeJS.Timeout>();
 export function debouncedSyncCourseProgress(
   accountId: string,
   profileId: string,
-  courseId: number,
+  courseId: string,
   delay: number = 2000
 ): void {
   const key = `${accountId}_${profileId}_${courseId}`;
-  
+
   // Clear existing timeout
   const existingTimeout = syncTimeouts.get(key);
   if (existingTimeout) {

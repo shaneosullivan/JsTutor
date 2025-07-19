@@ -6,8 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const courseId = parseInt(id);
-  const course = getCourse(courseId);
+  const course = getCourse(id);
 
   if (!course) {
     return NextResponse.json({ error: "Course not found" }, { status: 404 });

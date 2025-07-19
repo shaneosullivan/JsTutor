@@ -283,7 +283,7 @@ export default function Home() {
   // Save user code when it changes
   useEffect(() => {
     if (currentTutorial && userCode && typeof window !== "undefined") {
-      setUserCodeInStorage(currentTutorial.id, userCode);
+      setUserCodeInStorage(currentTutorial.id, userCode, "basics");
     }
   }, [currentTutorial, userCode]);
 

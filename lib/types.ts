@@ -38,7 +38,7 @@ export interface TutorialCode {
   id: string; // "${profileId}_${tutorialId}"
   profileId: string;
   tutorialId: number;
-  courseId: number;
+  courseId: string;
   code: string;
   completed: boolean;
   lastAccessed: string; // ISO timestamp

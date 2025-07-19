@@ -22,11 +22,11 @@ interface LocalizedText {
 }
 
 interface Course {
-  id: number;
+  id: string;
   text: Record<string, LocalizedText>;
   type: string;
   order: number;
-  requiredCourse: number | null;
+  requiredCourse: string | null;
 }
 
 interface TutorialText extends LocalizedText {
@@ -36,7 +36,7 @@ interface TutorialText extends LocalizedText {
 
 interface Tutorial {
   id: number;
-  courseId: number;
+  courseId: string;
   text: Record<string, TutorialText>;
   starterCode?: Record<string, string>;
   order: number;
@@ -81,6 +81,17 @@ function extractCodeFromMarkdown(content: string): string {
   const codeRegex = /```javascript\n([\s\S]*?)\n```/;
   const match = content.match(codeRegex);
   return match ? match[1] : "";
+}
+
+function generateCourseIdFromFolderName(folderName: string): string {
+  // Remove number prefix and convert to lowercase
+  // "1 - Basics" -> "basics"
+  // "2 - Array Methods" -> "array-methods"
+  return folderName
+    .replace(/^\d+\s*-\s*/, "") // Remove number and dash prefix
+    .toLowerCase()
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/[^a-z0-9-]/g, ""); // Remove any other special characters
 }
 
 function ensureLocaleFilesExist(
@@ -138,6 +149,21 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
     .filter((item) => fs.statSync(path.join(COURSES_DIR, item)).isDirectory())
     .sort();
 
+  // Create a mapping from old numeric IDs to new string IDs
+  const courseIdMapping: Record<number, string> = {};
+
+  // First pass: build the ID mapping
+  for (const courseFolder of courseFolders) {
+    const coursePath = path.join(COURSES_DIR, courseFolder);
+    const enJsonPath = path.join(coursePath, "en.json");
+
+    if (fs.existsSync(enJsonPath)) {
+      const baseCourseData = JSON.parse(fs.readFileSync(enJsonPath, "utf-8"));
+      const newCourseId = generateCourseIdFromFolderName(courseFolder);
+      courseIdMapping[baseCourseData.id] = newCourseId;
+    }
+  }
+
   for (const courseFolder of courseFolders) {
     const coursePath = path.join(COURSES_DIR, courseFolder);
 
@@ -176,13 +202,18 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
       }
     }
 
+    // Generate new string-based course ID
+    const newCourseId = generateCourseIdFromFolderName(courseFolder);
+
     // Convert to localized structure
     const courseData: Course = {
-      id: baseCourseData.id,
+      id: newCourseId,
       text,
       type: baseCourseData.type,
       order: baseCourseData.order,
       requiredCourse: baseCourseData.requiredCourse
+        ? courseIdMapping[baseCourseData.requiredCourse] || null
+        : null
     };
 
     courses.push(courseData);
@@ -231,13 +262,13 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
       };
 
       // Generate a unique global ID for the tutorial
-      // We'll use a simple scheme: courseId * 100 + tutorialOrder
+      // We'll use a simple scheme: oldCourseId * 100 + tutorialOrder
       const tutorialOrder = frontmatter.order || parseInt(tutorialFolder);
-      const globalId = courseData.id * 100 + tutorialOrder;
+      const globalId = baseCourseData.id * 100 + tutorialOrder;
 
       const tutorial: Tutorial = {
         id: globalId,
-        courseId: frontmatter.courseId || courseData.id,
+        courseId: newCourseId,
         text: tutorialText,
         starterCode:
           Object.keys(starterCode).length > 0 ? starterCode : undefined,

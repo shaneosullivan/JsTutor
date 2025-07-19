@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
 
     // Log the change to Firebase
     try {
-      await storeChange(profile.accountId, "profile", clientId, { 
-        profileId: profile.id 
+      await storeChange(profile.accountId, "profile", clientId, {
+        profileId: profile.id
       });
     } catch (error) {
       console.warn("Failed to log profile creation change:", error);
@@ -125,8 +125,8 @@ export async function PUT(request: NextRequest) {
 
     // Log the change to Firebase
     try {
-      await storeChange(profile.accountId, "profile", clientId, { 
-        profileId: profile.id 
+      await storeChange(profile.accountId, "profile", clientId, {
+        profileId: profile.id
       });
     } catch (error) {
       console.warn("Failed to log profile update change:", error);
@@ -170,14 +170,14 @@ export async function DELETE(request: NextRequest) {
 
     // Get profile info before deletion for logging
     const profileToDelete = await getProfileById(profileId);
-    
+
     await deleteProfile(profileId);
 
     // Log the change to Firebase
     if (profileToDelete) {
       try {
-        await storeChange(profileToDelete.accountId, "profile", clientId, { 
-          profileId: profileToDelete.id 
+        await storeChange(profileToDelete.accountId, "profile", clientId, {
+          profileId: profileToDelete.id
         });
       } catch (error) {
         console.warn("Failed to log profile deletion change:", error);

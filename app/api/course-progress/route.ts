@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     // Log the change to Firebase
     try {
       await storeChange(progress.accountId, "course", clientId, {
-        courseId: parseInt(progress.courseId),
+        courseId: progress.courseId,
         profileId: progress.profileId
       });
     } catch (error) {

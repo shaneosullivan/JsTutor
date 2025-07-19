@@ -6,8 +6,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const courseId = parseInt(id);
-  const courseTutorials = getTutorialsForCourse(courseId);
+  const courseTutorials = getTutorialsForCourse(id);
 
   return NextResponse.json(courseTutorials);
 }

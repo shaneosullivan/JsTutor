@@ -10,9 +10,11 @@ export function getClientIdFromRequest(request: NextRequest): string | null {
 }
 
 // Extract clientId from cookie header string (fallback)
-export function getClientIdFromCookieHeader(cookieHeader: string): string | null {
+export function getClientIdFromCookieHeader(
+  cookieHeader: string
+): string | null {
   if (!cookieHeader) return null;
-  
+
   const cookies = cookieHeader.split(";");
   for (const cookie of cookies) {
     const [name, value] = cookie.trim().split("=");
@@ -20,7 +22,7 @@ export function getClientIdFromCookieHeader(cookieHeader: string): string | null
       return decodeURIComponent(value);
     }
   }
-  
+
   return null;
 }
 
@@ -28,7 +30,7 @@ export function getClientIdFromCookieHeader(cookieHeader: string): string | null
 export function extractClientId(request: NextRequest): string | null {
   // First try to get from cookies
   let clientId = getClientIdFromRequest(request);
-  
+
   // If not found, try cookie header
   if (!clientId) {
     const cookieHeader = request.headers.get("cookie");
@@ -36,6 +38,6 @@ export function extractClientId(request: NextRequest): string | null {
       clientId = getClientIdFromCookieHeader(cookieHeader);
     }
   }
-  
+
   return clientId;
 }
