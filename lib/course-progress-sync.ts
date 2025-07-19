@@ -2,6 +2,7 @@
 import { getTutorialCodesForCourse } from "@/lib/profile-storage";
 import { CourseProgress } from "@/lib/types";
 import { syncCourseChanges } from "@/lib/sync-changes";
+import { getClientId } from "@/lib/client-id";
 
 // Track which courses have been checked for remote changes in this session
 const remoteCheckedCourses = new Set<string>();
@@ -78,6 +79,12 @@ export async function syncCourseProgressToServer(
       lastUpdated: new Date().toISOString()
     };
 
+    console.log("Sending course progress to API:", courseProgress);
+    
+    // Get client ID for the request
+    const clientId = getClientId();
+    console.log("Client ID for request:", clientId);
+    
     // Always use POST for both creating and updating
     const response = await fetch("/api/course-progress", {
       method: "POST",
@@ -87,12 +94,18 @@ export async function syncCourseProgressToServer(
       body: JSON.stringify(courseProgress)
     });
 
+    console.log("API response status:", response.status);
+    console.log("API response ok:", response.ok);
+
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("Failed to sync course progress:", errorData.error);
+      console.error("Failed to sync course progress:", errorData);
+      console.error("Request body was:", courseProgress);
       return false;
     }
 
+    const successData = await response.json();
+    console.log("API success response:", successData);
     console.log(
       `Course progress synced for course ${courseId}, profile ${profileId}`
     );
@@ -112,19 +125,28 @@ export function debouncedSyncCourseProgress(
   courseId: string,
   delay: number = 2000
 ): void {
+  console.log("=== DEBOUNCED SYNC CALLED ===");
+  console.log("debouncedSyncCourseProgress called with:", { accountId, profileId, courseId, delay });
+  
   const key = `${accountId}_${profileId}_${courseId}`;
 
   // Clear existing timeout
   const existingTimeout = syncTimeouts.get(key);
   if (existingTimeout) {
+    console.log("Clearing existing timeout for key:", key);
     clearTimeout(existingTimeout);
   }
 
+  console.log(`Setting timeout for ${delay}ms to sync course progress...`);
+  
   // Set new timeout
   const timeout = setTimeout(async () => {
-    await syncCourseProgressToServer(accountId, profileId, courseId);
+    console.log("Timeout triggered, calling syncCourseProgressToServer...");
+    const result = await syncCourseProgressToServer(accountId, profileId, courseId);
+    console.log("syncCourseProgressToServer result:", result);
     syncTimeouts.delete(key);
   }, delay);
 
   syncTimeouts.set(key, timeout);
+  console.log("=== END DEBOUNCED SYNC ===");
 }

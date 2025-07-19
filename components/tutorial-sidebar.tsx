@@ -15,7 +15,7 @@ interface TutorialSidebarProps {
   collapsed?: boolean;
   onToggleCollapsed?: () => void;
   course?: {
-    id: number;
+    id: string;
     title: string;
     description: string;
     type: string;

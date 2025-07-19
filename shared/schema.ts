@@ -8,12 +8,12 @@ export interface User {
 }
 
 export interface Course {
-  id: number;
+  id: string;
   title: string;
   description: string;
   type: string; // 'canvas', 'printData', 'iframe'
   order: number;
-  requiredCourse: number | null;
+  requiredCourse: string | null;
 }
 
 export interface UserProgress {
@@ -28,7 +28,7 @@ export interface UserProgress {
 
 export interface Tutorial {
   id: number;
-  courseId: number;
+  courseId: string;
   title: string;
   description: string;
   content: string;
@@ -58,11 +58,11 @@ export const insertCourseSchema = z.object({
   description: z.string().min(1),
   type: z.string().min(1),
   order: z.number(),
-  requiredCourse: z.number().nullable()
+  requiredCourse: z.string().nullable()
 });
 
 export const insertTutorialSchema = z.object({
-  courseId: z.number(),
+  courseId: z.string(),
   title: z.string().min(1),
   description: z.string().min(1),
   content: z.string().min(1),

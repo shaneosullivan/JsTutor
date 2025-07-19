@@ -37,12 +37,12 @@ import {
 } from "@/lib/dataUtils";
 
 interface Course {
-  id: number;
+  id: string;
   title: string;
   description: string;
   type: string;
   order: number;
-  requiredCourse: number | null;
+  requiredCourse: string | null;
 }
 
 export default function Home() {
@@ -51,8 +51,8 @@ export default function Home() {
 
   const courses = useMemo(() => getCoursesForLocale("en"), []);
 
-  // Determine which course to display - defaults to JavaScript Basics (course ID 1)
-  const [currentCourseId, setCurrentCourseId] = useState<number>(1);
+  // Determine which course to display - defaults to JavaScript Basics (course ID "basics")
+  const [currentCourseId, setCurrentCourseId] = useState<string>("basics");
   const [currentCourse, setCurrentCourse] = useState<Course | null>(null);
 
   // Check for last visited course on component mount
@@ -70,18 +70,18 @@ export default function Home() {
     if (lastCourseId && courses.length > 0) {
       // Verify the course still exists
       const courseExists = courses.some(
-        (course) => course.id === parseInt(lastCourseId)
+        (course) => course.id === lastCourseId
       );
-      if (courseExists && parseInt(lastCourseId) !== 1) {
+      if (courseExists && lastCourseId !== "basics") {
         // Redirect to the last course if it's not the Basics course (which is already on home)
         router.push(`/course/${lastCourseId}`);
         return;
       }
       // Set current course if it's the Basics course
-      setCurrentCourseId(parseInt(lastCourseId));
+      setCurrentCourseId(lastCourseId);
     }
 
-    // If the Basics course (id=1) is selected, stay on home page
+    // If the Basics course (id="basics") is selected, stay on home page
   }, [courses, router]);
 
   // Update current course when courses are loaded
@@ -395,7 +395,7 @@ export default function Home() {
                   type: currentCourse.type
                 }
               : {
-                  id: 1,
+                  id: "basics",
                   title: "JavaScript Basics",
                   description: "Learn the fundamentals",
                   type: "printData"

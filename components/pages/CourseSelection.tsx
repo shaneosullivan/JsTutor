@@ -36,12 +36,12 @@ import { getCoursesForLocale } from "@/lib/dataUtils";
 import { fetchAndSyncChanges } from "@/lib/sync-changes";
 
 interface Course {
-  id: number;
+  id: string;
   title: string;
   description: string;
   type: string;
   order: number;
-  requiredCourse: number | null;
+  requiredCourse: string | null;
 }
 
 export default function CourseSelection() {
@@ -52,12 +52,12 @@ export default function CourseSelection() {
   const [hasActiveAccount, setHasActiveAccount] = useState(false);
 
   // Get completion status from profile storage
-  const getCompletedCourses = (): number[] => {
+  const getCompletedCourses = (): string[] => {
     if (typeof window === "undefined") return [];
     return getCompletedCoursesFromStorage();
   };
 
-  const [completedCourses, setCompletedCourses] = useState<number[]>([]);
+  const [completedCourses, setCompletedCourses] = useState<string[]>([]);
 
   // Sync changes from other clients
   const syncChanges = async () => {
@@ -119,7 +119,7 @@ export default function CourseSelection() {
 
   const isCourseCompleted = useMemo(
     () =>
-      (courseId: number): boolean => {
+      (courseId: string): boolean => {
         return completedCourses.includes(courseId);
       },
     [completedCourses]
@@ -262,7 +262,7 @@ export default function CourseSelection() {
                 >
                   {isUnlocked ? (
                     <Link
-                      href={course.id === 1 ? "/" : `/course/${course.id}`}
+                      href={course.id === "basics" ? "/" : `/course/${course.id}`}
                       onClick={() => {
                         if (typeof window !== "undefined") {
                           setProfileItem("lastCourseId", course.id.toString());

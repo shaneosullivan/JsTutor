@@ -17,7 +17,7 @@ interface Message {
 
 interface AiChatProps {
   tutorialId: number;
-  courseId?: number;
+  courseId?: string;
   code: string;
   onClose: () => void;
   isVisible: boolean;
