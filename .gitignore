@@ -11,3 +11,4 @@ config
 public/buildId.json
 jstutor.env
 firebase.json
+tsconfig.tsbuildinfo
