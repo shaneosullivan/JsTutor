@@ -121,7 +121,7 @@ type StoreChangeType = "account" | "profile" | "course";
 function getChangeDocId(
   accountId: string,
   type: StoreChangeType,
-  data?: { courseId?: number; profileId?: number }
+  data?: { courseId?: number; profileId?: string }
 ): string {
   let docId = `a_${accountId}_t_${type}`;
   if (type === "profile") {
@@ -144,7 +144,7 @@ export async function storeChange(
   accountId: string,
   type: StoreChangeType,
   clientId: string,
-  data?: { courseId?: number; profileId?: number }
+  data?: { courseId?: number; profileId?: string }
 ): Promise<string> {
   const firestore = getFirestoreDb();
 
@@ -186,7 +186,7 @@ export async function getChangesForAccount(
 ): Promise<Array<{
   type: "account" | "profile" | "course";
   clientId: string;
-  data?: { courseId?: number; profileId?: number };
+  data?: { courseId?: number; profileId?: string };
   timestamp: string;
 }>> {
   if (!serviceAccount) {
@@ -205,7 +205,7 @@ export async function getChangesForAccount(
   let changes = snapshot.docs.map((doc) => doc.data() as {
     type: "account" | "profile" | "course";
     clientId: string;
-    data?: { courseId?: number; profileId?: number };
+    data?: { courseId?: number; profileId?: string };
     timestamp: string;
   });
 
@@ -229,7 +229,7 @@ export async function getObjectsFromChanges(
   changes: Array<{
     type: "account" | "profile" | "course";
     clientId: string;
-    data?: { courseId?: number; profileId?: number };
+    data?: { courseId?: number; profileId?: string };
     timestamp: string;
   }>
 ): Promise<{
@@ -252,14 +252,12 @@ export async function getObjectsFromChanges(
         }
       } else if (change.type === "profile" && change.data?.profileId) {
         const profiles = await getProfilesByAccountId(accountId);
-        const profile = profiles.find(p => 
-          parseInt(p.id.replace(/\D/g, '')) === change.data!.profileId
-        );
+        const profile = profiles.find(p => p.id === change.data!.profileId);
         if (profile && !result.profile.find(p => p.id === profile.id)) {
           result.profile.push(profile);
         }
       } else if (change.type === "course" && change.data?.courseId && change.data?.profileId) {
-        const profileId = change.data.profileId.toString();
+        const profileId = change.data.profileId;
         const courseId = change.data.courseId.toString();
         const courseProgress = await getCourseProgressById(accountId, profileId, courseId);
         if (courseProgress && !result.course.find(c => 

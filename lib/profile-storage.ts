@@ -9,6 +9,20 @@ import {
   CourseProgress,
   TutorialCode
 } from "@/lib/types";
+
+// Import clearSyncCache but only for client-side use
+let clearSyncCache: (() => void) | null = null;
+let debouncedSyncCourseProgress: ((accountId: string, profileId: string, courseId: number, delay?: number) => void) | null = null;
+
+if (typeof window !== "undefined") {
+  import("@/lib/sync-changes").then((module) => {
+    clearSyncCache = module.clearSyncCache;
+  });
+  
+  import("@/lib/course-progress-sync").then((module) => {
+    debouncedSyncCourseProgress = module.debouncedSyncCourseProgress;
+  });
+}
 // Course progress is now computed from TinyBase tutorial data
 
 // Legacy interfaces for backward compatibility
@@ -610,6 +624,12 @@ export function createProfile(
   };
 
   store.setRow("profiles", newProfile.id, newProfile as any);
+  
+  // Clear sync cache on client-side write
+  if (typeof window !== "undefined" && clearSyncCache) {
+    clearSyncCache();
+  }
+  
   enableFirebaseAutoSave();
 
   // Force the Firebase persister to sync
@@ -631,6 +651,12 @@ export function updateProfile(updatedProfile: UserProfile): boolean {
     lastActive: new Date().toISOString()
   };
   store.setRow("profiles", updatedProfile.id, profileWithTimestamp as any);
+  
+  // Clear sync cache on client-side write
+  if (typeof window !== "undefined" && clearSyncCache) {
+    clearSyncCache();
+  }
+  
   enableFirebaseAutoSave();
 
   // Force the Firebase persister to sync
@@ -818,6 +844,11 @@ export function setUserCode(
 
   store.setRow("tutorialCode", tutorialCodeId, newTutorialRecord as any);
 
+  // Clear sync cache on client-side write
+  if (typeof window !== "undefined" && clearSyncCache) {
+    clearSyncCache();
+  }
+
   // Force the Firebase persister to sync
   if (firebasePersister) {
     firebasePersister.save?.();
@@ -868,6 +899,11 @@ export function setTutorialCompleted(
   }
 
   store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
+
+  // Clear sync cache on client-side write
+  if (typeof window !== "undefined" && clearSyncCache) {
+    clearSyncCache();
+  }
 
   // Force the Firebase persister to sync
   if (firebasePersister) {
@@ -977,6 +1013,11 @@ export function getCompletedCourses(): number[] {
 
 export function setCompletedCourses(courseIds: number[]): void {
   setProfileItemAsArray("completedCourses", courseIds);
+  
+  // Clear sync cache on client-side write
+  if (typeof window !== "undefined" && clearSyncCache) {
+    clearSyncCache();
+  }
 }
 
 // Account management functions
@@ -1056,6 +1097,67 @@ export function setActiveAccount(accountId: string): boolean {
   return true;
 }
 
+// Set up TinyBase listeners for automatic course progress sync
+function setupCourseProgressListeners(): void {
+  if (typeof window === "undefined") return;
+
+  // Listen for changes to tutorial code table - using cell listener for better control
+  store.addCellListener(
+    "tutorialCode",
+    null,
+    "code",
+    (store, tableId, rowId, cellId, newCell, oldCell, getCellChange) => {
+      // Only sync on client side and if we have the sync function
+      if (typeof window === "undefined" || !debouncedSyncCourseProgress) return;
+
+      const activeAccount = getActiveAccount();
+      if (!activeAccount) return;
+
+      const tutorialCode = store.getRow("tutorialCode", rowId) as unknown as TutorialCode;
+      if (!tutorialCode) return;
+
+      console.log(`Tutorial code changed for tutorial ${tutorialCode.tutorialId}, course ${tutorialCode.courseId}`);
+
+      // Debounced sync to server
+      debouncedSyncCourseProgress(
+        activeAccount.id,
+        tutorialCode.profileId,
+        tutorialCode.courseId,
+        2000 // 2 second delay
+      );
+    }
+  );
+
+  // Listen for tutorial completion changes
+  store.addCellListener(
+    "tutorialCode",
+    null,
+    "completed",
+    (store, tableId, rowId, cellId, newCell, oldCell, getCellChange) => {
+      // Only sync on client side and if we have the sync function
+      if (typeof window === "undefined" || !debouncedSyncCourseProgress) return;
+
+      const activeAccount = getActiveAccount();
+      if (!activeAccount) return;
+
+      const tutorialCode = store.getRow("tutorialCode", rowId) as unknown as TutorialCode;
+      if (!tutorialCode) return;
+
+      console.log(`Tutorial completion changed for tutorial ${tutorialCode.tutorialId}, course ${tutorialCode.courseId}, completed: ${newCell}`);
+
+      // Debounced sync to server
+      debouncedSyncCourseProgress(
+        activeAccount.id,
+        tutorialCode.profileId,
+        tutorialCode.courseId,
+        2000 // 2 second delay
+      );
+    }
+  );
+
+  console.log("Course progress TinyBase listeners set up");
+}
+
 // Utility functions
 export function getStore(): Store {
   return store;
@@ -1091,6 +1193,9 @@ export async function initializeProfileSystem(): Promise<void> {
     }
 
     ensureDefaultProfile();
+
+    // Set up TinyBase listeners for course progress sync
+    setupCourseProgressListeners();
 
     // Migrate existing tutorial code to the new table structure
     // migrateTutorialCodeToTable();

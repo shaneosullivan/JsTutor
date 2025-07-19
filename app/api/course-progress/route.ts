@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST: Create course progress
+// POST: Create or update course progress
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -82,79 +82,79 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const savedProgress = await createCourseProgress(progress);
+    const savedProgress = await updateCourseProgress(progress);
 
     // Log the change to Firebase
     try {
       await storeChange(progress.accountId, "course", clientId, {
         courseId: parseInt(progress.courseId),
-        profileId: parseInt(progress.profileId.replace(/\D/g, "")) || 0
+        profileId: progress.profileId
       });
     } catch (error) {
-      console.warn("Failed to log course progress creation change:", error);
+      console.warn("Failed to log course progress change:", error);
     }
 
     return NextResponse.json({
       success: true,
       data: savedProgress,
-      message: "Course progress created successfully"
+      message: "Course progress saved successfully"
     });
   } catch (error) {
-    console.error("Error creating course progress:", error);
+    console.error("Error saving course progress:", error);
     return NextResponse.json(
-      { error: "Failed to create course progress" },
+      { error: "Failed to save course progress" },
       { status: 500 }
     );
   }
 }
 
 // PUT: Update course progress
-export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const progress: CourseProgress = body;
+// export async function PUT(request: NextRequest) {
+//   try {
+//     const body = await request.json();
+//     const progress: CourseProgress = body;
 
-    if (!progress.accountId || !progress.profileId || !progress.courseId) {
-      return NextResponse.json(
-        { error: "Account ID, profile ID, and course ID are required" },
-        { status: 400 }
-      );
-    }
+//     if (!progress.accountId || !progress.profileId || !progress.courseId) {
+//       return NextResponse.json(
+//         { error: "Account ID, profile ID, and course ID are required" },
+//         { status: 400 }
+//       );
+//     }
 
-    // Extract clientId and fail if not found
-    const clientId = extractClientId(request);
-    if (!clientId) {
-      return NextResponse.json(
-        { error: "Client ID is required" },
-        { status: 400 }
-      );
-    }
+//     // Extract clientId and fail if not found
+//     const clientId = extractClientId(request);
+//     if (!clientId) {
+//       return NextResponse.json(
+//         { error: "Client ID is required" },
+//         { status: 400 }
+//       );
+//     }
 
-    const updatedProgress = await updateCourseProgress(progress);
+//     const updatedProgress = await updateCourseProgress(progress);
 
-    // Log the change to Firebase
-    try {
-      await storeChange(progress.accountId, "course", clientId, {
-        courseId: parseInt(progress.courseId),
-        profileId: parseInt(progress.profileId.replace(/\D/g, "")) || 0
-      });
-    } catch (error) {
-      console.warn("Failed to log course progress update change:", error);
-    }
+//     // Log the change to Firebase
+//     try {
+//       await storeChange(progress.accountId, "course", clientId, {
+//         courseId: parseInt(progress.courseId),
+//         profileId: parseInt(progress.profileId.replace(/\D/g, "")) || 0
+//       });
+//     } catch (error) {
+//       console.warn("Failed to log course progress update change:", error);
+//     }
 
-    return NextResponse.json({
-      success: true,
-      data: updatedProgress,
-      message: "Course progress updated successfully"
-    });
-  } catch (error) {
-    console.error("Error updating course progress:", error);
-    return NextResponse.json(
-      { error: "Failed to update course progress" },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json({
+//       success: true,
+//       data: updatedProgress,
+//       message: "Course progress updated successfully"
+//     });
+//   } catch (error) {
+//     console.error("Error updating course progress:", error);
+//     return NextResponse.json(
+//       { error: "Failed to update course progress" },
+//       { status: 500 }
+//     );
+//   }
+// }
 
 // DELETE: Delete course progress
 export async function DELETE(request: NextRequest) {

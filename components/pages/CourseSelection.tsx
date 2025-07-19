@@ -21,16 +21,19 @@ import {
   Globe,
   Layers,
   Database,
-  User
+  User,
+  RefreshCw
 } from "lucide-react";
 import GithubIcon from "@/components/GithubIcon";
 import ProfileAvatar from "@/components/ProfileAvatar";
 import Analytics from "@/components/Analytics";
 import {
+  getActiveAccount,
   getCompletedCourses as getCompletedCoursesFromStorage,
   setProfileItem
 } from "@/lib/profile-storage";
 import { getCoursesForLocale } from "@/lib/dataUtils";
+import { fetchAndSyncChanges } from "@/lib/sync-changes";
 
 interface Course {
   id: number;
@@ -43,7 +46,10 @@ interface Course {
 
 export default function CourseSelection() {
   const courses = useMemo(() => getCoursesForLocale("en"), []);
-  const isLoading = false;
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const [hasActiveAccount, setHasActiveAccount] = useState(false);
 
   // Get completion status from profile storage
   const getCompletedCourses = (): number[] => {
@@ -53,10 +59,50 @@ export default function CourseSelection() {
 
   const [completedCourses, setCompletedCourses] = useState<number[]>([]);
 
-  // Initialize state from profile storage after component mounts
+  // Sync changes from other clients
+  const syncChanges = async () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      const result = await fetchAndSyncChanges({
+        types: ["course", "profile"]
+      });
+
+      if (result.success) {
+        // Refresh completed courses after sync
+        setCompletedCourses(getCompletedCourses());
+
+        if (result.synced.courses > 0 || result.synced.profiles > 0) {
+          console.log(
+            `Synced ${result.synced.courses} course changes and ${result.synced.profiles} profile changes`
+          );
+        }
+      } else {
+        console.warn("Failed to sync changes:", result.error);
+      }
+    } catch (error) {
+      console.warn("Error syncing changes:", error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Initialize state from profile storage after component mounts and sync changes
   useEffect(() => {
-    setCompletedCourses(getCompletedCourses());
-    // Course progress is computed from tutorial data, no sync needed
+    const initialize = async () => {
+      setCompletedCourses(getCompletedCourses());
+      setIsLoading(false);
+
+      setHasActiveAccount(!!getActiveAccount());
+
+      // Sync changes from other clients
+      await syncChanges();
+    };
+
+    initialize();
   }, []);
 
   const isCourseUnlocked = useMemo(
@@ -123,16 +169,34 @@ export default function CourseSelection() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-4">
-            <Link href="/profiles">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
-              >
-                <User className="h-4 w-4" />
-                Manage Profiles
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/profiles">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-200"
+                >
+                  <User className="h-4 w-4" />
+                  Manage Profiles
+                </Button>
+              </Link>
+
+              {hasActiveAccount ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={syncChanges}
+                  disabled={isSyncing}
+                  className="flex items-center gap-2 hover:bg-green-50 hover:border-green-200"
+                  title="Sync latest changes from other devices"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`}
+                  />
+                  {isSyncing ? "Syncing..." : "Sync"}
+                </Button>
+              ) : null}
+            </div>
 
             <div className="flex items-center space-x-3">
               <a

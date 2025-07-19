@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Log the change to Firebase
     try {
       await storeChange(profile.accountId, "profile", clientId, { 
-        profileId: parseInt(profile.id.replace(/\D/g, '')) || 0 
+        profileId: profile.id 
       });
     } catch (error) {
       console.warn("Failed to log profile creation change:", error);
@@ -126,7 +126,7 @@ export async function PUT(request: NextRequest) {
     // Log the change to Firebase
     try {
       await storeChange(profile.accountId, "profile", clientId, { 
-        profileId: parseInt(profile.id.replace(/\D/g, '')) || 0 
+        profileId: profile.id 
       });
     } catch (error) {
       console.warn("Failed to log profile update change:", error);
@@ -177,7 +177,7 @@ export async function DELETE(request: NextRequest) {
     if (profileToDelete) {
       try {
         await storeChange(profileToDelete.accountId, "profile", clientId, { 
-          profileId: parseInt(profileToDelete.id.replace(/\D/g, '')) || 0 
+          profileId: profileToDelete.id 
         });
       } catch (error) {
         console.warn("Failed to log profile deletion change:", error);
