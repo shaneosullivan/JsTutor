@@ -262,7 +262,9 @@ export default function CourseSelection() {
                 >
                   {isUnlocked ? (
                     <Link
-                      href={course.id === "basics" ? "/" : `/course/${course.id}`}
+                      href={
+                        course.id === "basics" ? "/" : `/course/${course.id}`
+                      }
                       onClick={() => {
                         if (typeof window !== "undefined") {
                           setProfileItem("lastCourseId", course.id.toString());

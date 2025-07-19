@@ -69,9 +69,7 @@ export default function Home() {
 
     if (lastCourseId && courses.length > 0) {
       // Verify the course still exists
-      const courseExists = courses.some(
-        (course) => course.id === lastCourseId
-      );
+      const courseExists = courses.some((course) => course.id === lastCourseId);
       if (courseExists && lastCourseId !== "basics") {
         // Redirect to the last course if it's not the Basics course (which is already on home)
         router.push(`/course/${lastCourseId}`);

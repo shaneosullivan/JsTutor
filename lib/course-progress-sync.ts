@@ -80,11 +80,11 @@ export async function syncCourseProgressToServer(
     };
 
     console.log("Sending course progress to API:", courseProgress);
-    
+
     // Get client ID for the request
     const clientId = getClientId();
     console.log("Client ID for request:", clientId);
-    
+
     // Always use POST for both creating and updating
     const response = await fetch("/api/course-progress", {
       method: "POST",
@@ -126,8 +126,13 @@ export function debouncedSyncCourseProgress(
   delay: number = 2000
 ): void {
   console.log("=== DEBOUNCED SYNC CALLED ===");
-  console.log("debouncedSyncCourseProgress called with:", { accountId, profileId, courseId, delay });
-  
+  console.log("debouncedSyncCourseProgress called with:", {
+    accountId,
+    profileId,
+    courseId,
+    delay
+  });
+
   const key = `${accountId}_${profileId}_${courseId}`;
 
   // Clear existing timeout
@@ -138,11 +143,15 @@ export function debouncedSyncCourseProgress(
   }
 
   console.log(`Setting timeout for ${delay}ms to sync course progress...`);
-  
+
   // Set new timeout
   const timeout = setTimeout(async () => {
     console.log("Timeout triggered, calling syncCourseProgressToServer...");
-    const result = await syncCourseProgressToServer(accountId, profileId, courseId);
+    const result = await syncCourseProgressToServer(
+      accountId,
+      profileId,
+      courseId
+    );
     console.log("syncCourseProgressToServer result:", result);
     syncTimeouts.delete(key);
   }, delay);

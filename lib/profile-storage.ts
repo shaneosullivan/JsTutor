@@ -881,7 +881,11 @@ export function setTutorialCompleted(
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
 
   console.log("=== TUTORIAL COMPLETION DEBUG ===");
-  console.log("setTutorialCompleted called with:", { tutorialId, completed, courseId });
+  console.log("setTutorialCompleted called with:", {
+    tutorialId,
+    completed,
+    courseId
+  });
   console.log("Active profile:", activeProfile);
   console.log("Tutorial code ID:", tutorialCodeId);
 
@@ -1119,7 +1123,7 @@ export function setActiveAccount(accountId: string): boolean {
 // Set up TinyBase listeners for automatic course progress sync
 async function setupCourseProgressListeners(): Promise<void> {
   if (typeof window === "undefined") return;
-  
+
   // Ensure the modules are loaded before setting up listeners
   if (!debouncedSyncCourseProgress) {
     console.log("debouncedSyncCourseProgress not loaded yet, waiting...");
@@ -1132,7 +1136,7 @@ async function setupCourseProgressListeners(): Promise<void> {
       return;
     }
   }
-  
+
   if (!clearSyncCache) {
     console.log("clearSyncCache not loaded yet, waiting...");
     try {
@@ -1184,14 +1188,20 @@ async function setupCourseProgressListeners(): Promise<void> {
     "completed",
     (store, tableId, rowId, cellId, newCell, oldCell, getCellChange) => {
       console.log("=== TINYBASE LISTENER TRIGGERED ===");
-      console.log("Completion listener triggered for:", { tableId, rowId, cellId, newCell, oldCell });
-      
+      console.log("Completion listener triggered for:", {
+        tableId,
+        rowId,
+        cellId,
+        newCell,
+        oldCell
+      });
+
       // Only sync on client side and if we have the sync function
       if (typeof window === "undefined") {
         console.log("Skipping - not on client side");
         return;
       }
-      
+
       if (!debouncedSyncCourseProgress) {
         console.log("Skipping - debouncedSyncCourseProgress not available");
         return;
@@ -1233,22 +1243,31 @@ async function setupCourseProgressListeners(): Promise<void> {
   );
 
   console.log("Course progress TinyBase listeners set up");
-  
+
   // Add diagnostic function to verify listeners are working
   if (typeof window !== "undefined") {
     (window as any).debugTinyBaseListeners = () => {
       console.log("=== TINYBASE DIAGNOSTIC ===");
       console.log("Store exists:", !!store);
-      console.log("debouncedSyncCourseProgress exists:", !!debouncedSyncCourseProgress);
+      console.log(
+        "debouncedSyncCourseProgress exists:",
+        !!debouncedSyncCourseProgress
+      );
       console.log("clearSyncCache exists:", !!clearSyncCache);
       console.log("firebasePersister exists:", !!firebasePersister);
-      console.log("Current tutorial code table:", store.getTable("tutorialCode"));
+      console.log(
+        "Current tutorial code table:",
+        store.getTable("tutorialCode")
+      );
       console.log("Active account:", getActiveAccount());
       console.log("Active profile:", getActiveProfile());
       console.log("=== END DIAGNOSTIC ===");
     };
-    
-    (window as any).testTutorialCompletion = (tutorialId: number = 1, courseId: string = "1") => {
+
+    (window as any).testTutorialCompletion = (
+      tutorialId: number = 1,
+      courseId: string = "1"
+    ) => {
       console.log("Testing tutorial completion manually...");
       setTutorialCompleted(tutorialId, true, courseId);
     };
