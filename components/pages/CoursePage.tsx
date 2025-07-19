@@ -289,7 +289,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
             <p className="text-gray-600 mb-4">
               The course you're looking for doesn't exist.
             </p>
-            <Link href="/courses">
+            <Link href="/">
               <Button>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Courses
@@ -326,7 +326,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.push("/courses")}
+                onClick={() => router.push("/")}
                 className="text-slate-600 hover:text-slate-800"
               >
                 All Courses

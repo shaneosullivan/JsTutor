@@ -63,7 +63,7 @@ export default function Home() {
 
     if (!lastCourseId && courses.length > 0) {
       // No course selected, redirect to course selection
-      router.push("/courses");
+      router.push("/");
       return;
     }
 
