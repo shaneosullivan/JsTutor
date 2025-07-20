@@ -83,7 +83,9 @@ export default function CoursePage({ courseId }: CoursePageProps) {
 
   // Compute completed tutorials from TinyBase tutorial code data
   const completedTutorials = useMemo(() => {
-    if (!isClient) return []; // Return empty array on server to prevent hydration mismatch
+    if (!isClient) {
+      return [];
+    } // Return empty array on server to prevent hydration mismatch
 
     const tutorialCodes = Object.values(
       tutorialCodeTable

@@ -53,7 +53,9 @@ export default function CourseSelection() {
 
   // Get completion status from profile storage
   const getCompletedCourses = (): string[] => {
-    if (typeof window === "undefined") return [];
+    if (typeof window === "undefined") {
+      return [];
+    }
     return getCompletedCoursesFromStorage();
   };
 

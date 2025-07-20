@@ -1011,7 +1011,9 @@ export function getComputedCourseProgressList(
 }
 
 export function getCompletedCourses(): string[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") {
+    return [];
+  }
 
   try {
     // Import here to avoid circular dependencies
