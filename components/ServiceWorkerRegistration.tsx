@@ -7,7 +7,6 @@ export default function ServiceWorkerRegistration() {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       const registerSW = async () => {
         try {
-          console.log("Registering service worker...");
           const registration = await navigator.serviceWorker.register("/sw.js");
 
           registration.addEventListener("updatefound", () => {
@@ -27,8 +26,6 @@ export default function ServiceWorkerRegistration() {
               });
             }
           });
-
-          console.log("Service Worker registered successfully:", registration);
         } catch (error) {
           console.error("Service Worker registration failed:", error);
         }

@@ -1,8 +1,7 @@
 "use client";
 
-// Removed useQuery import - now using local utility functions
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,17 +17,13 @@ import TutorialContent from "@/components/tutorial-content";
 import TutorialSidebar from "@/components/tutorial-sidebar";
 import ApiDocumentation from "@/components/api-documentation";
 import {
-  getCompletedTutorials,
-  setCompletedTutorials as setCompletedTutorialsInStorage,
-  getCurrentTutorial,
-  setCurrentTutorial as setCurrentTutorialInStorage,
+  setTutorialCompleted,
+  setProfileItem,
   getUserCode,
   setUserCode as setUserCodeInStorage,
-  getCompletedCourses,
-  setCompletedCourses as setCompletedCoursesInStorage,
-  getProfileItem,
-  setProfileItem
+  getCurrentTutorial
 } from "@/lib/profile-storage";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 import {
   getCoursesForLocale,
   getTutorialsForCourse,
@@ -41,6 +36,9 @@ import ProfileAvatar from "@/components/ProfileAvatar";
 import { useKeyboard } from "@/components/KeyboardProvider";
 import { useTutorial } from "@/hooks/use-course-tutorial";
 import Analytics from "@/components/Analytics";
+import { useTable, useValues } from "tinybase/ui-react";
+import { Inspector } from "tinybase/ui-react-inspector";
+import type { TutorialCode } from "@/lib/types";
 
 // Using LocalizedTutorial from dataUtils instead of local interface
 
@@ -51,30 +49,29 @@ interface CoursePageProps {
 export default function CoursePage({ courseId }: CoursePageProps) {
   const router = useRouter();
   const keyboard = useKeyboard();
-
-  // Local storage hooks for course-specific progress
-  const getCompletedTutorialsFromStorage = (): number[] => {
-    if (typeof window === "undefined") return [];
-    return getCompletedTutorials(courseId);
-  };
-
-  const getCurrentTutorialFromStorage = (): number => {
-    if (typeof window === "undefined") return 1;
-    return getCurrentTutorial(courseId) || 1;
-  };
-
-  const getHighestTutorialReached = (): number => {
-    if (typeof window === "undefined") return 1;
-    const saved = getProfileItem(`highestTutorial_course_${courseId}`);
-    return saved ? parseInt(saved) : 1;
-  };
-
-  const [completedTutorials, setCompletedTutorials] = useState<number[]>([]);
-  const [currentTutorialOrder, setCurrentTutorialOrder] = useState<number>(1);
-  const [highestTutorialReached, setHighestTutorialReached] =
-    useState<number>(1);
-  const [hasRestoredFromStorage, setHasRestoredFromStorage] = useState(false);
   const [showReferenceDialog, setShowReferenceDialog] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Get reactive data from TinyBase using hooks
+  const tutorialCodeTable = useTable("tutorialCode");
+  const values = useValues();
+
+  // Get current profile reactively
+  const activeProfile = useActiveProfile();
+
+  // Track client-side mounting to prevent hydration mismatches
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const currentTutorialOrder = getCurrentTutorial(courseId) || 1;
+
+  // Highest tutorial reached from profile settings using useValues
+  const highestTutorialValue = values[
+    `highestTutorial_course_${courseId}`
+  ] as string;
+  const highestTutorialReached =
+    isClient && highestTutorialValue ? parseInt(highestTutorialValue) : 1;
 
   // Memoized course data from local utils
   const courses = useMemo(() => getCoursesForLocale("en"), []);
@@ -84,102 +81,79 @@ export default function CoursePage({ courseId }: CoursePageProps) {
   );
   const tutorials = useMemo(() => getTutorialsForCourse(courseId), [courseId]);
 
-  // Loading states no longer needed since we use local utils
+  // Compute completed tutorials from TinyBase tutorial code data
+  const completedTutorials = useMemo(() => {
+    if (!isClient) return []; // Return empty array on server to prevent hydration mismatch
 
-  // Course progress is computed from tutorial data, no sync needed
-
-  // Initialize state from profile storage after component mounts
-  useEffect(() => {
-    if (tutorials.length > 0 && !hasRestoredFromStorage) {
-      const restoredCompleted = getCompletedTutorialsFromStorage();
-      const restoredCurrent = getCurrentTutorialFromStorage();
-      const restoredHighest = getHighestTutorialReached();
-
-      // Mark all tutorials below the highest reached as completed
-      const tutorialsToComplete = tutorials
-        .filter((t) => t.order < restoredHighest)
-        .map((t) => t.id);
-
-      const allCompleted = Array.from(
-        new Set([...restoredCompleted, ...tutorialsToComplete])
-      );
-
-      setCompletedTutorials(allCompleted);
-      setCurrentTutorialOrder(restoredCurrent);
-      setHighestTutorialReached(restoredHighest);
-      setHasRestoredFromStorage(true);
-    }
-  }, [tutorials.length, hasRestoredFromStorage, courseId]);
+    const tutorialCodes = Object.values(
+      tutorialCodeTable
+    ) as unknown as TutorialCode[];
+    return tutorialCodes
+      .filter(
+        (tc) =>
+          tc &&
+          tc.profileId === activeProfile.id &&
+          tc.courseId === courseId &&
+          tc.completed
+      )
+      .map((tc) => tc.tutorialId);
+  }, [tutorialCodeTable, activeProfile.id, courseId, isClient]);
 
   const { userCode, setUserCode, sidebarCollapsed, setSidebarCollapsed } =
     useTutorial();
 
-  // Save progress to profile storage
-  useEffect(() => {
-    if (typeof window !== "undefined" && hasRestoredFromStorage) {
-      setCompletedTutorialsInStorage(courseId, completedTutorials);
-    }
-  }, [completedTutorials, courseId, hasRestoredFromStorage]);
+  // Tutorial completion logic using TinyBase
+  const markTutorialComplete = useCallback(
+    (tutorialOrder: number) => {
+      const tutorial = tutorials.find((t) => t.order === tutorialOrder);
+      if (!tutorial) return;
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && hasRestoredFromStorage) {
-      setCurrentTutorialInStorage(courseId, currentTutorialOrder);
+      // Mark tutorial as completed in TinyBase
+      setTutorialCompleted(tutorial.id, true, courseId);
+
       // Update highest tutorial reached if current is higher
-      if (currentTutorialOrder > highestTutorialReached) {
-        setHighestTutorialReached(currentTutorialOrder);
+      if (tutorialOrder > highestTutorialReached) {
+        setProfileItem(
+          `highestTutorial_course_${courseId}`,
+          tutorialOrder.toString()
+        );
       }
-    }
-  }, [
-    currentTutorialOrder,
-    courseId,
-    hasRestoredFromStorage,
-    highestTutorialReached
-  ]);
 
-  // Save highest tutorial reached to profile storage
-  useEffect(() => {
-    if (typeof window !== "undefined" && hasRestoredFromStorage) {
-      setProfileItem(
-        `highestTutorial_course_${courseId}`,
-        highestTutorialReached.toString()
-      );
-    }
-  }, [highestTutorialReached, courseId, hasRestoredFromStorage]);
-
-  // Tutorial completion logic
-  const markTutorialComplete = (tutorialOrder: number) => {
-    const tutorial = tutorials.find((t) => t.order === tutorialOrder);
-    if (!tutorial) return;
-
-    if (!completedTutorials.includes(tutorial.id)) {
-      setCompletedTutorials((prev) => [...prev, tutorial.id]);
-    }
-
-    // Check if this is the last tutorial in the course
-    const isLastTutorial =
-      tutorials.length > 0
-        ? tutorialOrder === Math.max(...tutorials.map((t) => t.order))
-        : false;
-    if (isLastTutorial && typeof window !== "undefined") {
-      // Mark course as completed
-      const completedCourses = getCompletedCourses();
-      if (!completedCourses.includes(courseId)) {
-        setCompletedCoursesInStorage([...completedCourses, courseId]);
+      // Check if this is the last tutorial in the course
+      const isLastTutorial =
+        tutorials.length > 0
+          ? tutorialOrder === Math.max(...tutorials.map((t) => t.order))
+          : false;
+      if (isLastTutorial) {
+        // Mark course as completed - this will be handled by the course progress sync
+        // The completed course tracking is computed from tutorial completion
       }
-    }
-  };
+    },
+    [tutorials, courseId, highestTutorialReached]
+  );
 
-  const goToNextTutorial = () => {
+  const goToNextTutorial = useCallback(() => {
     const nextOrder = currentTutorialOrder + 1;
     const nextTutorial = tutorials.find((t) => t.order === nextOrder);
     if (nextTutorial) {
-      setCurrentTutorialOrder(nextOrder);
+      setProfileItem(
+        `currentTutorial_course_${courseId}`,
+        nextOrder.toString()
+      );
+      // The listener will update the state automatically
     }
-  };
+  }, [currentTutorialOrder, tutorials, courseId]);
 
-  const selectTutorial = (tutorial: LocalizedTutorial) => {
-    setCurrentTutorialOrder(tutorial.order);
-  };
+  const selectTutorial = useCallback(
+    (tutorial: LocalizedTutorial) => {
+      setProfileItem(
+        `currentTutorial_course_${courseId}`,
+        tutorial.order.toString()
+      );
+      // The listener will update the state automatically
+    },
+    [courseId]
+  );
 
   // Check if tutorial is unlocked
   const isTutorialUnlocked = (tutorial: LocalizedTutorial): boolean => {
@@ -198,24 +172,20 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     return prevTutorial ? completedTutorials.includes(prevTutorial.id) : false;
   };
 
-  const currentTutorial = useMemo(
-    () => tutorials.find((t) => t.order === currentTutorialOrder),
-    [tutorials, currentTutorialOrder]
-  );
+  const currentTutorial = useMemo(() => {
+    if (!isClient) return tutorials[0]; // Return first tutorial on server to prevent hydration mismatch
+    return tutorials.find((t) => t.order === currentTutorialOrder);
+  }, [tutorials, currentTutorialOrder, isClient]);
 
-  const isCurrentCompleted = useMemo(
-    () =>
-      currentTutorial ? completedTutorials.includes(currentTutorial.id) : false,
-    [currentTutorial, completedTutorials]
-  );
+  const isCurrentCompleted = useMemo(() => {
+    if (!isClient || !currentTutorial) return false; // Return false on server to prevent hydration mismatch
+    return completedTutorials.includes(currentTutorial.id);
+  }, [currentTutorial, completedTutorials, isClient]);
 
-  const hasNextTutorial = useMemo(
-    () =>
-      tutorials.length > 0
-        ? currentTutorialOrder < Math.max(...tutorials.map((t) => t.order))
-        : false,
-    [tutorials, currentTutorialOrder]
-  );
+  const hasNextTutorial = useMemo(() => {
+    if (!isClient || tutorials.length === 0) return false; // Return false on server to prevent hydration mismatch
+    return currentTutorialOrder < Math.max(...tutorials.map((t) => t.order));
+  }, [tutorials, currentTutorialOrder, isClient]);
 
   // Load starter code when tutorial changes
   useEffect(() => {
@@ -243,22 +213,24 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     }
   }, [currentTutorial, userCode, courseId]);
 
-  const progressPercentage = useMemo(
-    () =>
-      tutorials.length > 0
-        ? (completedTutorials.length / tutorials.length) * 100
-        : 0,
-    [tutorials.length, completedTutorials.length]
-  );
+  const progressPercentage = useMemo(() => {
+    if (!isClient || tutorials.length === 0) return 0; // Return 0 on server to prevent hydration mismatch
+    return (completedTutorials.length / tutorials.length) * 100;
+  }, [tutorials.length, completedTutorials.length, isClient]);
 
-  const sidebarTutorials = useMemo(
-    () =>
-      transformTutorials(
+  const sidebarTutorials = useMemo(() => {
+    if (!isClient) {
+      // Return tutorials with all locked on server to prevent hydration mismatch
+      return transformTutorials(
         tutorials.sort((a, b) => a.order - b.order),
-        (t) => ({ isLocked: !isTutorialUnlocked(t) })
-      ),
-    [tutorials, completedTutorials, highestTutorialReached]
-  );
+        () => ({ isLocked: true })
+      );
+    }
+    return transformTutorials(
+      tutorials.sort((a, b) => a.order - b.order),
+      (t) => ({ isLocked: !isTutorialUnlocked(t) })
+    );
+  }, [tutorials, completedTutorials, highestTutorialReached, isClient]);
 
   const sidebarCurrentTutorial = useMemo(
     () =>
@@ -267,14 +239,6 @@ export default function CoursePage({ courseId }: CoursePageProps) {
         : null,
     [currentTutorial]
   );
-
-  if (!hasRestoredFromStorage) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
-      </div>
-    );
-  }
 
   if (!course) {
     return (
@@ -304,11 +268,11 @@ export default function CoursePage({ courseId }: CoursePageProps) {
   return (
     <div
       className="bg-slate-50 flex flex-col keyboard-stable"
-      style={{ height: keyboard.visibleHeight }}
+      style={{ height: isClient ? keyboard.visibleHeight : "100vh" }}
     >
       {/* Header */}
       <header
-        className={`bg-white shadow-sm border-b border-slate-200 flex-shrink-0 keyboard-responsive-header keyboard-transition ${keyboard.isVisible ? "keyboard-hidden" : ""}`}
+        className={`bg-white shadow-sm border-b border-slate-200 flex-shrink-0 keyboard-responsive-header keyboard-transition ${isClient && keyboard.isVisible ? "keyboard-hidden" : ""}`}
       >
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -334,6 +298,8 @@ export default function CoursePage({ courseId }: CoursePageProps) {
             </div>
 
             <div className="flex items-center space-x-3">
+              {process.env.NODE_ENV === "development" && <Inspector />}
+
               <div className="flex items-center space-x-1">
                 <span className="text-sm text-slate-600">Progress:</span>
                 <Progress

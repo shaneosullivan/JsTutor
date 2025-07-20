@@ -532,7 +532,7 @@ async function initializeFirebasePersister(
 }
 
 // Profile management functions
-function ensureDefaultProfile(): void {
+export function ensureDefaultProfile(): void {
   if (typeof window === "undefined") return;
 
   // Don't create default profile if we're currently loading from Firebase
@@ -847,8 +847,6 @@ export function setUserCode(
           lastAccessed: new Date().toISOString()
         };
 
-  console.log("setUserCode", newTutorialRecord);
-
   store.setRow("tutorialCode", tutorialCodeId, newTutorialRecord as any);
 
   // Clear sync cache on client-side write
@@ -880,15 +878,6 @@ export function setTutorialCompleted(
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
 
-  console.log("=== TUTORIAL COMPLETION DEBUG ===");
-  console.log("setTutorialCompleted called with:", {
-    tutorialId,
-    completed,
-    courseId
-  });
-  console.log("Active profile:", activeProfile);
-  console.log("Tutorial code ID:", tutorialCodeId);
-
   let tutorialCode = store.getRow(
     "tutorialCode",
     tutorialCodeId
@@ -912,26 +901,17 @@ export function setTutorialCompleted(
     };
   }
 
-  console.log("Storing tutorial code in TinyBase:", tutorialCode);
   store.setRow("tutorialCode", tutorialCodeId, tutorialCode as any);
-  console.log("Tutorial code stored successfully");
 
   // Clear sync cache on client-side write
   if (typeof window !== "undefined" && clearSyncCache) {
-    console.log("Clearing sync cache...");
     clearSyncCache();
-  } else {
-    console.log("clearSyncCache not available or not on client side");
   }
 
   // Force the Firebase persister to sync
   if (firebasePersister) {
-    console.log("Triggering Firebase persister save...");
     firebasePersister.save?.();
-  } else {
-    console.log("Firebase persister not available");
   }
-  console.log("=== END TUTORIAL COMPLETION DEBUG ===");
 }
 
 export function getTutorialCodesForProfile(profileId: string): TutorialCode[] {
@@ -1126,11 +1106,9 @@ async function setupCourseProgressListeners(): Promise<void> {
 
   // Ensure the modules are loaded before setting up listeners
   if (!debouncedSyncCourseProgress) {
-    console.log("debouncedSyncCourseProgress not loaded yet, waiting...");
     try {
       const module = await import("@/lib/course-progress-sync");
       debouncedSyncCourseProgress = module.debouncedSyncCourseProgress;
-      console.log("debouncedSyncCourseProgress loaded successfully");
     } catch (error) {
       console.error("Failed to load course-progress-sync module:", error);
       return;
@@ -1138,11 +1116,9 @@ async function setupCourseProgressListeners(): Promise<void> {
   }
 
   if (!clearSyncCache) {
-    console.log("clearSyncCache not loaded yet, waiting...");
     try {
       const module = await import("@/lib/sync-changes");
       clearSyncCache = module.clearSyncCache;
-      console.log("clearSyncCache loaded successfully");
     } catch (error) {
       console.error("Failed to load sync-changes module:", error);
       return;
@@ -1167,10 +1143,6 @@ async function setupCourseProgressListeners(): Promise<void> {
       ) as unknown as TutorialCode;
       if (!tutorialCode) return;
 
-      console.log(
-        `Tutorial code changed for tutorial ${tutorialCode.tutorialId}, course ${tutorialCode.courseId}`
-      );
-
       // Debounced sync to server
       debouncedSyncCourseProgress(
         activeAccount.id,
@@ -1187,29 +1159,17 @@ async function setupCourseProgressListeners(): Promise<void> {
     null,
     "completed",
     (store, tableId, rowId, cellId, newCell, oldCell, getCellChange) => {
-      console.log("=== TINYBASE LISTENER TRIGGERED ===");
-      console.log("Completion listener triggered for:", {
-        tableId,
-        rowId,
-        cellId,
-        newCell,
-        oldCell
-      });
-
       // Only sync on client side and if we have the sync function
       if (typeof window === "undefined") {
-        console.log("Skipping - not on client side");
         return;
       }
 
       if (!debouncedSyncCourseProgress) {
-        console.log("Skipping - debouncedSyncCourseProgress not available");
         return;
       }
 
       const activeAccount = getActiveAccount();
       if (!activeAccount) {
-        console.log("Skipping - no active account");
         return;
       }
 
@@ -1218,18 +1178,8 @@ async function setupCourseProgressListeners(): Promise<void> {
         rowId
       ) as unknown as TutorialCode;
       if (!tutorialCode) {
-        console.log("Skipping - tutorial code not found");
         return;
       }
-
-      console.log(
-        `Tutorial completion changed for tutorial ${tutorialCode.tutorialId}, course ${tutorialCode.courseId}, completed: ${newCell}`
-      );
-      console.log("Calling debouncedSyncCourseProgress with:", {
-        accountId: activeAccount.id,
-        profileId: tutorialCode.profileId,
-        courseId: tutorialCode.courseId
-      });
 
       // Debounced sync to server
       debouncedSyncCourseProgress(
@@ -1238,37 +1188,17 @@ async function setupCourseProgressListeners(): Promise<void> {
         tutorialCode.courseId,
         2000 // 2 second delay
       );
-      console.log("=== END TINYBASE LISTENER ===");
     }
   );
 
-  console.log("Course progress TinyBase listeners set up");
-
   // Add diagnostic function to verify listeners are working
   if (typeof window !== "undefined") {
-    (window as any).debugTinyBaseListeners = () => {
-      console.log("=== TINYBASE DIAGNOSTIC ===");
-      console.log("Store exists:", !!store);
-      console.log(
-        "debouncedSyncCourseProgress exists:",
-        !!debouncedSyncCourseProgress
-      );
-      console.log("clearSyncCache exists:", !!clearSyncCache);
-      console.log("firebasePersister exists:", !!firebasePersister);
-      console.log(
-        "Current tutorial code table:",
-        store.getTable("tutorialCode")
-      );
-      console.log("Active account:", getActiveAccount());
-      console.log("Active profile:", getActiveProfile());
-      console.log("=== END DIAGNOSTIC ===");
-    };
+    (window as any).debugTinyBaseListeners = () => {};
 
     (window as any).testTutorialCompletion = (
       tutorialId: number = 1,
       courseId: string = "1"
     ) => {
-      console.log("Testing tutorial completion manually...");
       setTutorialCompleted(tutorialId, true, courseId);
     };
   }
@@ -1397,3 +1327,4 @@ export async function syncIfNewer(): Promise<boolean> {
 export function isValidRecord(obj: any): boolean {
   return !!obj && Object.keys(obj).length > 0;
 }
+export { store };

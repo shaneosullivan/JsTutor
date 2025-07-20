@@ -38,7 +38,6 @@ import IconSelector from "@/components/profile-icons/IconSelector";
 import { getProfileIcon } from "@/components/profile-icons/ProfileIcons";
 import {
   getAllProfiles,
-  getActiveProfile,
   setActiveProfile,
   createProfile,
   updateProfile,
@@ -46,6 +45,7 @@ import {
   getStore,
   type Account
 } from "@/lib/profile-storage";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { type UserProfile } from "@/lib/types";
 import GoogleSignIn from "@/components/GoogleSignIn";
 
@@ -58,9 +58,9 @@ export default function ProfilesPageClient({
 }: ProfilesPageClientProps) {
   const router = useRouter();
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
-  const [activeProfile, setActiveProfileState] = useState<UserProfile | null>(
-    null
-  );
+
+  // Get active profile reactively
+  const activeProfile = useActiveProfile();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -81,9 +81,7 @@ export default function ProfilesPageClient({
     const loadProfiles = () => {
       try {
         const loadedProfiles = getAllProfiles();
-        const currentActive = getActiveProfile();
         setProfiles(loadedProfiles);
-        setActiveProfileState(currentActive);
         setIsProfilesLoaded(true);
       } catch (error) {
         console.error("Failed to load profiles:", error);
@@ -116,9 +114,8 @@ export default function ProfilesPageClient({
   const refreshProfiles = () => {
     try {
       const loadedProfiles = getAllProfiles();
-      const currentActive = getActiveProfile();
       setProfiles(loadedProfiles);
-      setActiveProfileState(currentActive);
+      // activeProfile will update automatically via the hook
     } catch (error) {
       console.error("Failed to refresh profiles:", error);
     }
@@ -159,10 +156,7 @@ export default function ProfilesPageClient({
     const updatedProfiles = getAllProfiles();
     setProfiles(updatedProfiles);
 
-    // Update active profile state if we edited the active profile
-    if (activeProfile?.id === updatedProfile.id) {
-      setActiveProfileState(updatedProfile);
-    }
+    // activeProfile will update automatically via the hook if we edited the active profile
 
     setIsEditDialogOpen(false);
     setEditingProfile(null);
@@ -180,9 +174,8 @@ export default function ProfilesPageClient({
       const wasDeleted = await deleteProfile(deletingProfile.id);
       if (wasDeleted) {
         const updatedProfiles = getAllProfiles();
-        const currentActive = getActiveProfile();
         setProfiles(updatedProfiles);
-        setActiveProfileState(currentActive);
+        // activeProfile will update automatically via the hook
       } else {
         // Handle deletion failure - could show an error message
         console.error("Failed to delete profile");
@@ -199,7 +192,7 @@ export default function ProfilesPageClient({
 
   const handleActivateProfile = (profile: UserProfile) => {
     setActiveProfile(profile.id);
-    setActiveProfileState(profile);
+    // activeProfile will update automatically via the hook
   };
 
   const openDeleteDialog = (profile: UserProfile) => {

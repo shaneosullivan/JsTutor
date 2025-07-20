@@ -5,6 +5,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { KeyboardProvider } from "@/components/KeyboardProvider";
 import { initializeClientId } from "@/lib/client-id";
+import { Provider } from "tinybase/ui-react";
+import { store } from "@/lib/profile-storage";
 
 export default function ClientProvider({
   children
@@ -18,7 +20,9 @@ export default function ClientProvider({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <KeyboardProvider>{children}</KeyboardProvider>
+      <Provider store={store}>
+        <KeyboardProvider>{children}</KeyboardProvider>
+      </Provider>
     </QueryClientProvider>
   );
 }

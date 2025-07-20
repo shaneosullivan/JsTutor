@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { User } from "lucide-react";
-import { getActiveProfile } from "@/lib/profile-storage";
+import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { getProfileIcon } from "@/components/profile-icons/ProfileIcons";
 
 interface ProfileAvatarProps {
@@ -15,29 +15,17 @@ export default function ProfileAvatar({
   className = "",
   size = 32
 }: ProfileAvatarProps) {
-  const [profileIcon, setProfileIcon] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
-  const [profileName, setProfileName] = useState("");
+
+  // Get active profile reactively
+  const activeProfile = useActiveProfile();
+  const profileIcon = activeProfile?.icon || "short_brown";
+  const profileName = activeProfile?.name || "";
 
   // Track client-side mounting to prevent hydration mismatches
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  useEffect(() => {
-    if (!isClient) {
-      return;
-    }
-
-    try {
-      const activeProfile = getActiveProfile();
-      setProfileIcon(activeProfile?.icon || "short_brown");
-      setProfileName(activeProfile?.name || "");
-    } catch (error) {
-      console.warn("Failed to get active profile for avatar:", error);
-      setProfileIcon("short_brown");
-    }
-  }, [isClient]);
 
   const renderIcon = () => {
     if (!isClient || !profileIcon) {
@@ -82,7 +70,9 @@ export default function ProfileAvatar({
       href="/profiles"
       className={`block hover:scale-110 transition-transform duration-200 ${className}`}
       title={
-        profileName ? `${profileName}: Manage Profiles` : "Manage Profiles"
+        isClient && profileName
+          ? `${profileName}: Manage Profiles`
+          : "Manage Profiles"
       }
     >
       {renderIcon()}

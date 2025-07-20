@@ -1,7 +1,6 @@
 "use client";
 
 import { Check, Lock, ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";

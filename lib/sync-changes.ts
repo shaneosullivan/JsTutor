@@ -45,7 +45,6 @@ export function clearSyncCache(): void {
 
   const cache = getCache();
   cache.clear();
-  console.log("Sync cache cleared due to write operation");
 }
 
 // Clean expired entries from cache - client side only
@@ -117,7 +116,6 @@ async function fetchChangesFromOtherClients(
       existingEntry &&
       Date.now() - existingEntry.timestamp < CACHE_DURATION
     ) {
-      console.log(`Returning cached request for key: ${cacheKey}`);
       return existingEntry.promise;
     }
 
