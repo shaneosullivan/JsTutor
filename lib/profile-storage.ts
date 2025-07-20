@@ -1011,15 +1011,38 @@ export function getComputedCourseProgressList(
 }
 
 export function getCompletedCourses(): string[] {
-  return getProfileItemAsArray("completedCourses");
-}
+  if (typeof window === "undefined") return [];
 
-export function setCompletedCourses(courseIds: string[]): void {
-  setProfileItemAsArray("completedCourses", courseIds);
+  try {
+    // Import here to avoid circular dependencies
+    const {
+      getCoursesForLocale,
+      getTutorialsForCourse
+    } = require("@/lib/dataUtils");
 
-  // Clear sync cache on client-side write
-  if (typeof window !== "undefined" && clearSyncCache) {
-    clearSyncCache();
+    const courses = getCoursesForLocale("en");
+    const completedCourses: string[] = [];
+
+    for (const course of courses) {
+      const tutorials = getTutorialsForCourse(course.id);
+      if (tutorials.length === 0) continue;
+
+      // Find the last tutorial by order
+      const lastTutorial = tutorials.reduce((latest: any, tutorial: any) =>
+        tutorial.order > latest.order ? tutorial : latest
+      );
+
+      // Check if the last tutorial is completed
+      const tutorialCode = getTutorialCode(lastTutorial.id);
+      if (tutorialCode && tutorialCode.completed) {
+        completedCourses.push(course.id);
+      }
+    }
+
+    return completedCourses;
+  } catch (error) {
+    console.error("Error calculating completed courses:", error);
+    return [];
   }
 }
 

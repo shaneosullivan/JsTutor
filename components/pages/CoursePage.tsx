@@ -118,18 +118,8 @@ export default function CoursePage({ courseId }: CoursePageProps) {
           tutorialOrder.toString()
         );
       }
-
-      // Check if this is the last tutorial in the course
-      const isLastTutorial =
-        tutorials.length > 0
-          ? tutorialOrder === Math.max(...tutorials.map((t) => t.order))
-          : false;
-      if (isLastTutorial) {
-        // Mark course as completed - this will be handled by the course progress sync
-        // The completed course tracking is computed from tutorial completion
-      }
     },
-    [tutorials, courseId, highestTutorialReached]
+    [tutorials, courseId, highestTutorialReached, activeProfile.id]
   );
 
   const goToNextTutorial = useCallback(() => {
