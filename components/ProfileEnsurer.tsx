@@ -24,7 +24,9 @@ export default function ProfileEnsurer({ children }: ProfileEnsurerProps) {
 
   useEffect(() => {
     // Only run on client side after component has mounted
-    if (!isClient) return;
+    if (!isClient) {
+      return;
+    }
 
     const initializeProfiles = async () => {
       try {

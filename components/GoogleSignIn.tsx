@@ -79,7 +79,9 @@ export default function GoogleSignIn({
   }, []);
 
   const initializeGoogle = () => {
-    if (!window.google?.accounts) return;
+    if (!window.google?.accounts) {
+      return;
+    }
 
     // const clientId = process.env.GOOGLE_CLIENT_ID;
     if (!clientId || clientId === "YOUR_GOOGLE_CLIENT_ID") {
@@ -193,7 +195,9 @@ export default function GoogleSignIn({
   };
 
   const handleSignIn = () => {
-    if (!window.google?.accounts || !isConfigured) return;
+    if (!window.google?.accounts || !isConfigured) {
+      return;
+    }
 
     setIsLoading(true);
 

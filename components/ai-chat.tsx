@@ -245,7 +245,9 @@ export default function AiChat({
   };
 
   const handleSendMessage = () => {
-    if (!inputMessage.trim() || isLoading) return;
+    if (!inputMessage.trim() || isLoading) {
+      return;
+    }
 
     const userMessage: Message = {
       role: "user",

@@ -126,7 +126,9 @@ export default function ProfilesPageClient({
   };
 
   const handleCreateProfile = () => {
-    if (!profileName.trim()) return;
+    if (!profileName.trim()) {
+      return;
+    }
 
     createProfile(profileName.trim(), selectedIcon);
     const updatedProfiles = getAllProfiles();
@@ -144,7 +146,9 @@ export default function ProfilesPageClient({
   };
 
   const handleUpdateProfile = () => {
-    if (!editingProfile || !profileName.trim()) return;
+    if (!editingProfile || !profileName.trim()) {
+      return;
+    }
 
     const updatedProfile = {
       ...editingProfile,

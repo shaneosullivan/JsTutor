@@ -49,10 +49,14 @@ export default function DrawingCanvas({
     // Debounce code execution to prevent errors while typing
     const timer = setTimeout(() => {
       const canvas = canvasRef.current;
-      if (!canvas) return;
+      if (!canvas) {
+        return;
+      }
 
       const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+      if (!ctx) {
+        return;
+      }
 
       // Cleanup previous timers and event listeners
       cleanupAll();

@@ -115,7 +115,9 @@ export function KeyboardProvider({ children }: KeyboardProviderProps) {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length !== 1) return;
+      if (e.touches.length !== 1) {
+        return;
+      }
 
       const touch = e.touches[0];
       const deltaY = touch.clientY - startY;

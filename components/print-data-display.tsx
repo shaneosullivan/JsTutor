@@ -201,13 +201,21 @@ export default function PrintDataDisplay({
   }, [outputItems]);
 
   const formatData = (data: any): string => {
-    if (data === null) return "null";
-    if (data === undefined) return "undefined";
-    if (typeof data === "string") return data;
-    if (typeof data === "number" || typeof data === "boolean")
+    if (data === null) {
+      return "null";
+    }
+    if (data === undefined) {
+      return "undefined";
+    }
+    if (typeof data === "string") {
+      return data;
+    }
+    if (typeof data === "number" || typeof data === "boolean") {
       return String(data);
-    if (Array.isArray(data))
+    }
+    if (Array.isArray(data)) {
       return `Array(${data.length}) [${data.map(formatData).join(", ")}]`;
+    }
     if (typeof data === "object") {
       try {
         return JSON.stringify(data, null, 2);
@@ -219,16 +227,21 @@ export default function PrintDataDisplay({
   };
 
   const renderDataValue = (data: any) => {
-    if (data === null)
+    if (data === null) {
       return <span className="text-gray-500 italic">null</span>;
-    if (data === undefined)
+    }
+    if (data === undefined) {
       return <span className="text-gray-500 italic">undefined</span>;
-    if (typeof data === "string")
+    }
+    if (typeof data === "string") {
       return <span className="text-green-700">"{data}"</span>;
-    if (typeof data === "number")
+    }
+    if (typeof data === "number") {
       return <span className="text-blue-600">{data}</span>;
-    if (typeof data === "boolean")
+    }
+    if (typeof data === "boolean") {
       return <span className="text-purple-600">{String(data)}</span>;
+    }
     if (Array.isArray(data)) {
       return (
         <div className="ml-4">

@@ -3,7 +3,9 @@ import { describe, it, expect } from "bun:test";
 // Simple utilities for string and number manipulation
 function formatCourseTitle(title: string): string {
   const cleaned = title.trim().toLowerCase();
-  if (cleaned === "") return "";
+  if (cleaned === "") {
+    return "";
+  }
   return cleaned.replace(/\s+/g, "-");
 }
 

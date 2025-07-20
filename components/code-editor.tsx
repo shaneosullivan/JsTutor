@@ -73,7 +73,9 @@ export default function CodeEditor({
   };
 
   useEffect(() => {
-    if (!editorRef.current) return;
+    if (!editorRef.current) {
+      return;
+    }
 
     const state = EditorState.create({
       doc: value,
@@ -146,7 +148,9 @@ export default function CodeEditor({
 
   // Handle keyboard visibility changes and maintain cursor position
   useEffect(() => {
-    if (!viewRef.current) return;
+    if (!viewRef.current) {
+      return;
+    }
 
     const view = viewRef.current;
 

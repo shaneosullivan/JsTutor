@@ -194,7 +194,9 @@ export function createLocalizedData(
       const currentTutorial = rawTutorials.find(
         (t) => t.id === currentTutorialId
       );
-      if (!currentTutorial) return null;
+      if (!currentTutorial) {
+        return null;
+      }
 
       const courseTutorials = rawTutorials.filter(
         (t) => t.courseId === currentTutorial.courseId
@@ -233,7 +235,9 @@ export function createLocalizedData(
       const currentTutorial = rawTutorials.find(
         (t) => t.id === currentTutorialId
       );
-      if (!currentTutorial) return null;
+      if (!currentTutorial) {
+        return null;
+      }
 
       const courseTutorials = rawTutorials.filter(
         (t) => t.courseId === currentTutorial.courseId

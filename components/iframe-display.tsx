@@ -226,7 +226,9 @@ export default function IframeDisplay({
   };
 
   const openInNewTab = () => {
-    if (!code.trim()) return;
+    if (!code.trim()) {
+      return;
+    }
 
     const blob = new Blob([code], { type: "text/html" });
     const url = URL.createObjectURL(blob);

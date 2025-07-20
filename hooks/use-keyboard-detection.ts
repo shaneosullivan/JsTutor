@@ -16,7 +16,9 @@ export function useKeyboardDetection(): KeyboardState {
   });
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
 
     let initialViewportHeight = window.innerHeight;
     let currentViewportHeight = window.innerHeight;

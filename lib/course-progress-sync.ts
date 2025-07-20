@@ -26,7 +26,9 @@ export async function syncCourseProgressToServer(
   courseId: string
 ): Promise<boolean> {
   try {
-    if (typeof window === "undefined") return false;
+    if (typeof window === "undefined") {
+      return false;
+    }
 
     // Check for remote changes first (only once per session/course)
     const courseKey = `${accountId}_${profileId}_${courseId}`;

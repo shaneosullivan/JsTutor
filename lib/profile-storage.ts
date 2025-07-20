@@ -533,10 +533,14 @@ async function initializeFirebasePersister(
 
 // Profile management functions
 export function ensureDefaultProfile(): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   // Don't create default profile if we're currently loading from Firebase
-  if (isLoadingFromFirebase) return;
+  if (isLoadingFromFirebase) {
+    return;
+  }
 
   const profiles = getProfilesInternal();
   if (profiles.length === 0) {
@@ -1027,7 +1031,9 @@ export function getCompletedCourses(): string[] {
 
     for (const course of courses) {
       const tutorials = getTutorialsForCourse(course.id);
-      if (tutorials.length === 0) continue;
+      if (tutorials.length === 0) {
+        continue;
+      }
 
       // Find the last tutorial by order
       const lastTutorial = tutorials.reduce((latest: any, tutorial: any) =>
@@ -1127,7 +1133,9 @@ export function setActiveAccount(accountId: string): boolean {
 
 // Set up TinyBase listeners for automatic course progress sync
 async function setupCourseProgressListeners(): Promise<void> {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   // Ensure the modules are loaded before setting up listeners
   if (!debouncedSyncCourseProgress) {
@@ -1157,16 +1165,22 @@ async function setupCourseProgressListeners(): Promise<void> {
     "code",
     (store, tableId, rowId, cellId, newCell, oldCell, getCellChange) => {
       // Only sync on client side and if we have the sync function
-      if (typeof window === "undefined" || !debouncedSyncCourseProgress) return;
+      if (typeof window === "undefined" || !debouncedSyncCourseProgress) {
+        return;
+      }
 
       const activeAccount = getActiveAccount();
-      if (!activeAccount) return;
+      if (!activeAccount) {
+        return;
+      }
 
       const tutorialCode = store.getRow(
         "tutorialCode",
         rowId
       ) as unknown as TutorialCode;
-      if (!tutorialCode) return;
+      if (!tutorialCode) {
+        return;
+      }
 
       // Debounced sync to server
       debouncedSyncCourseProgress(
@@ -1255,7 +1269,9 @@ export function enableFirebaseAutoSave(): void {
 }
 
 export async function initializeProfileSystem(): Promise<void> {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") {
+    return;
+  }
 
   try {
     if (persister) {

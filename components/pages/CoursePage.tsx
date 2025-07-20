@@ -108,7 +108,9 @@ export default function CoursePage({ courseId }: CoursePageProps) {
   const markTutorialComplete = useCallback(
     (tutorialOrder: number) => {
       const tutorial = tutorials.find((t) => t.order === tutorialOrder);
-      if (!tutorial) return;
+      if (!tutorial) {
+        return;
+      }
 
       // Mark tutorial as completed in TinyBase
       setTutorialCompleted(tutorial.id, true, courseId);
@@ -165,17 +167,23 @@ export default function CoursePage({ courseId }: CoursePageProps) {
   };
 
   const currentTutorial = useMemo(() => {
-    if (!isClient) return tutorials[0]; // Return first tutorial on server to prevent hydration mismatch
+    if (!isClient) {
+      return tutorials[0];
+    } // Return first tutorial on server to prevent hydration mismatch
     return tutorials.find((t) => t.order === currentTutorialOrder);
   }, [tutorials, currentTutorialOrder, isClient]);
 
   const isCurrentCompleted = useMemo(() => {
-    if (!isClient || !currentTutorial) return false; // Return false on server to prevent hydration mismatch
+    if (!isClient || !currentTutorial) {
+      return false;
+    } // Return false on server to prevent hydration mismatch
     return completedTutorials.includes(currentTutorial.id);
   }, [currentTutorial, completedTutorials, isClient]);
 
   const hasNextTutorial = useMemo(() => {
-    if (!isClient || tutorials.length === 0) return false; // Return false on server to prevent hydration mismatch
+    if (!isClient || tutorials.length === 0) {
+      return false;
+    } // Return false on server to prevent hydration mismatch
     return currentTutorialOrder < Math.max(...tutorials.map((t) => t.order));
   }, [tutorials, currentTutorialOrder, isClient]);
 
@@ -206,7 +214,9 @@ export default function CoursePage({ courseId }: CoursePageProps) {
   }, [currentTutorial, userCode, courseId]);
 
   const progressPercentage = useMemo(() => {
-    if (!isClient || tutorials.length === 0) return 0; // Return 0 on server to prevent hydration mismatch
+    if (!isClient || tutorials.length === 0) {
+      return 0;
+    } // Return 0 on server to prevent hydration mismatch
     return (completedTutorials.length / tutorials.length) * 100;
   }, [tutorials.length, completedTutorials.length, isClient]);
 

@@ -83,7 +83,9 @@ export function useTutorial() {
   };
 
   const completeTutorial = async (tutorialId: number) => {
-    if (completedTutorials.includes(tutorialId)) return;
+    if (completedTutorials.includes(tutorialId)) {
+      return;
+    }
 
     const newCompleted = [...completedTutorials, tutorialId];
     setCompletedTutorials(newCompleted);
@@ -92,7 +94,9 @@ export function useTutorial() {
   };
 
   const goToNextTutorial = () => {
-    if (!currentTutorial) return;
+    if (!currentTutorial) {
+      return;
+    }
 
     const nextTutorial = tutorials.find(
       (t: Tutorial) => t.order === currentTutorial.order + 1

@@ -13,7 +13,9 @@ export function getClientIdFromRequest(request: NextRequest): string | null {
 export function getClientIdFromCookieHeader(
   cookieHeader: string
 ): string | null {
-  if (!cookieHeader) return null;
+  if (!cookieHeader) {
+    return null;
+  }
 
   const cookies = cookieHeader.split(";");
   for (const cookie of cookies) {

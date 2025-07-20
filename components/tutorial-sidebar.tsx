@@ -36,7 +36,9 @@ export default function TutorialSidebar({
       return !tutorial.isLocked;
     }
     // Fallback to original logic for backward compatibility
-    if (tutorial.order === 1) return true;
+    if (tutorial.order === 1) {
+      return true;
+    }
     const previousTutorial = tutorials.find(
       (t) => t.order === tutorial.order - 1
     );
