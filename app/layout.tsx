@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false
   },
-  metadataBase: new URL("https://jstutor.com"),
+  metadataBase: new URL("https://jstutor.chofter.com"),
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -148,20 +148,14 @@ export const metadata: Metadata = {
     title: "JsTutor - Interactive JavaScript Learning Platform",
     description:
       "Learn JavaScript through interactive tutorials, code examples, and real-time practice. Master programming fundamentals with hands-on exercises and real-time feedback.",
-    url: "https://jstutor.com",
+    url: "https://jstutor.chofter.com",
     siteName: "JsTutor",
     images: [
       {
-        url: "/icons/icon-512x512.png",
-        width: 512,
-        height: 512,
-        alt: "JsTutor - Interactive JavaScript Learning Platform"
-      },
-      {
-        url: "/logo.svg",
+        url: "/jstutor-og-image.png",
         width: 1200,
         height: 630,
-        alt: "JsTutor Logo"
+        alt: "JsTutor - Interactive JavaScript Learning Platform with visual courses for Basics, Array Methods, DOM Manipulation, and TypeScript"
       }
     ],
     locale: "en_US",
@@ -173,7 +167,7 @@ export const metadata: Metadata = {
     title: "JsTutor - Interactive JavaScript Learning Platform",
     description:
       "Learn JavaScript through interactive tutorials, code examples, and real-time practice. Master programming fundamentals with hands-on exercises.",
-    images: ["/icons/icon-512x512.png"],
+    images: ["/jstutor-og-image.png"],
     creator: "@jstutor",
     site: "@jstutor"
   },
@@ -191,7 +185,7 @@ export const metadata: Metadata = {
     }
   },
   alternates: {
-    canonical: "https://jstutor.com"
+    canonical: "https://jstutor.chofter.com"
   },
   other: {
     "msapplication-TileColor": "#6366f1",
@@ -211,10 +205,10 @@ export default function RootLayout({
     name: "JsTutor - Interactive JavaScript Learning Platform",
     description:
       "Learn JavaScript through interactive tutorials, code examples, and real-time practice. Master programming fundamentals with hands-on exercises.",
-    url: "https://jstutor.com",
+    url: "https://jstutor.chofter.com",
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://jstutor.com/search?q={search_term_string}",
+      target: "https://jstutor.chofter.com/search?q={search_term_string}",
       "query-input": "required name=search_term_string"
     },
     author: {
@@ -226,7 +220,7 @@ export default function RootLayout({
       name: "JsTutor",
       logo: {
         "@type": "ImageObject",
-        url: "https://jstutor.com/logo.svg"
+        url: "https://jstutor.chofter.com/logo.svg"
       }
     },
     educationalAlignment: {

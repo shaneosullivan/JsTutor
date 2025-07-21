@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Generate OG Image</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: system-ui, -apple-system, sans-serif; }
+        #canvas { border: 1px solid #ccc; }
+        button { margin: 10px 0; padding: 10px 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>JsTutor Open Graph Image Generator</h1>
+    <button onclick="generateImage()">Generate PNG Image</button>
+    <br>
+    <canvas id="canvas" width="1200" height="630"></canvas>
+    
+    <script>
+        function generateImage() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, 1200, 630);
+            
+            // Background gradient
+            const bgGradient = ctx.createLinearGradient(0, 0, 1200, 630);
+            bgGradient.addColorStop(0, '#f3e8ff');
+            bgGradient.addColorStop(0.5, '#dbeafe');
+            bgGradient.addColorStop(1, '#fce7f3');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, 1200, 630);
+            
+            // Decorative circles
+            ctx.globalAlpha = 0.1;
+            ctx.fillStyle = '#ec4899';
+            ctx.beginPath();
+            ctx.arc(100, 100, 60, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.arc(1100, 530, 80, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#9333ea';
+            ctx.beginPath();
+            ctx.arc(200, 500, 40, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(1000, 150, 50, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.globalAlpha = 1;
+            
+            // Main content area
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 2;
+            roundRect(ctx, 80, 120, 1040, 390, 24);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Title
+            const titleGradient = ctx.createLinearGradient(0, 0, 1200, 0);
+            titleGradient.addColorStop(0, '#9333ea');
+            titleGradient.addColorStop(0.5, '#2563eb');
+            titleGradient.addColorStop(1, '#ec4899');
+            
+            ctx.fillStyle = titleGradient;
+            ctx.font = 'bold 64px system-ui, -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('JsTutor', 600, 220);
+            
+            // Subtitle
+            ctx.fillStyle = '#374151';
+            ctx.font = '600 28px system-ui, -apple-system, sans-serif';
+            ctx.fillText('Interactive JavaScript Learning Platform', 600, 280);
+            
+            // Feature highlights
+            drawFeature(ctx, 220, 340, '#10b981', '✓', 'Interactive Tutorials');
+            drawFeature(ctx, 500, 340, '#3b82f6', '⚡', 'Real-time Practice');
+            drawFeature(ctx, 760, 340, '#ec4899', '🎨', 'Visual Canvas');
+            
+            // Course preview cards
+            drawCourseCard(ctx, 200, 380, 'Basics', 'Variables, Functions\nDrawing Canvas', '#fef3c7', '#f59e0b', '#92400e');
+            drawCourseCard(ctx, 410, 380, 'Array Methods', 'map, filter, reduce\nData Processing', '#dbeafe', '#3b82f6', '#1e40af');
+            drawCourseCard(ctx, 620, 380, 'DOM Manipulation', 'HTML Elements\nWeb Development', '#d1fae5', '#10b981', '#065f46');
+            drawCourseCard(ctx, 830, 380, 'TypeScript', 'Types, Interfaces\nType Safety', '#fce7f3', '#ec4899', '#be185d');
+            
+            // Call to action
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '600 20px system-ui, -apple-system, sans-serif';
+            ctx.fillText('Start Your JavaScript Journey Today!', 600, 570);
+            
+            // Download the image
+            const link = document.createElement('a');
+            link.download = 'jstutor-og-image.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        function drawFeature(ctx, x, y, color, icon, text) {
+            // Circle
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x, y, 16, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Icon
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px system-ui, -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(icon, x, y + 6);
+            
+            // Text
+            ctx.fillStyle = '#374151';
+            ctx.font = '600 20px system-ui, -apple-system, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(text, x + 30, y + 7);
+        }
+        
+        function drawCourseCard(ctx, x, y, title, subtitle, bgColor, borderColor, textColor) {
+            // Card background
+            ctx.fillStyle = bgColor;
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 2;
+            roundRect(ctx, x, y, 180, 100, 12);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Title
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 16px system-ui, -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(title, x + 90, y + 30);
+            
+            // Subtitle lines
+            const lines = subtitle.split('\n');
+            ctx.font = '12px system-ui, -apple-system, sans-serif';
+            lines.forEach((line, index) => {
+                ctx.fillText(line, x + 90, y + 50 + (index * 20));
+            });
+        }
+        
+        // Auto-generate on page load
+        window.onload = () => {
+            setTimeout(generateImage, 100);
+        };
+    </script>
+</body>
+</html>
