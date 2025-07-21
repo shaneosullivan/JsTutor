@@ -18,4 +18,4 @@ JavaScript can do maths just like you! You can add `+`, subtract `-`, multiply `
 
 ### 🌟 Your Challenge:
 
-Clear the code and try this on your own! Create variables for your age and your favorite number, then do some maths with them. Draw rectangles using the results - maybe make a building or a robot face!
+Fix the code to put the eyes and mouth on the happy face. Use `drawRect` to draw the mouth.
