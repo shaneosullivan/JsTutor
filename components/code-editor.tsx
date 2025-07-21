@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef, useCallback } from "react";
 import { EditorView, basicSetup } from "codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { oneDark } from "@codemirror/theme-one-dark";
@@ -9,6 +9,7 @@ import { Decoration, DecorationSet } from "@codemirror/view";
 import { useKeyboard } from "@/components/KeyboardProvider";
 import { CodeEditorErrorBoundary } from "./code-editor-error-boundary";
 import { formatCode, canFormatCode } from "@/lib/prettier-formatter";
+import { debounce } from "@/lib/debounce";
 
 interface CodeEditorProps {
   value: string;
@@ -139,6 +140,29 @@ const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function CodeEdito
   useImperativeHandle(ref, () => ({
     formatCode: performFormat
   }), []);
+
+  // Create a debounced version of performFormat for resize events
+  const debouncedFormatOnResize = useCallback(
+    debounce(() => {
+      if (shouldFormat && viewRef.current) {
+        performFormat();
+      }
+    }, 300), // 300ms debounce delay
+    [shouldFormat]
+  );
+
+  // Handle window resize events
+  useEffect(() => {
+    const handleResize = () => {
+      debouncedFormatOnResize();
+    };
+
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [debouncedFormatOnResize]);
 
   useEffect(() => {
     if (!editorRef.current) {
