@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
 import { EditorView, basicSetup } from "codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { oneDark } from "@codemirror/theme-one-dark";
@@ -18,6 +18,10 @@ interface CodeEditorProps {
   errorLine?: number;
   originalCode?: string;
   shouldFormat?: boolean; // Whether to format code on blur
+}
+
+export interface CodeEditorRef {
+  formatCode: () => Promise<void>;
 }
 
 // Error line decoration
@@ -55,14 +59,14 @@ const errorLineField = StateField.define<DecorationSet>({
   provide: (f) => EditorView.decorations.from(f)
 });
 
-export default function CodeEditor({
+const CodeEditor = forwardRef<CodeEditorRef, CodeEditorProps>(function CodeEditor({
   value,
   onChange,
   className = "",
   errorLine,
   originalCode,
   shouldFormat = false
-}: CodeEditorProps) {
+}, ref) {
   const keyboard = useKeyboard();
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
@@ -74,8 +78,37 @@ export default function CodeEditor({
     }
   };
 
-  const handleBlur = async () => {
-    if (!shouldFormat || !viewRef.current) {
+  const calculateEditorCharacterWidth = (): number => {
+    if (!viewRef.current) {
+      return 80; // Default fallback
+    }
+
+    const view = viewRef.current;
+    const editorRect = view.dom.getBoundingClientRect();
+    
+    // Get the approximate character width based on the monospace font
+    // Create a temporary element to measure character width
+    const measureElement = document.createElement('span');
+    measureElement.style.font = "14px 'Fira Code', 'Monaco', 'Menlo', monospace";
+    measureElement.style.visibility = 'hidden';
+    measureElement.style.position = 'absolute';
+    measureElement.textContent = 'M'.repeat(10); // Use 10 characters for better accuracy
+    
+    document.body.appendChild(measureElement);
+    const charWidth = measureElement.getBoundingClientRect().width / 10;
+    document.body.removeChild(measureElement);
+    
+    // Calculate how many characters can fit in the editor width
+    // Subtract some padding for line numbers, scrollbars, etc.
+    const usableWidth = editorRect.width - 60; // Account for line numbers and padding
+    const maxChars = Math.floor(usableWidth / charWidth);
+    
+    // Return a reasonable minimum and maximum
+    return Math.max(40, Math.min(maxChars, 120));
+  };
+
+  const performFormat = async () => {
+    if (!viewRef.current) {
       return;
     }
 
@@ -85,14 +118,27 @@ export default function CodeEditor({
     }
 
     try {
-      const formattedCode = await formatCode(currentCode);
+      const editorWidth = calculateEditorCharacterWidth();
+      const formattedCode = await formatCode(currentCode, editorWidth);
       if (formattedCode !== currentCode) {
         onChange(formattedCode);
       }
     } catch (error) {
-      console.warn("Failed to format code on blur:", error);
+      console.warn("Failed to format code:", error);
     }
   };
+
+  const handleBlur = async () => {
+    if (!shouldFormat) {
+      return;
+    }
+    await performFormat();
+  };
+
+  // Expose formatCode function to parent components
+  useImperativeHandle(ref, () => ({
+    formatCode: performFormat
+  }), []);
 
   useEffect(() => {
     if (!editorRef.current) {
@@ -244,4 +290,6 @@ export default function CodeEditor({
       />
     </CodeEditorErrorBoundary>
   );
-}
+});
+
+export default CodeEditor;

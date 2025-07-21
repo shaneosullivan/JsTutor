@@ -364,6 +364,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
                 onCodeChange={setUserCode}
                 courseType={course?.type || "canvas"}
                 onShowReference={() => setShowReferenceDialog(true)}
+                sidebarCollapsed={sidebarCollapsed}
               />
             ) : (
               <div className="h-full flex items-center justify-center">

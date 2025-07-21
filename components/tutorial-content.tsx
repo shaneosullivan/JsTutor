@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowRight, CircleHelp, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import CodeEditor from "@/components/code-editor";
+import CodeEditor, { CodeEditorRef } from "@/components/code-editor";
 import DrawingCanvas from "@/components/drawing-canvas";
 import PrintDataDisplay from "@/components/print-data-display";
 import IframeDisplay from "@/components/iframe-display";
@@ -24,6 +24,7 @@ interface TutorialContentProps {
   onCodeChange: (code: string) => void;
   courseType?: string;
   onShowReference?: () => void;
+  sidebarCollapsed?: boolean;
 }
 
 export default function TutorialContent({
@@ -35,9 +36,11 @@ export default function TutorialContent({
   userCode,
   onCodeChange,
   courseType = "canvas",
-  onShowReference
+  onShowReference,
+  sidebarCollapsed
 }: TutorialContentProps) {
   const keyboard = useKeyboard();
+  const codeEditorRef = useRef<CodeEditorRef>(null);
   const [, setOutput] = useState<string[]>([]);
   const [showAiChat, setShowAiChat] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -60,6 +63,18 @@ export default function TutorialContent({
       setShowHelp(true);
     }
   }, [tutorial.id]);
+
+  // Trigger code formatting when sidebar is expanded/collapsed
+  useEffect(() => {
+    if (courseType !== "iframe" && codeEditorRef.current) {
+      // Add a small delay to wait for the sidebar animation to complete
+      const timer = setTimeout(() => {
+        codeEditorRef.current?.formatCode();
+      }, 320); // Slightly longer than the 300ms transition duration
+      
+      return () => clearTimeout(timer);
+    }
+  }, [sidebarCollapsed, courseType]);
 
   const handleComplete = () => {
     onComplete();
@@ -169,6 +184,7 @@ export default function TutorialContent({
             >
               <div className="h-full border border-slate-200 rounded-lg overflow-hidden keyboard-stable">
                 <CodeEditor
+                  ref={codeEditorRef}
                   value={userCode}
                   onChange={onCodeChange}
                   language="javascript"
