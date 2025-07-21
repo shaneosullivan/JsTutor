@@ -188,7 +188,7 @@ export function createLocalizedData(
     },
 
     getNextTutorial(
-      currentTutorialId: number,
+      currentTutorialId: string,
       locale?: string
     ): LocalizedTutorial | null {
       const currentTutorial = rawTutorials.find(
@@ -229,7 +229,7 @@ export function createLocalizedData(
     },
 
     getPreviousTutorial(
-      currentTutorialId: number,
+      currentTutorialId: string,
       locale?: string
     ): LocalizedTutorial | null {
       const currentTutorial = rawTutorials.find(

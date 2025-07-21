@@ -9,6 +9,7 @@ import {
   CourseProgress,
   TutorialCode
 } from "@/lib/types";
+import { DEFAULT_COURSE_ID, DEFAULT_TUTORIAL_ID } from "./consts";
 
 // Import clearSyncCache but only for client-side use
 let clearSyncCache: (() => void) | null = null;
@@ -803,14 +804,8 @@ export function getCurrentTutorial(courseId: string): string | null {
   return item || null;
 }
 
-export function setCurrentTutorial(
-  courseId: string,
-  tutorialId: string
-): void {
-  setProfileItem(
-    `currentTutorial_course_${courseId}`,
-    tutorialId
-  );
+export function setCurrentTutorial(courseId: string, tutorialId: string): void {
+  setProfileItem(`currentTutorial_course_${courseId}`, tutorialId);
 }
 
 // Updated tutorial code functions using TinyBase table
@@ -1235,8 +1230,8 @@ async function setupCourseProgressListeners(): Promise<void> {
     (window as any).debugTinyBaseListeners = () => {};
 
     (window as any).testTutorialCompletion = (
-      tutorialId: number = 1,
-      courseId: string = "1"
+      tutorialId: string = DEFAULT_TUTORIAL_ID,
+      courseId: string = DEFAULT_COURSE_ID
     ) => {
       setTutorialCompleted(tutorialId, true, courseId);
     };

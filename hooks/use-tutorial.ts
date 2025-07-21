@@ -28,7 +28,7 @@ export function useTutorial() {
 
   // Update progress mutation
   const updateProgressMutation = useMutation({
-    mutationFn: async (data: { completedTutorials: number[] }) => {
+    mutationFn: async (data: { completedTutorials: string[] }) => {
       const response = await apiRequest("POST", "/api/progress", data);
       return response.json();
     },
@@ -74,15 +74,15 @@ export function useTutorial() {
     setUserCode(savedCode || tutorial.starterCode || "");
   };
 
-  const saveUserCode = (code: string, tutorialId: number) => {
+  const saveUserCode = (code: string, tutorialId: string) => {
     localStorage.setItem(`${USER_CODE_KEY}-${tutorialId}`, code);
   };
 
-  const saveCompletedTutorials = (completed: number[]) => {
+  const saveCompletedTutorials = (completed: string[]) => {
     localStorage.setItem(COMPLETED_TUTORIALS_KEY, JSON.stringify(completed));
   };
 
-  const completeTutorial = async (tutorialId: number) => {
+  const completeTutorial = async (tutorialId: string) => {
     if (completedTutorials.includes(tutorialId)) {
       return;
     }
