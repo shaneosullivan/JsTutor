@@ -37,7 +37,7 @@ export interface CourseProgress {
 export interface TutorialCode {
   id: string; // "${profileId}_${tutorialId}"
   profileId: string;
-  tutorialId: number;
+  tutorialId: string;
   courseId: string;
   code: string;
   completed: boolean;

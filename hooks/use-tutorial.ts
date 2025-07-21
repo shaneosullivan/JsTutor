@@ -12,7 +12,7 @@ const USER_CODE_KEY = "js-adventure-code";
 export function useTutorial() {
   const queryClient = useQueryClient();
   const [currentTutorial, setCurrentTutorial] = useState<Tutorial | null>(null);
-  const [completedTutorials, setCompletedTutorials] = useState<number[]>([]);
+  const [completedTutorials, setCompletedTutorials] = useState<string[]>([]);
   const [userCode, setUserCode] = useState<string>("");
 
   // Fetch tutorials

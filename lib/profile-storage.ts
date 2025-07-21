@@ -787,34 +787,34 @@ export function setProfileItemAsObject(key: string, value: any): void {
 }
 
 // Tutorial/course convenience functions
-export function getCompletedTutorials(courseId: string): number[] {
+export function getCompletedTutorials(courseId: string): string[] {
   return getProfileItemAsArray(`completedTutorials_course_${courseId}`);
 }
 
 export function setCompletedTutorials(
   courseId: string,
-  tutorialIds: number[]
+  tutorialIds: string[]
 ): void {
   setProfileItemAsArray(`completedTutorials_course_${courseId}`, tutorialIds);
 }
 
-export function getCurrentTutorial(courseId: string): number | null {
+export function getCurrentTutorial(courseId: string): string | null {
   const item = getProfileItem(`currentTutorial_course_${courseId}`);
-  return item ? parseInt(item) : null;
+  return item || null;
 }
 
 export function setCurrentTutorial(
   courseId: string,
-  tutorialOrder: number
+  tutorialId: string
 ): void {
   setProfileItem(
     `currentTutorial_course_${courseId}`,
-    tutorialOrder.toString()
+    tutorialId
   );
 }
 
 // Updated tutorial code functions using TinyBase table
-export function getUserCode(tutorialId: number): string | null {
+export function getUserCode(tutorialId: string): string | null {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
   const tutorialCode = store.getRow(
@@ -825,7 +825,7 @@ export function getUserCode(tutorialId: number): string | null {
 }
 
 export function setUserCode(
-  tutorialId: number,
+  tutorialId: string,
   code: string,
   courseId: string
 ): void {
@@ -864,7 +864,7 @@ export function setUserCode(
   }
 }
 
-export function getTutorialCode(tutorialId: number): TutorialCode | null {
+export function getTutorialCode(tutorialId: string): TutorialCode | null {
   const activeProfile = getActiveProfile();
   const tutorialCodeId = `${activeProfile.id}_${tutorialId}`;
   const tutorialCode = store.getRow(
@@ -875,7 +875,7 @@ export function getTutorialCode(tutorialId: number): TutorialCode | null {
 }
 
 export function setTutorialCompleted(
-  tutorialId: number,
+  tutorialId: string,
   completed: boolean,
   courseId: string
 ): void {

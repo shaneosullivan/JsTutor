@@ -19,15 +19,15 @@ export interface Course {
 export interface UserProgress {
   id: number;
   userId: number;
-  completedTutorials: number[];
-  currentTutorial: number;
+  completedTutorials: string[];
+  currentTutorial: string;
   currentCourse: number;
   completedCourses: number[];
   stars: number;
 }
 
 export interface Tutorial {
-  id: number;
+  id: string;
   courseId: string;
   title: string;
   description: string;
@@ -46,8 +46,8 @@ export const insertUserSchema = z.object({
 
 export const insertUserProgressSchema = z.object({
   userId: z.number(),
-  completedTutorials: z.array(z.number()).default([]),
-  currentTutorial: z.number().default(1),
+  completedTutorials: z.array(z.string()).default([]),
+  currentTutorial: z.string().default("your-first-variable"),
   currentCourse: z.number().default(1),
   completedCourses: z.array(z.number()).default([]),
   stars: z.number().default(0)
@@ -62,6 +62,7 @@ export const insertCourseSchema = z.object({
 });
 
 export const insertTutorialSchema = z.object({
+  id: z.string(),
   courseId: z.string(),
   title: z.string().min(1),
   description: z.string().min(1),

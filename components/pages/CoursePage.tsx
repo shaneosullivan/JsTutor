@@ -21,7 +21,8 @@ import {
   setProfileItem,
   getUserCode,
   setUserCode as setUserCodeInStorage,
-  getCurrentTutorial
+  getCurrentTutorial,
+  setCurrentTutorial
 } from "@/lib/profile-storage";
 import { useActiveProfile } from "@/hooks/useActiveProfile";
 import {
@@ -64,15 +65,6 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     setIsClient(true);
   }, []);
 
-  const currentTutorialOrder = getCurrentTutorial(courseId) || 1;
-
-  // Highest tutorial reached from profile settings using useValues
-  const highestTutorialValue = values[
-    `highestTutorial_course_${courseId}`
-  ] as string;
-  const highestTutorialReached =
-    isClient && highestTutorialValue ? parseInt(highestTutorialValue) : 1;
-
   // Memoized course data from local utils
   const courses = useMemo(() => getCoursesForLocale("en"), []);
   const course = useMemo(
@@ -80,6 +72,20 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     [courses, courseId]
   );
   const tutorials = useMemo(() => getTutorialsForCourse(courseId), [courseId]);
+
+  const currentTutorialId = getCurrentTutorial(courseId);
+  const currentTutorialOrder = useMemo(() => {
+    if (!currentTutorialId) return 1;
+    const tutorial = tutorials.find((t) => t.id === currentTutorialId);
+    return tutorial ? tutorial.order : 1;
+  }, [currentTutorialId, tutorials]);
+
+  // Highest tutorial reached from profile settings using useValues
+  const highestTutorialValue = values[
+    `highestTutorial_course_${courseId}`
+  ] as string;
+  const highestTutorialReached =
+    isClient && highestTutorialValue ? parseInt(highestTutorialValue) : 1;
 
   // Compute completed tutorials from TinyBase tutorial code data
   const completedTutorials = useMemo(() => {
@@ -130,10 +136,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
     const nextOrder = currentTutorialOrder + 1;
     const nextTutorial = tutorials.find((t) => t.order === nextOrder);
     if (nextTutorial) {
-      setProfileItem(
-        `currentTutorial_course_${courseId}`,
-        nextOrder.toString()
-      );
+      setCurrentTutorial(courseId, nextTutorial.id);
       // The listener will update the state automatically
     }
   }, [currentTutorialOrder, tutorials, courseId]);

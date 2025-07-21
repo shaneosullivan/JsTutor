@@ -9,7 +9,7 @@ import type { Tutorial } from "@shared/schema";
 interface TutorialSidebarProps {
   tutorials: Tutorial[];
   currentTutorial: Tutorial | null;
-  completedTutorials: number[];
+  completedTutorials: string[];
   onTutorialSelect: (tutorial: Tutorial) => void;
   collapsed?: boolean;
   onToggleCollapsed?: () => void;

@@ -8,7 +8,14 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { LOCALES } from "../lib/locales.js";
+import { LOCALES } from "../lib/locales";
+import {
+  generateCourseIdFromFolderName,
+  parseMarkdownFrontmatter,
+  extractCodeFromMarkdown,
+  generateTutorialIdFromFolderName,
+  updateFrontmatterOrder
+} from "../lib/build-data-utils";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,63 +42,11 @@ interface TutorialText extends LocalizedText {
 }
 
 interface Tutorial {
-  id: number;
+  id: string;
   courseId: string;
   text: Record<string, TutorialText>;
   starterCode?: Record<string, string>;
   order: number;
-}
-
-function parseMarkdownFrontmatter(content: string): {
-  frontmatter: any;
-  body: string;
-} {
-  const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
-  const match = content.match(frontmatterRegex);
-
-  if (!match) {
-    return { frontmatter: {}, body: content };
-  }
-
-  const [, frontmatterStr, body] = match;
-  const frontmatter: any = {};
-
-  // Parse simple YAML-like frontmatter
-  frontmatterStr.split("\n").forEach((line) => {
-    const colonIndex = line.indexOf(":");
-    if (colonIndex > 0) {
-      const key = line.substring(0, colonIndex).trim();
-      let value = line.substring(colonIndex + 1).trim();
-
-      // Parse JSON values
-      try {
-        value = JSON.parse(value);
-      } catch {
-        // Keep as string if not valid JSON
-      }
-
-      frontmatter[key] = value;
-    }
-  });
-
-  return { frontmatter, body };
-}
-
-function extractCodeFromMarkdown(content: string): string {
-  const codeRegex = /```javascript\n([\s\S]*?)\n```/;
-  const match = content.match(codeRegex);
-  return match ? match[1] : "";
-}
-
-function generateCourseIdFromFolderName(folderName: string): string {
-  // Remove number prefix and convert to lowercase
-  // "1 - Basics" -> "basics"
-  // "2 - Array Methods" -> "array-methods"
-  return folderName
-    .replace(/^\d+\s*-\s*/, "") // Remove number and dash prefix
-    .toLowerCase()
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/[^a-z0-9-]/g, ""); // Remove any other special characters
 }
 
 function ensureLocaleFilesExist(
@@ -220,14 +175,21 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
 
     // console.log(`Processing course: ${courseData.text.en.title}`);
 
-    // Read tutorials
+    // Read tutorials - now supporting both old numeric format (1, 2, 3) and new format (1 - Title)
     const tutorialFolders = fs
       .readdirSync(coursePath)
       .filter((item) => {
         const itemPath = path.join(coursePath, item);
-        return fs.statSync(itemPath).isDirectory() && /^\d+$/.test(item);
+        return (
+          fs.statSync(itemPath).isDirectory() &&
+          (/^\d+$/.test(item) || /^\d+\s*-\s*.+/.test(item))
+        );
       })
-      .sort((a, b) => parseInt(a) - parseInt(b));
+      .sort((a, b) => {
+        const numA = parseInt(a.match(/^\d+/)?.[0] || "0");
+        const numB = parseInt(b.match(/^\d+/)?.[0] || "0");
+        return numA - numB;
+      });
 
     for (const tutorialFolder of tutorialFolders) {
       const tutorialPath = path.join(coursePath, tutorialFolder);
@@ -261,13 +223,43 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
         }
       };
 
-      // Generate a unique global ID for the tutorial
-      // We'll use a simple scheme: oldCourseId * 100 + tutorialOrder
-      const tutorialOrder = frontmatter.order || parseInt(tutorialFolder);
-      const globalId = baseCourseData.id * 100 + tutorialOrder;
+      // Extract order from folder name (this is the authoritative source)
+      const folderNumber = parseInt(tutorialFolder.match(/^\d+/)?.[0] || "1");
+      const tutorialOrder = folderNumber;
+
+      // Generate tutorial ID based on folder name
+      let tutorialId: string;
+
+      if (/^\d+\s*-\s*.+/.test(tutorialFolder)) {
+        // New format: "1 - Your First Variable" -> "your-first-variable"
+        tutorialId = generateTutorialIdFromFolderName(tutorialFolder);
+      } else {
+        // Old format: just "1" - generate from title
+        const title = frontmatter.title || `Tutorial ${tutorialFolder}`;
+        tutorialId = generateTutorialIdFromFolderName(title);
+      }
+
+      // Update the frontmatter file if order or id has changed
+      const expectedOrder = tutorialOrder;
+      const expectedId = tutorialId;
+
+      if (
+        frontmatter.order !== expectedOrder ||
+        frontmatter.id !== expectedId
+      ) {
+        const updatedContent = updateFrontmatterOrder(
+          enContent,
+          expectedOrder,
+          expectedId
+        );
+        fs.writeFileSync(enMdPath, updatedContent, "utf-8");
+        console.log(
+          `Updated frontmatter for ${tutorialFolder}: order=${expectedOrder}, id="${expectedId}"`
+        );
+      }
 
       const tutorial: Tutorial = {
-        id: globalId,
+        id: tutorialId,
         courseId: newCourseId,
         text: tutorialText,
         starterCode:
