@@ -143,10 +143,7 @@ export default function CoursePage({ courseId }: CoursePageProps) {
 
   const selectTutorial = useCallback(
     (tutorial: LocalizedTutorial) => {
-      setProfileItem(
-        `currentTutorial_course_${courseId}`,
-        tutorial.order.toString()
-      );
+      setCurrentTutorial(courseId, tutorial.id);
       // The listener will update the state automatically
     },
     [courseId]
