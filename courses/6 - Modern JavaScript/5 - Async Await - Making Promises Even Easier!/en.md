@@ -1,7 +1,7 @@
 ---
 id: "async-await-making-promises-even-easier"
 courseId: "modern-javascript"
-title: "Async/Await - Making Promises Even Easier!"
+title: "Async Await - Making Promises Even Easier!"
 description: "Learn about async/await - the super easy way to work with promises!"
 expectedOutput: "Messages showing how async/await makes promises simpler to use"
 order: 5

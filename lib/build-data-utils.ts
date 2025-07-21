@@ -66,15 +66,34 @@ export function generateTutorialIdFromFolderName(folderName: string): string {
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 }
 
+export function extractTitleFromFolderName(folderName: string): string {
+  // Extract title from folder name like "1 - Your First Variable" -> "Your First Variable"
+  if (/^\d+\s*-\s*.+/.test(folderName)) {
+    return folderName.replace(/^\d+\s*-\s*/, "").trim();
+  }
+
+  // If no dash format, return the folder name as-is (handles old numeric format)
+  return folderName;
+}
+
 export function updateFrontmatterOrder(
   content: string,
   newOrder: number,
-  newId: string
+  newId: string,
+  newTitle?: string,
+  incrementVersion?: boolean
 ): string {
   // Handle the special case of completely empty frontmatter (---\n---\n)
   if (/^---\n---\n/.test(content)) {
     const body = content.replace(/^---\n---\n/, "");
-    return `---\nid: "${newId}"\norder: ${newOrder}\n---\n${body}`;
+    let frontmatterContent = `id: "${newId}"\norder: ${newOrder}`;
+    if (newTitle) {
+      frontmatterContent += `\ntitle: "${newTitle}"`;
+    }
+    if (incrementVersion) {
+      frontmatterContent += `\nversion: 1`;
+    }
+    return `---\n${frontmatterContent}\n---\n${body}`;
   }
 
   const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
@@ -113,6 +132,39 @@ export function updateFrontmatterOrder(
       updatedFrontmatter.trim() +
       (updatedFrontmatter.trim() ? "\n" : "") +
       `order: ${newOrder}`;
+  }
+
+  // Replace or add title field if provided
+  if (newTitle) {
+    if (/^title:\s*.*$/m.test(updatedFrontmatter)) {
+      updatedFrontmatter = updatedFrontmatter.replace(
+        /^title:\s*.*$/m,
+        `title: "${newTitle}"`
+      );
+    } else {
+      updatedFrontmatter =
+        updatedFrontmatter.trim() +
+        (updatedFrontmatter.trim() ? "\n" : "") +
+        `title: "${newTitle}"`;
+    }
+  }
+
+  // Increment version field if requested
+  if (incrementVersion) {
+    if (/^version:\s*\d+/m.test(updatedFrontmatter)) {
+      updatedFrontmatter = updatedFrontmatter.replace(
+        /^version:\s*(\d+)/m,
+        (_match, currentVersion) => {
+          const newVersion = parseInt(currentVersion) + 1;
+          return `version: ${newVersion}`;
+        }
+      );
+    } else {
+      updatedFrontmatter =
+        updatedFrontmatter.trim() +
+        (updatedFrontmatter.trim() ? "\n" : "") +
+        `version: 1`;
+    }
   }
 
   return `---\n${updatedFrontmatter}\n---\n${body}`;

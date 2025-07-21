@@ -4,7 +4,8 @@ import {
   parseMarkdownFrontmatter,
   extractCodeFromMarkdown,
   generateTutorialIdFromFolderName,
-  updateFrontmatterOrder
+  updateFrontmatterOrder,
+  extractTitleFromFolderName
 } from "../lib/build-data-utils.js";
 
 describe("build-data utilities", () => {
@@ -468,6 +469,87 @@ const template = \`This is a \\\`template\\\` string\`;
     });
   });
 
+  describe("extractTitleFromFolderName", () => {
+    it("should extract title from folder names with dash format", () => {
+      expect(extractTitleFromFolderName("1 - Your First Variable")).toBe(
+        "Your First Variable"
+      );
+      expect(extractTitleFromFolderName("2 - Maths is Fun!")).toBe(
+        "Maths is Fun!"
+      );
+      expect(extractTitleFromFolderName("10 - Advanced Tutorial")).toBe(
+        "Advanced Tutorial"
+      );
+    });
+
+    it("should handle varying whitespace around dash", () => {
+      expect(extractTitleFromFolderName("1- Your Tutorial")).toBe(
+        "Your Tutorial"
+      );
+      expect(extractTitleFromFolderName("1 -Your Tutorial")).toBe(
+        "Your Tutorial"
+      );
+      expect(extractTitleFromFolderName("1-Your Tutorial")).toBe(
+        "Your Tutorial"
+      );
+      expect(extractTitleFromFolderName("1  -  Your Tutorial")).toBe(
+        "Your Tutorial"
+      );
+    });
+
+    it("should handle different number formats", () => {
+      expect(extractTitleFromFolderName("01 - First Tutorial")).toBe(
+        "First Tutorial"
+      );
+      expect(extractTitleFromFolderName("100 - Advanced Tutorial")).toBe(
+        "Advanced Tutorial"
+      );
+      expect(extractTitleFromFolderName("999 - Last Tutorial")).toBe(
+        "Last Tutorial"
+      );
+    });
+
+    it("should return original name for old numeric format", () => {
+      expect(extractTitleFromFolderName("1")).toBe("1");
+      expect(extractTitleFromFolderName("42")).toBe("42");
+      expect(extractTitleFromFolderName("100")).toBe("100");
+    });
+
+    it("should handle folders without number prefix", () => {
+      expect(extractTitleFromFolderName("Your First Variable")).toBe(
+        "Your First Variable"
+      );
+      expect(extractTitleFromFolderName("Advanced Topics")).toBe(
+        "Advanced Topics"
+      );
+    });
+
+    it("should handle real-world examples", () => {
+      const examples = [
+        { input: "1 - Your First Variable", expected: "Your First Variable" },
+        {
+          input: "2 - forEach - Do Something with Each Item",
+          expected: "forEach - Do Something with Each Item"
+        },
+        { input: "3 - What is HTML?", expected: "What is HTML?" },
+        {
+          input: "4 - Arrow Functions - The Cool New Way to Write Functions",
+          expected: "Arrow Functions - The Cool New Way to Write Functions"
+        },
+        {
+          input: "5 - Async/Await - Making Promises Even Easier!",
+          expected: "Async/Await - Making Promises Even Easier!"
+        },
+        { input: "13 - Snake Game", expected: "Snake Game" },
+        { input: "14 - Your Own Game!", expected: "Your Own Game!" }
+      ];
+
+      examples.forEach(({ input, expected }) => {
+        expect(extractTitleFromFolderName(input)).toBe(expected);
+      });
+    });
+  });
+
   describe("updateFrontmatterOrder", () => {
     it("should update both id and order in frontmatter", () => {
       const content = `---
@@ -636,6 +718,108 @@ Content`;
       expect(result).toContain("order: 999");
     });
 
+    it("should update title when provided", () => {
+      const content = `---
+id: "tutorial-id"
+courseId: "basics"
+title: "Old Title"
+order: 1
+---
+Tutorial content.`;
+
+      const result = updateFrontmatterOrder(
+        content,
+        2,
+        "new-tutorial-id",
+        "New Title"
+      );
+
+      expect(result).toContain('id: "new-tutorial-id"');
+      expect(result).toContain("order: 2");
+      expect(result).toContain('title: "New Title"');
+      expect(result).toContain('courseId: "basics"');
+      expect(result).toContain("Tutorial content.");
+    });
+
+    it("should add title to frontmatter when not present", () => {
+      const content = `---
+id: "tutorial-id"
+order: 1
+---
+Content`;
+
+      const result = updateFrontmatterOrder(
+        content,
+        1,
+        "tutorial-id",
+        "New Title"
+      );
+
+      expect(result).toContain('title: "New Title"');
+      expect(result).toContain('id: "tutorial-id"');
+      expect(result).toContain("order: 1");
+    });
+
+    it("should not modify title when not provided", () => {
+      const content = `---
+id: "tutorial-id"
+title: "Existing Title"
+order: 1
+---
+Content`;
+
+      const result = updateFrontmatterOrder(content, 2, "tutorial-id");
+
+      expect(result).toContain('title: "Existing Title"');
+      expect(result).toContain("order: 2");
+      expect(result).not.toContain('title: "undefined"');
+    });
+
+    it("should handle title with special characters", () => {
+      const content = `---
+id: "test-id"
+title: "Old Title"
+order: 1
+---
+Content`;
+
+      const specialTitles = [
+        'Title with "quotes"',
+        "Title with 'apostrophes'",
+        "Title with $pecial Ch@rs!",
+        "Title: with colons",
+        "Title - with hyphens"
+      ];
+
+      specialTitles.forEach((specialTitle) => {
+        const result = updateFrontmatterOrder(
+          content,
+          1,
+          "test-id",
+          specialTitle
+        );
+        expect(result).toContain(`title: "${specialTitle}"`);
+      });
+    });
+
+    it("should add title to empty frontmatter", () => {
+      const content = `---
+---
+Body content`;
+
+      const result = updateFrontmatterOrder(
+        content,
+        3,
+        "test-id",
+        "Test Title"
+      );
+
+      expect(result).toContain('id: "test-id"');
+      expect(result).toContain("order: 3");
+      expect(result).toContain('title: "Test Title"');
+      expect(result).toContain("Body content");
+    });
+
     it("should maintain frontmatter formatting", () => {
       const content = `---
 id: "old-id"
@@ -660,6 +844,141 @@ Body`;
       expect(lines.find((line) => line.includes("order:"))).toContain(
         "order: 3"
       );
+    });
+  });
+
+  describe("updateFrontmatterOrder with version increment", () => {
+    it("should increment version when title changes", () => {
+      const content = `---
+id: "test-id"
+order: 1
+title: "Old Title"
+version: 1
+---
+
+Content here`;
+
+      const result = updateFrontmatterOrder(content, 1, "test-id", "New Title", true);
+      
+      const { frontmatter } = parseMarkdownFrontmatter(result);
+      expect(frontmatter.id).toBe("test-id");
+      expect(frontmatter.order).toBe(1);
+      expect(frontmatter.title).toBe("New Title");
+      expect(frontmatter.version).toBe(2);
+    });
+
+    it("should add version field when incrementing and none exists", () => {
+      const content = `---
+id: "test-id"
+order: 1
+title: "Old Title"
+---
+
+Content here`;
+
+      const result = updateFrontmatterOrder(content, 1, "test-id", "New Title", true);
+      
+      const { frontmatter } = parseMarkdownFrontmatter(result);
+      expect(frontmatter.id).toBe("test-id");
+      expect(frontmatter.order).toBe(1);
+      expect(frontmatter.title).toBe("New Title");
+      expect(frontmatter.version).toBe(1);
+    });
+
+    it("should handle version increment in empty frontmatter", () => {
+      const content = `---
+---
+
+Content here`;
+
+      const result = updateFrontmatterOrder(content, 1, "test-id", "New Title", true);
+      
+      const { frontmatter } = parseMarkdownFrontmatter(result);
+      expect(frontmatter.id).toBe("test-id");
+      expect(frontmatter.order).toBe(1);
+      expect(frontmatter.title).toBe("New Title");
+      expect(frontmatter.version).toBe(1);
+    });
+
+    it("should not increment version when title doesn't change", () => {
+      const content = `---
+id: "test-id"
+order: 1
+title: "Same Title"
+version: 3
+---
+
+Content here`;
+
+      const result = updateFrontmatterOrder(content, 2, "new-id", "Same Title", false);
+      
+      const { frontmatter } = parseMarkdownFrontmatter(result);
+      expect(frontmatter.id).toBe("new-id");
+      expect(frontmatter.order).toBe(2);
+      expect(frontmatter.title).toBe("Same Title");
+      expect(frontmatter.version).toBe(3); // Should remain unchanged
+    });
+
+    it("should handle high version numbers correctly", () => {
+      const content = `---
+id: "test-id"
+order: 1
+title: "Old Title"
+version: 999
+---
+
+Content here`;
+
+      const result = updateFrontmatterOrder(content, 1, "test-id", "New Title", true);
+      
+      const { frontmatter } = parseMarkdownFrontmatter(result);
+      expect(frontmatter.version).toBe(1000);
+    });
+
+    it("should not increment version when not requested", () => {
+      const content = `---
+id: "test-id"
+order: 1
+title: "Old Title"
+version: 5
+---
+
+Content here`;
+
+      const result = updateFrontmatterOrder(content, 2, "new-id", "New Title");
+      
+      const { frontmatter } = parseMarkdownFrontmatter(result);
+      expect(frontmatter.id).toBe("new-id");
+      expect(frontmatter.order).toBe(2);
+      expect(frontmatter.title).toBe("New Title");
+      expect(frontmatter.version).toBe(5); // Should remain unchanged
+    });
+
+    it("should handle version increment with complex frontmatter", () => {
+      const content = `---
+id: "complex-id"
+courseId: "advanced"
+title: "Complex Tutorial"
+description: "A complex example"
+expectedOutput: "Some output"
+author: "Test Author"
+tags: ["tag1", "tag2"]
+version: 42
+order: 15
+---
+
+Complex tutorial content with multiple sections.`;
+
+      const result = updateFrontmatterOrder(content, 20, "updated-complex-id", "Updated Complex Tutorial", true);
+      
+      const { frontmatter } = parseMarkdownFrontmatter(result);
+      expect(frontmatter.id).toBe("updated-complex-id");
+      expect(frontmatter.order).toBe(20);
+      expect(frontmatter.title).toBe("Updated Complex Tutorial");
+      expect(frontmatter.version).toBe(43);
+      expect(frontmatter.courseId).toBe("advanced");
+      expect(frontmatter.description).toBe("A complex example");
+      expect(frontmatter.author).toBe("Test Author");
     });
   });
 
@@ -829,6 +1148,50 @@ Tutorial content here.`;
       });
 
       // This proves that reordering tutorials won't break references
+    });
+
+    it("should handle complete folder renaming workflow with title updates", () => {
+      // Simulate renaming "1 - Old Title" to "1 - New Title"
+      const oldFolderName = "1 - Old Title";
+      const newFolderName = "1 - New Title";
+
+      const oldTitle = extractTitleFromFolderName(oldFolderName);
+      const newTitle = extractTitleFromFolderName(newFolderName);
+
+      expect(oldTitle).toBe("Old Title");
+      expect(newTitle).toBe("New Title");
+
+      // IDs should be different since title changed
+      const oldId = generateTutorialIdFromFolderName(oldFolderName);
+      const newId = generateTutorialIdFromFolderName(newFolderName);
+
+      expect(oldId).toBe("old-title");
+      expect(newId).toBe("new-title");
+
+      const frontmatter = `---
+id: "${oldId}"
+courseId: "basics"
+title: "${oldTitle}"
+order: 1
+---
+Tutorial content here.`;
+
+      // Extract order from folder name
+      const newOrder = parseInt(newFolderName.match(/^\d+/)?.[0] || "1");
+      expect(newOrder).toBe(1);
+
+      const updatedFrontmatter = updateFrontmatterOrder(
+        frontmatter,
+        newOrder,
+        newId,
+        newTitle
+      );
+
+      expect(updatedFrontmatter).toContain(`id: "${newId}"`);
+      expect(updatedFrontmatter).toContain("order: 1");
+      expect(updatedFrontmatter).toContain(`title: "${newTitle}"`);
+      expect(updatedFrontmatter).toContain('courseId: "basics"');
+      expect(updatedFrontmatter).toContain("Tutorial content here.");
     });
   });
 });

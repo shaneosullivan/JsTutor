@@ -14,7 +14,8 @@ import {
   parseMarkdownFrontmatter,
   extractCodeFromMarkdown,
   generateTutorialIdFromFolderName,
-  updateFrontmatterOrder
+  updateFrontmatterOrder,
+  extractTitleFromFolderName
 } from "../lib/build-data-utils";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -239,23 +240,38 @@ function buildDataFromCourses(): { courses: Course[]; tutorials: Tutorial[] } {
         tutorialId = generateTutorialIdFromFolderName(title);
       }
 
-      // Update the frontmatter file if order or id has changed
+      // Update the frontmatter file if order, id, or title has changed
       const expectedOrder = tutorialOrder;
       const expectedId = tutorialId;
 
+      // Extract expected title from folder name (for new format with dash)
+      let expectedTitle: string | undefined;
+      if (/^\d+\s*-\s*.+/.test(tutorialFolder)) {
+        expectedTitle = extractTitleFromFolderName(tutorialFolder);
+      }
+
+      // Check if title has changed (this will trigger version increment)
+      const titleHasChanged = !!(expectedTitle && frontmatter.title !== expectedTitle);
+      
       if (
         frontmatter.order !== expectedOrder ||
-        frontmatter.id !== expectedId
+        frontmatter.id !== expectedId ||
+        titleHasChanged
       ) {
         const updatedContent = updateFrontmatterOrder(
           enContent,
           expectedOrder,
-          expectedId
+          expectedId,
+          expectedTitle,
+          titleHasChanged // increment version if title changed
         );
         fs.writeFileSync(enMdPath, updatedContent, "utf-8");
-        console.log(
-          `Updated frontmatter for ${tutorialFolder}: order=${expectedOrder}, id="${expectedId}"`
-        );
+
+        let updateMessage = `Updated frontmatter for ${tutorialFolder}: order=${expectedOrder}, id="${expectedId}"`;
+        if (expectedTitle && frontmatter.title !== expectedTitle) {
+          updateMessage += `, title="${expectedTitle}", version incremented`;
+        }
+        console.log(updateMessage);
       }
 
       const tutorial: Tutorial = {

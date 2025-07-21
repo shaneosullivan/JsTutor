@@ -1,9 +1,9 @@
 ---
-id: "maths-is-fun"
+id: "draw-a-happy-face"
 courseId: "basics"
-title: "Maths is Fun!"
+title: "Draw A Happy Face"
 description: "Add, subtract, and more"
-expectedOutput: "Three rectangles of different sizes"
+expectedOutput: "A happy face with circles and rectangles"
 order: 2
 version: 1
 ---
