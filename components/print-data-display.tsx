@@ -298,7 +298,7 @@ export default function PrintDataDisplay({
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 pl-12">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Console Output</CardTitle>
           <div className="flex gap-2">

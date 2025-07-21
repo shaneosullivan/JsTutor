@@ -242,7 +242,7 @@ export default function IframeDisplay({
     <div className="h-full flex flex-col">
       {/* Website Preview */}
       <Card className="flex-1 flex flex-col">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 pl-12">
           <div className="flex items-center justify-between">
             <CardTitle className="text-lg">Website Preview</CardTitle>
             <div className="flex gap-2">
