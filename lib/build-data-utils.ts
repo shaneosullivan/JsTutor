@@ -66,38 +66,54 @@ export function generateTutorialIdFromFolderName(folderName: string): string {
     .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 }
 
-export function updateFrontmatterOrder(content: string, newOrder: number, newId: string): string {
+export function updateFrontmatterOrder(
+  content: string,
+  newOrder: number,
+  newId: string
+): string {
   // Handle the special case of completely empty frontmatter (---\n---\n)
   if (/^---\n---\n/.test(content)) {
-    const body = content.replace(/^---\n---\n/, '');
+    const body = content.replace(/^---\n---\n/, "");
     return `---\nid: "${newId}"\norder: ${newOrder}\n---\n${body}`;
   }
-  
+
   const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
   const match = content.match(frontmatterRegex);
-  
+
   if (!match) {
     return content;
   }
-  
+
   const [, frontmatterStr, body] = match;
-  
+
   // Update the frontmatter
   let updatedFrontmatter = frontmatterStr;
-  
+
   // Replace or add id field
   if (/^id:\s*.*$/m.test(updatedFrontmatter)) {
-    updatedFrontmatter = updatedFrontmatter.replace(/^id:\s*.*$/m, `id: "${newId}"`);
+    updatedFrontmatter = updatedFrontmatter.replace(
+      /^id:\s*.*$/m,
+      `id: "${newId}"`
+    );
   } else {
-    updatedFrontmatter = updatedFrontmatter.trim() + (updatedFrontmatter.trim() ? '\n' : '') + `id: "${newId}"`;
+    updatedFrontmatter =
+      updatedFrontmatter.trim() +
+      (updatedFrontmatter.trim() ? "\n" : "") +
+      `id: "${newId}"`;
   }
-  
+
   // Replace or add order field
   if (/^order:\s*\d+/m.test(updatedFrontmatter)) {
-    updatedFrontmatter = updatedFrontmatter.replace(/^order:\s*\d+/m, `order: ${newOrder}`);
+    updatedFrontmatter = updatedFrontmatter.replace(
+      /^order:\s*\d+/m,
+      `order: ${newOrder}`
+    );
   } else {
-    updatedFrontmatter = updatedFrontmatter.trim() + (updatedFrontmatter.trim() ? '\n' : '') + `order: ${newOrder}`;
+    updatedFrontmatter =
+      updatedFrontmatter.trim() +
+      (updatedFrontmatter.trim() ? "\n" : "") +
+      `order: ${newOrder}`;
   }
-  
+
   return `---\n${updatedFrontmatter}\n---\n${body}`;
 }

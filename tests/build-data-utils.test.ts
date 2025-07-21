@@ -315,37 +315,73 @@ const template = \`This is a \\\`template\\\` string\`;
 
   describe("generateTutorialIdFromFolderName", () => {
     it("should convert tutorial folder names correctly (removing number prefix)", () => {
-      expect(generateTutorialIdFromFolderName("1 - Your First Variable")).toBe("your-first-variable");
-      expect(generateTutorialIdFromFolderName("2 - Maths is Fun!")).toBe("maths-is-fun");
-      expect(generateTutorialIdFromFolderName("3 - Shortcuts with Math")).toBe("shortcuts-with-math");
-      expect(generateTutorialIdFromFolderName("10 - Random Fun")).toBe("random-fun");
+      expect(generateTutorialIdFromFolderName("1 - Your First Variable")).toBe(
+        "your-first-variable"
+      );
+      expect(generateTutorialIdFromFolderName("2 - Maths is Fun!")).toBe(
+        "maths-is-fun"
+      );
+      expect(generateTutorialIdFromFolderName("3 - Shortcuts with Math")).toBe(
+        "shortcuts-with-math"
+      );
+      expect(generateTutorialIdFromFolderName("10 - Random Fun")).toBe(
+        "random-fun"
+      );
     });
 
     it("should handle different number formats", () => {
-      expect(generateTutorialIdFromFolderName("01 - First Tutorial")).toBe("first-tutorial");
-      expect(generateTutorialIdFromFolderName("100 - Advanced Tutorial")).toBe("advanced-tutorial");
-      expect(generateTutorialIdFromFolderName("999 - Last Tutorial")).toBe("last-tutorial");
+      expect(generateTutorialIdFromFolderName("01 - First Tutorial")).toBe(
+        "first-tutorial"
+      );
+      expect(generateTutorialIdFromFolderName("100 - Advanced Tutorial")).toBe(
+        "advanced-tutorial"
+      );
+      expect(generateTutorialIdFromFolderName("999 - Last Tutorial")).toBe(
+        "last-tutorial"
+      );
     });
 
     it("should handle varying whitespace around dash", () => {
-      expect(generateTutorialIdFromFolderName("1- Your Tutorial")).toBe("your-tutorial");
-      expect(generateTutorialIdFromFolderName("1 -Your Tutorial")).toBe("your-tutorial");
-      expect(generateTutorialIdFromFolderName("1-Your Tutorial")).toBe("your-tutorial");
-      expect(generateTutorialIdFromFolderName("1  -  Your Tutorial")).toBe("your-tutorial");
+      expect(generateTutorialIdFromFolderName("1- Your Tutorial")).toBe(
+        "your-tutorial"
+      );
+      expect(generateTutorialIdFromFolderName("1 -Your Tutorial")).toBe(
+        "your-tutorial"
+      );
+      expect(generateTutorialIdFromFolderName("1-Your Tutorial")).toBe(
+        "your-tutorial"
+      );
+      expect(generateTutorialIdFromFolderName("1  -  Your Tutorial")).toBe(
+        "your-tutorial"
+      );
     });
 
     it("should remove special characters and normalize spaces", () => {
-      expect(generateTutorialIdFromFolderName("1 - JavaScript & TypeScript")).toBe("javascript-typescript");
-      expect(generateTutorialIdFromFolderName("2 - APIs (REST)")).toBe("apis-rest");
-      expect(generateTutorialIdFromFolderName("3 - Node.js Basics")).toBe("nodejs-basics");
+      expect(
+        generateTutorialIdFromFolderName("1 - JavaScript & TypeScript")
+      ).toBe("javascript-typescript");
+      expect(generateTutorialIdFromFolderName("2 - APIs (REST)")).toBe(
+        "apis-rest"
+      );
+      expect(generateTutorialIdFromFolderName("3 - Node.js Basics")).toBe(
+        "nodejs-basics"
+      );
       expect(generateTutorialIdFromFolderName("4 - HTML/CSS")).toBe("htmlcss");
-      expect(generateTutorialIdFromFolderName("5 - Making Decisions?")).toBe("making-decisions");
+      expect(generateTutorialIdFromFolderName("5 - Making Decisions?")).toBe(
+        "making-decisions"
+      );
     });
 
     it("should handle multiple consecutive spaces and hyphens", () => {
-      expect(generateTutorialIdFromFolderName("1 - Very   Long    Tutorial   Name")).toBe("very-long-tutorial-name");
-      expect(generateTutorialIdFromFolderName("2 - Multi  -  Word  -  Tutorial")).toBe("multi-word-tutorial");
-      expect(generateTutorialIdFromFolderName("3 - Tutorial---With---Dashes")).toBe("tutorialwithdashes");
+      expect(
+        generateTutorialIdFromFolderName("1 - Very   Long    Tutorial   Name")
+      ).toBe("very-long-tutorial-name");
+      expect(
+        generateTutorialIdFromFolderName("2 - Multi  -  Word  -  Tutorial")
+      ).toBe("multi-word-tutorial");
+      expect(
+        generateTutorialIdFromFolderName("3 - Tutorial---With---Dashes")
+      ).toBe("tutorialwithdashes");
     });
 
     it("should handle edge cases", () => {
@@ -358,10 +394,19 @@ const template = \`This is a \\\`template\\\` string\`;
     it("should handle real-world tutorial examples", () => {
       const realExamples = [
         { input: "1 - Your First Variable", expected: "your-first-variable" },
-        { input: "2 - forEach - Do Something with Each Item", expected: "foreach-do-something-with-each-item" },
+        {
+          input: "2 - forEach - Do Something with Each Item",
+          expected: "foreach-do-something-with-each-item"
+        },
         { input: "3 - What is HTML?", expected: "what-is-html" },
-        { input: "4 - Arrow Functions - The Cool New Way to Write Functions", expected: "arrow-functions-the-cool-new-way-to-write-functions" },
-        { input: "5 - Async/Await - Making Promises Even Easier!", expected: "asyncawait-making-promises-even-easier" },
+        {
+          input: "4 - Arrow Functions - The Cool New Way to Write Functions",
+          expected: "arrow-functions-the-cool-new-way-to-write-functions"
+        },
+        {
+          input: "5 - Async/Await - Making Promises Even Easier!",
+          expected: "asyncawait-making-promises-even-easier"
+        },
         { input: "13 - Snake Game", expected: "snake-game" },
         { input: "14 - Your Own Game!", expected: "your-own-game" }
       ];
@@ -372,15 +417,25 @@ const template = \`This is a \\\`template\\\` string\`;
     });
 
     it("should preserve numbers in tutorial names", () => {
-      expect(generateTutorialIdFromFolderName("1 - HTML5 and CSS3")).toBe("html5-and-css3");
-      expect(generateTutorialIdFromFolderName("2 - ES6 Features")).toBe("es6-features");
+      expect(generateTutorialIdFromFolderName("1 - HTML5 and CSS3")).toBe(
+        "html5-and-css3"
+      );
+      expect(generateTutorialIdFromFolderName("2 - ES6 Features")).toBe(
+        "es6-features"
+      );
       expect(generateTutorialIdFromFolderName("3 - Web 2.0")).toBe("web-20");
     });
 
     it("should handle Unicode and international characters", () => {
-      expect(generateTutorialIdFromFolderName("1 - Básic Tutorial")).toBe("bsic-tutorial");
-      expect(generateTutorialIdFromFolderName("2 - Café Script")).toBe("caf-script");
-      expect(generateTutorialIdFromFolderName("3 - Naïve Implementation")).toBe("nave-implementation");
+      expect(generateTutorialIdFromFolderName("1 - Básic Tutorial")).toBe(
+        "bsic-tutorial"
+      );
+      expect(generateTutorialIdFromFolderName("2 - Café Script")).toBe(
+        "caf-script"
+      );
+      expect(generateTutorialIdFromFolderName("3 - Naïve Implementation")).toBe(
+        "nave-implementation"
+      );
     });
 
     it("should handle old format (just numbers)", () => {
@@ -391,14 +446,24 @@ const template = \`This is a \\\`template\\\` string\`;
     });
 
     it("should handle folders without number prefix", () => {
-      expect(generateTutorialIdFromFolderName("Your First Variable")).toBe("your-first-variable");
-      expect(generateTutorialIdFromFolderName("forEach Tutorial")).toBe("foreach-tutorial");
-      expect(generateTutorialIdFromFolderName("Advanced Topics")).toBe("advanced-topics");
+      expect(generateTutorialIdFromFolderName("Your First Variable")).toBe(
+        "your-first-variable"
+      );
+      expect(generateTutorialIdFromFolderName("forEach Tutorial")).toBe(
+        "foreach-tutorial"
+      );
+      expect(generateTutorialIdFromFolderName("Advanced Topics")).toBe(
+        "advanced-topics"
+      );
     });
 
     it("should remove leading and trailing hyphens", () => {
-      expect(generateTutorialIdFromFolderName("1 - -Leading Hyphen")).toBe("leading-hyphen");
-      expect(generateTutorialIdFromFolderName("1 - Trailing Hyphen-")).toBe("trailing-hyphen");
+      expect(generateTutorialIdFromFolderName("1 - -Leading Hyphen")).toBe(
+        "leading-hyphen"
+      );
+      expect(generateTutorialIdFromFolderName("1 - Trailing Hyphen-")).toBe(
+        "trailing-hyphen"
+      );
       expect(generateTutorialIdFromFolderName("1 - -Both-")).toBe("both");
     });
   });
@@ -415,23 +480,23 @@ version: 1
 This is the tutorial content.`;
 
       const result = updateFrontmatterOrder(content, 5, "new-tutorial-id");
-      
+
       expect(result).toContain('id: "new-tutorial-id"');
-      expect(result).toContain('order: 5');
+      expect(result).toContain("order: 5");
       expect(result).toContain('courseId: "basics"');
       expect(result).toContain('title: "Test Tutorial"');
-      expect(result).toContain('This is the tutorial content.');
+      expect(result).toContain("This is the tutorial content.");
     });
 
     it("should handle different id formats", () => {
       const testCases = [
         'id: "quoted-id"',
-        'id: old-unquoted-id',
-        'id: 123',
-        'id: null'
+        "id: old-unquoted-id",
+        "id: 123",
+        "id: null"
       ];
 
-      testCases.forEach(idLine => {
+      testCases.forEach((idLine) => {
         const content = `---
 ${idLine}
 order: 1
@@ -440,19 +505,14 @@ Content`;
 
         const result = updateFrontmatterOrder(content, 3, "new-id");
         expect(result).toContain('id: "new-id"');
-        expect(result).toContain('order: 3');
+        expect(result).toContain("order: 3");
       });
     });
 
     it("should handle different order formats", () => {
-      const testCases = [
-        'order: 1',
-        'order:1',
-        'order: 42',
-        'order: 999'
-      ];
+      const testCases = ["order: 1", "order:1", "order: 42", "order: 999"];
 
-      testCases.forEach(orderLine => {
+      testCases.forEach((orderLine) => {
         const content = `---
 id: "test-id"
 ${orderLine}
@@ -460,7 +520,7 @@ ${orderLine}
 Content`;
 
         const result = updateFrontmatterOrder(content, 7, "test-id");
-        expect(result).toContain('order: 7');
+        expect(result).toContain("order: 7");
         expect(result).toContain('id: "test-id"');
       });
     });
@@ -481,17 +541,17 @@ Tutorial body content
 with multiple lines.`;
 
       const result = updateFrontmatterOrder(content, 10, "updated-id");
-      
+
       expect(result).toContain('id: "updated-id"');
-      expect(result).toContain('order: 10');
+      expect(result).toContain("order: 10");
       expect(result).toContain('courseId: "basics"');
       expect(result).toContain('title: "Tutorial Title"');
       expect(result).toContain('description: "Tutorial description"');
       expect(result).toContain('expectedOutput: "Expected output"');
-      expect(result).toContain('version: 1');
+      expect(result).toContain("version: 1");
       expect(result).toContain('author: "Test Author"');
       expect(result).toContain('tags: ["tag1", "tag2"]');
-      expect(result).toContain('Tutorial body content\nwith multiple lines.');
+      expect(result).toContain("Tutorial body content\nwith multiple lines.");
     });
 
     it("should return original content when no frontmatter exists", () => {
@@ -508,11 +568,11 @@ without any frontmatter.`;
 Body content`;
 
       const result = updateFrontmatterOrder(content, 3, "test-id");
-      
+
       // The function should add id and order to empty frontmatter
       expect(result).toContain('id: "test-id"');
-      expect(result).toContain('order: 3');
-      expect(result).toContain('Body content');
+      expect(result).toContain("order: 3");
+      expect(result).toContain("Body content");
     });
 
     it("should handle multiline body content", () => {
@@ -536,12 +596,12 @@ const example = "code";
 More content here.`;
 
       const result = updateFrontmatterOrder(content, 8, "updated-tutorial-id");
-      
+
       expect(result).toContain('id: "updated-tutorial-id"');
-      expect(result).toContain('order: 8');
-      expect(result).toContain('# Tutorial Title');
+      expect(result).toContain("order: 8");
+      expect(result).toContain("# Tutorial Title");
       expect(result).toContain('const example = "code";');
-      expect(result).toContain('More content here.');
+      expect(result).toContain("More content here.");
     });
 
     it("should handle edge cases with special characters in id", () => {
@@ -552,7 +612,7 @@ More content here.`;
         "tutorial-with-many-hyphens-and-words"
       ];
 
-      specialIds.forEach(specialId => {
+      specialIds.forEach((specialId) => {
         const content = `---
 id: "old-id"
 order: 1
@@ -561,7 +621,7 @@ Content`;
 
         const result = updateFrontmatterOrder(content, 2, specialId);
         expect(result).toContain(`id: "${specialId}"`);
-        expect(result).toContain('order: 2');
+        expect(result).toContain("order: 2");
       });
     });
 
@@ -573,7 +633,7 @@ order: 1
 Content`;
 
       const result = updateFrontmatterOrder(content, 999, "test-id");
-      expect(result).toContain('order: 999');
+      expect(result).toContain("order: 999");
     });
 
     it("should maintain frontmatter formatting", () => {
@@ -586,16 +646,20 @@ order: 1
 Body`;
 
       const result = updateFrontmatterOrder(content, 3, "new-id");
-      
+
       // Check that the overall structure is maintained
-      expect(result.startsWith('---\n')).toBe(true);
-      expect(result).toContain('\n---\n');
-      expect(result.endsWith('Body')).toBe(true);
-      
+      expect(result.startsWith("---\n")).toBe(true);
+      expect(result).toContain("\n---\n");
+      expect(result.endsWith("Body")).toBe(true);
+
       // Verify the updated content
-      const lines = result.split('\n');
-      expect(lines.find(line => line.includes('id:'))).toContain('id: "new-id"');
-      expect(lines.find(line => line.includes('order:'))).toContain('order: 3');
+      const lines = result.split("\n");
+      expect(lines.find((line) => line.includes("id:"))).toContain(
+        'id: "new-id"'
+      );
+      expect(lines.find((line) => line.includes("order:"))).toContain(
+        "order: 3"
+      );
     });
   });
 
@@ -647,14 +711,14 @@ Variables are containers for storing data.`;
       // Simulate renaming "1 - Your First Variable" to "3 - Your First Variable"
       const originalFolderName = "1 - Your First Variable";
       const newFolderName = "3 - Your First Variable";
-      
+
       const originalId = generateTutorialIdFromFolderName(originalFolderName);
       const newId = generateTutorialIdFromFolderName(newFolderName);
-      
+
       // IDs should be the same (stable)
       expect(originalId).toBe("your-first-variable");
       expect(newId).toBe("your-first-variable");
-      
+
       const frontmatter = `---
 id: "${originalId}"
 courseId: "basics"
@@ -664,13 +728,17 @@ order: 1
 Tutorial content here.`;
 
       // Extract new order from folder name
-      const newOrder = parseInt(newFolderName.match(/^\d+/)?.[0] || '1');
+      const newOrder = parseInt(newFolderName.match(/^\d+/)?.[0] || "1");
       expect(newOrder).toBe(3);
-      
-      const updatedFrontmatter = updateFrontmatterOrder(frontmatter, newOrder, newId);
-      
+
+      const updatedFrontmatter = updateFrontmatterOrder(
+        frontmatter,
+        newOrder,
+        newId
+      );
+
       expect(updatedFrontmatter).toContain('id: "your-first-variable"');
-      expect(updatedFrontmatter).toContain('order: 3');
+      expect(updatedFrontmatter).toContain("order: 3");
       expect(updatedFrontmatter).toContain('title: "Your First Variable"');
     });
 
@@ -685,7 +753,7 @@ Tutorial content here.`;
       ];
 
       testCases.forEach(({ folder, expectedOrder }) => {
-        const extractedOrder = parseInt(folder.match(/^\d+/)?.[0] || '1');
+        const extractedOrder = parseInt(folder.match(/^\d+/)?.[0] || "1");
         expect(extractedOrder).toBe(expectedOrder);
       });
     });
@@ -698,10 +766,10 @@ Tutorial content here.`;
         "3 - Shortcuts with Math"
       ];
 
-      const processedTutorials = tutorialFolders.map(folder => {
-        const order = parseInt(folder.match(/^\d+/)?.[0] || '1');
+      const processedTutorials = tutorialFolders.map((folder) => {
+        const order = parseInt(folder.match(/^\d+/)?.[0] || "1");
         const id = generateTutorialIdFromFolderName(folder);
-        
+
         return {
           folder,
           id,
@@ -711,9 +779,24 @@ Tutorial content here.`;
       });
 
       expect(processedTutorials).toEqual([
-        { folder: "1 - Your First Variable", id: "your-first-variable", order: 1, courseId: "basics" },
-        { folder: "2 - Maths is Fun!", id: "maths-is-fun", order: 2, courseId: "basics" },
-        { folder: "3 - Shortcuts with Math", id: "shortcuts-with-math", order: 3, courseId: "basics" }
+        {
+          folder: "1 - Your First Variable",
+          id: "your-first-variable",
+          order: 1,
+          courseId: "basics"
+        },
+        {
+          folder: "2 - Maths is Fun!",
+          id: "maths-is-fun",
+          order: 2,
+          courseId: "basics"
+        },
+        {
+          folder: "3 - Shortcuts with Math",
+          id: "shortcuts-with-math",
+          order: 3,
+          courseId: "basics"
+        }
       ]);
     });
 
@@ -726,7 +809,7 @@ Tutorial content here.`;
       ];
 
       edgeCases.forEach(({ input, expected }) => {
-        const extracted = parseInt(input.match(/^\d+/)?.[0] || '1');
+        const extracted = parseInt(input.match(/^\d+/)?.[0] || "1");
         expect(extracted).toBe(expected);
       });
     });
@@ -735,16 +818,16 @@ Tutorial content here.`;
       // Test that renaming tutorials preserves ID stability
       const baseTitle = "Your First Variable";
       const orders = [1, 2, 5, 10, 99];
-      
-      const ids = orders.map(order => 
+
+      const ids = orders.map((order) =>
         generateTutorialIdFromFolderName(`${order} - ${baseTitle}`)
       );
-      
+
       // All IDs should be identical regardless of order
-      ids.forEach(id => {
+      ids.forEach((id) => {
         expect(id).toBe("your-first-variable");
       });
-      
+
       // This proves that reordering tutorials won't break references
     });
   });

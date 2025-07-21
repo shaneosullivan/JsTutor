@@ -71,7 +71,7 @@ export default function TutorialContent({
       const timer = setTimeout(() => {
         codeEditorRef.current?.formatCode();
       }, 320); // Slightly longer than the 300ms transition duration
-      
+
       return () => clearTimeout(timer);
     }
   }, [sidebarCollapsed, courseType]);

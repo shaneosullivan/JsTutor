@@ -75,7 +75,9 @@ export default function CoursePage({ courseId }: CoursePageProps) {
 
   const currentTutorialId = getCurrentTutorial(courseId);
   const currentTutorialOrder = useMemo(() => {
-    if (!currentTutorialId) return 1;
+    if (!currentTutorialId) {
+      return 1;
+    }
     const tutorial = tutorials.find((t) => t.id === currentTutorialId);
     return tutorial ? tutorial.order : 1;
   }, [currentTutorialId, tutorials]);
