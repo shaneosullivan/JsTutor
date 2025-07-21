@@ -8,6 +8,7 @@ import { EditorState, StateField, StateEffect } from "@codemirror/state";
 import { Decoration, DecorationSet } from "@codemirror/view";
 import { useKeyboard } from "@/components/KeyboardProvider";
 import { CodeEditorErrorBoundary } from "./code-editor-error-boundary";
+import { formatCode, canFormatCode } from "@/lib/prettier-formatter";
 
 interface CodeEditorProps {
   value: string;
@@ -16,6 +17,7 @@ interface CodeEditorProps {
   className?: string;
   errorLine?: number;
   originalCode?: string;
+  shouldFormat?: boolean; // Whether to format code on blur
 }
 
 // Error line decoration
@@ -56,10 +58,10 @@ const errorLineField = StateField.define<DecorationSet>({
 export default function CodeEditor({
   value,
   onChange,
-  language = "javascript",
   className = "",
   errorLine,
-  originalCode
+  originalCode,
+  shouldFormat = false
 }: CodeEditorProps) {
   const keyboard = useKeyboard();
   const editorRef = useRef<HTMLDivElement>(null);
@@ -69,6 +71,26 @@ export default function CodeEditor({
   const handleReset = () => {
     if (originalCode) {
       onChange(originalCode);
+    }
+  };
+
+  const handleBlur = async () => {
+    if (!shouldFormat || !viewRef.current) {
+      return;
+    }
+
+    const currentCode = viewRef.current.state.doc.toString();
+    if (!canFormatCode(currentCode)) {
+      return;
+    }
+
+    try {
+      const formattedCode = await formatCode(currentCode);
+      if (formattedCode !== currentCode) {
+        onChange(formattedCode);
+      }
+    } catch (error) {
+      console.warn("Failed to format code on blur:", error);
     }
   };
 
@@ -87,6 +109,12 @@ export default function CodeEditor({
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString());
+          }
+        }),
+        EditorView.domEventHandlers({
+          blur: (_event, _view) => {
+            handleBlur();
+            return false;
           }
         }),
         EditorView.theme({

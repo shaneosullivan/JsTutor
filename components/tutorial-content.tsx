@@ -174,6 +174,7 @@ export default function TutorialContent({
                   language="javascript"
                   className="h-full"
                   errorLine={canvasError?.line}
+                  shouldFormat={courseType !== "iframe"}
                 />
               </div>
             </div>
