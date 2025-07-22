@@ -144,48 +144,32 @@ export default function GoogleSignIn({
         throw new Error(result.error || "OAuth callback failed");
       }
 
-      // Create account in local storage using the data from the callback
-      const newAccount = createAccount(result.account.email, "google");
+      // Use the account data directly from the server (which properly handles existing accounts)
+      const accountData = {
+        ...result.account,
+        createdAt: result.account.createdAt || new Date().toISOString()
+      };
 
-      // Update the account with the correct ID from the server
-      if (newAccount.id !== result.account.id) {
-        // Remove the auto-generated account and create one with the correct ID
-        removeAccount(newAccount.id);
+      // Store the account directly in TinyBase with the server-provided ID
+      const { getStore } = await import("@/lib/profile-storage");
+      const store = getStore();
+      store.setRow("accounts", accountData.id, accountData);
+      store.setValue("activeAccountId", accountData.id);
 
-        // Create account with the server-provided ID
-        const accountWithCorrectId = {
-          ...result.account,
-          createdAt: result.account.createdAt || newAccount.createdAt
-        };
-
-        // Store the account directly in TinyBase
-        const { getStore } = await import("@/lib/profile-storage");
-        const { FIREBASE_ACCOUNTS_COLLECTION } = await import("@/lib/consts");
-        const store = getStore();
-        store.setRow(
-          FIREBASE_ACCOUNTS_COLLECTION,
-          accountWithCorrectId.id,
-          accountWithCorrectId
-        );
-        store.setValue("activeAccountId", accountWithCorrectId.id);
-
-        setAccount(accountWithCorrectId);
-      } else {
-        setAccount(newAccount);
-      }
+      setAccount(accountData);
 
       // Initialize Firebase sync for the account
       try {
         await initializeFirebaseSync(result.isNewAccount);
         // Call success callback after sync is complete
-        onSignInSuccess?.(newAccount);
+        onSignInSuccess?.(accountData);
       } catch (error) {
         console.warn(
           "Failed to initialize Firebase sync after sign-in:",
           error
         );
         // Still call success callback even if sync fails
-        onSignInSuccess?.(newAccount);
+        onSignInSuccess?.(accountData);
       }
     } catch (error) {
       console.error("Failed to process Google sign-in:", error);
