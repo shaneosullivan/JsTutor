@@ -201,10 +201,9 @@ export default function AiChat({
       };
 
       const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "o4-mini",
         messages: [systemMessage, ...chatMessages],
-        max_tokens: 500,
-        temperature: 0.7
+        max_completion_tokens: 2000
       });
 
       const assistantMessage: Message = {
