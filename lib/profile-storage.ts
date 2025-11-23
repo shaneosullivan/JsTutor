@@ -134,12 +134,17 @@ if (typeof window !== "undefined") {
                 // Create a new profile ID to avoid conflicts
                 const newProfileId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
+                const profileName =
+                  (profile.name || "").indexOf("(Local Progress)") < 0
+                    ? profile.name + " (Local Progress)"
+                    : profile.name;
+
                 // Update the profile with the new ID and account ID
                 const updatedProfile: UserProfile = {
                   ...profile,
                   id: newProfileId,
                   accountId: activeAccount.id,
-                  name: profile.name + " (Local Progress)",
+                  name: profileName,
                   lastActive: new Date().toISOString()
                 };
 
