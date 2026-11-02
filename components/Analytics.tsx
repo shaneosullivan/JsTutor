@@ -12,6 +12,7 @@ function isDevServer(): boolean {
   return isDev;
 }
 
+// Self-hosted Umami analytics (https://chofterstats.com)
 export default function Analytics() {
   if (isDevServer()) {
     return null;
@@ -19,8 +20,13 @@ export default function Analytics() {
 
   React.useEffect(() => {
     const script = document.createElement("script");
-    script.async = true;
-    script.src = "https://scripts.simpleanalyticscdn.com/latest.js";
+    script.defer = true;
+    script.src = "https://chofterstats.com/cs.js";
+    script.setAttribute(
+      "data-website-id",
+      "6d3b780e-b9cf-490e-a198-d3c8a0c59f8f"
+    );
+    script.setAttribute("data-domains", "js-tutor.com");
     document.head.appendChild(script);
 
     return () => {
@@ -28,13 +34,5 @@ export default function Analytics() {
     };
   }, []);
 
-  return (
-    <noscript>
-      <img
-        src="https://queue.simpleanalyticscdn.com/noscript.gif"
-        alt=""
-        referrerPolicy="no-referrer-when-downgrade"
-      />
-    </noscript>
-  );
+  return null;
 }
